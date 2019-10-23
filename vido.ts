@@ -60,6 +60,8 @@ export default function Vido(state, api) {
     unsafeHTML,
     until,
     actions(componentActions, props) {},
+    onDestroy() {},
+    onChange(props) {},
 
     createComponent(component, props) {
       const instance = componentId++;
@@ -71,14 +73,23 @@ export default function Vido(state, api) {
       function onDestroy(fn) {
         destroyable.push(fn);
       }
-      const vidoInstance = { ...vido, update, onDestroy, instance, actions: getActions(instance) };
+      const onChangeFuntions = [];
+      function onChange(fn) {
+        onChangeFuntions.push(fn);
+      }
+      const vidoInstance = { ...vido, update, onDestroy, onChange, instance, actions: getActions(instance) };
       const methods = {
         destroy() {
           for (const d of destroyable) {
             d();
           }
         },
-        update: component(vidoInstance, props)
+        update: component(vidoInstance, props),
+        change(props) {
+          for (const fn of onChangeFuntions) {
+            fn(props);
+          }
+        }
       };
       components[instance] = methods;
       return componentInstanceMethods;
@@ -156,6 +167,10 @@ export default function Vido(state, api) {
       },
       update() {
         return vido.updateTemplate();
+      },
+
+      change(props) {
+        components[instance].change(props);
       },
 
       html(props = {}) {

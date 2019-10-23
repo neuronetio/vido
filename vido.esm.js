@@ -2275,6 +2275,8 @@ function Vido(state, api) {
         unsafeHTML,
         until,
         actions(componentActions, props) { },
+        onDestroy() { },
+        onChange(props) { },
         createComponent(component, props) {
             const instance = componentId++;
             const componentInstanceMethods = getComponentInstanceMethods(instance);
@@ -2285,14 +2287,23 @@ function Vido(state, api) {
             function onDestroy(fn) {
                 destroyable.push(fn);
             }
-            const vidoInstance = Object.assign(Object.assign({}, vido), { update, onDestroy, instance, actions: getActions(instance) });
+            const onChangeFuntions = [];
+            function onChange(fn) {
+                onChangeFuntions.push(fn);
+            }
+            const vidoInstance = Object.assign(Object.assign({}, vido), { update, onDestroy, onChange, instance, actions: getActions(instance) });
             const methods = {
                 destroy() {
                     for (const d of destroyable) {
                         d();
                     }
                 },
-                update: component(vidoInstance, props)
+                update: component(vidoInstance, props),
+                change(props) {
+                    for (const fn of onChangeFuntions) {
+                        fn(props);
+                    }
+                }
             };
             components[instance] = methods;
             return componentInstanceMethods;
@@ -2365,6 +2376,9 @@ function Vido(state, api) {
             },
             update() {
                 return vido.updateTemplate();
+            },
+            change(props) {
+                components[instance].change(props);
             },
             html(props = {}) {
                 return components[instance].update(props);
