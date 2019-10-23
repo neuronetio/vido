@@ -2236,6 +2236,7 @@ function Vido(state, api) {
     let actions = [];
     let app, element;
     let shouldUpdateCount = 0;
+    const resolved = Promise.resolve();
     function getActions(instance) {
         return directive(function actionsDirective(createFunctions, props) {
             return function partial(part) {
@@ -2324,18 +2325,12 @@ function Vido(state, api) {
             shouldUpdateCount++;
             const currentShouldUpdateCount = shouldUpdateCount;
             const self = this;
-            window.setTimeout(function flush() {
+            resolved.then(function flush() {
                 if (currentShouldUpdateCount === shouldUpdateCount) {
                     self.render();
                     shouldUpdateCount = 0;
                 }
-            }, 0);
-            /*resolved.then(function flush() {
-              if (currentShouldUpdateCount === shouldUpdateCount) {
-                self.render();
-                shouldUpdateCount = 0;
-              }
-            });*/
+            });
         },
         createApp(instance, el) {
             element = el;

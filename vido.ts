@@ -19,7 +19,6 @@ export default function Vido(state, api) {
 
   let shouldUpdateCount = 0;
   const resolved = Promise.resolve();
-  let timeout;
 
   function getActions(instance) {
     return directive(function actionsDirective(createFunctions, props) {
@@ -114,21 +113,12 @@ export default function Vido(state, api) {
       shouldUpdateCount++;
       const currentShouldUpdateCount = shouldUpdateCount;
       const self = this;
-      if (timeout) {
-        window.clearTimeout(timeout);
-      }
-      window.setTimeout(function flush() {
+      resolved.then(function flush() {
         if (currentShouldUpdateCount === shouldUpdateCount) {
           self.render();
           shouldUpdateCount = 0;
         }
-      }, 0);
-      /*resolved.then(function flush() {
-        if (currentShouldUpdateCount === shouldUpdateCount) {
-          self.render();
-          shouldUpdateCount = 0;
-        }
-      });*/
+      });
     },
 
     createApp(instance, el) {
