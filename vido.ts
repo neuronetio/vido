@@ -92,6 +92,7 @@ export default function Vido(state, api) {
         }
       };
       components[instance] = methods;
+      methods.change(props);
       return componentInstanceMethods;
     },
 

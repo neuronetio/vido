@@ -2312,6 +2312,7 @@
                     }
                 };
                 components[instance] = methods;
+                methods.change(props);
                 return componentInstanceMethods;
             },
             destroyComponent(instance) {
