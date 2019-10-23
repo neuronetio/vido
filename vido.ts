@@ -1,6 +1,6 @@
 import { render, html, directive, svg } from 'lit-html';
-//import { asyncAppend } from 'lit-html/directives/async-append';
-//import { asyncReplace } from 'lit-html/directives/async-replace';
+import { asyncAppend } from 'lit-html/directives/async-append';
+import { asyncReplace } from 'lit-html/directives/async-replace';
 import { cache } from 'lit-html/directives/cache';
 import { classMap } from 'lit-html/directives/class-map';
 import { guard } from 'lit-html/directives/guard';
@@ -49,8 +49,8 @@ export default function Vido(state, api) {
     html,
     svg,
     directive,
-    //asyncAppend,
-    //asyncReplace,
+    asyncAppend,
+    asyncReplace,
     cache,
     classMap,
     guard,
@@ -62,8 +62,8 @@ export default function Vido(state, api) {
     actions(componentActions, props) {},
 
     createComponent(component, props) {
-      const instance = component.name + ':' + componentId++;
-      const componentInstance = getComponentInstance(instance);
+      const instance = componentId++;
+      const componentInstanceMethods = getComponentInstanceMethods(instance);
       function update() {
         vido.updateTemplate();
       }
@@ -72,27 +72,16 @@ export default function Vido(state, api) {
         destroyable.push(fn);
       }
       const vidoInstance = { ...vido, update, onDestroy, instance, actions: getActions(instance) };
-      let firstMethods, methods;
-      if (props) {
-        firstMethods = component(props, vidoInstance);
-      } else {
-        firstMethods = component(vidoInstance);
-      }
-      if (typeof firstMethods === 'function') {
-        const destroy = () => {
-          destroyable.forEach(d => d());
-        };
-        methods = { update: firstMethods, destroy };
-      } else {
-        const originalDestroy = methods.destroy;
-        const destroy = () => {
-          destroyable.forEach(d => d());
-          originalDestroy();
-        };
-        methods = { ...firstMethods, destroy };
-      }
+      const methods = {
+        destroy() {
+          for (const d of destroyable) {
+            d();
+          }
+        },
+        update: component(vidoInstance, props)
+      };
       components[instance] = methods;
-      return componentInstance;
+      return componentInstanceMethods;
     },
 
     destroyComponent(instance) {
@@ -159,7 +148,7 @@ export default function Vido(state, api) {
     }
   };
 
-  function getComponentInstance(instance) {
+  function getComponentInstanceMethods(instance) {
     return {
       instance,
       destroy() {
