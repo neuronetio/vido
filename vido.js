@@ -2242,7 +2242,6 @@
         let actions = [];
         let app, element;
         let shouldUpdateCount = 0;
-        const resolved = Promise.resolve();
         function getActions(instance) {
             return directive(function actionsDirective(createFunctions, props) {
                 return function partial(part) {
@@ -2293,9 +2292,9 @@
                 function onDestroy(fn) {
                     destroyable.push(fn);
                 }
-                const onChangeFuntions = [];
+                const onChangeFunctions = [];
                 function onChange(fn) {
-                    onChangeFuntions.push(fn);
+                    onChangeFunctions.push(fn);
                 }
                 const vidoInstance = Object.assign(Object.assign({}, vido), { update, onDestroy, onChange, instance, actions: getActions(instance) });
                 const methods = {
@@ -2306,13 +2305,13 @@
                     },
                     update: component(vidoInstance, props),
                     change(props) {
-                        for (const fn of onChangeFuntions) {
+                        for (const fn of onChangeFunctions) {
                             fn(props);
                         }
                     }
                 };
                 components[instance] = methods;
-                methods.change(props);
+                components[instance].change(props);
                 return componentInstanceMethods;
             },
             destroyComponent(instance) {
@@ -2331,12 +2330,18 @@
                 shouldUpdateCount++;
                 const currentShouldUpdateCount = shouldUpdateCount;
                 const self = this;
-                resolved.then(function flush() {
+                window.setTimeout(function flush() {
                     if (currentShouldUpdateCount === shouldUpdateCount) {
                         self.render();
                         shouldUpdateCount = 0;
                     }
-                });
+                }, 0);
+                /*resolved.then(function flush() {
+                  if (currentShouldUpdateCount === shouldUpdateCount) {
+                    self.render();
+                    shouldUpdateCount = 0;
+                  }
+                });*/
             },
             createApp(instance, el) {
                 element = el;

@@ -19,6 +19,7 @@ export default function Vido(state, api) {
 
   let shouldUpdateCount = 0;
   const resolved = Promise.resolve();
+  let timeout;
 
   function getActions(instance) {
     return directive(function actionsDirective(createFunctions, props) {
@@ -73,9 +74,9 @@ export default function Vido(state, api) {
       function onDestroy(fn) {
         destroyable.push(fn);
       }
-      const onChangeFuntions = [];
+      const onChangeFunctions = [];
       function onChange(fn) {
-        onChangeFuntions.push(fn);
+        onChangeFunctions.push(fn);
       }
       const vidoInstance = { ...vido, update, onDestroy, onChange, instance, actions: getActions(instance) };
       const methods = {
@@ -86,13 +87,13 @@ export default function Vido(state, api) {
         },
         update: component(vidoInstance, props),
         change(props) {
-          for (const fn of onChangeFuntions) {
+          for (const fn of onChangeFunctions) {
             fn(props);
           }
         }
       };
       components[instance] = methods;
-      methods.change(props);
+      components[instance].change(props);
       return componentInstanceMethods;
     },
 
@@ -113,12 +114,21 @@ export default function Vido(state, api) {
       shouldUpdateCount++;
       const currentShouldUpdateCount = shouldUpdateCount;
       const self = this;
-      resolved.then(function flush() {
+      if (timeout) {
+        window.clearTimeout(timeout);
+      }
+      window.setTimeout(function flush() {
         if (currentShouldUpdateCount === shouldUpdateCount) {
           self.render();
           shouldUpdateCount = 0;
         }
-      });
+      }, 0);
+      /*resolved.then(function flush() {
+        if (currentShouldUpdateCount === shouldUpdateCount) {
+          self.render();
+          shouldUpdateCount = 0;
+        }
+      });*/
     },
 
     createApp(instance, el) {
