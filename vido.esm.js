@@ -2384,12 +2384,15 @@ function Vido(state, api) {
                 return vido.updateTemplate();
             },
             change(props) {
-                if (components[instance])
+                try {
                     components[instance].change(props);
+                }
+                catch (e) {
+                    console.error(e.message, instance, components);
+                }
             },
             html(props = {}) {
-                if (components[instance])
-                    return components[instance].update(props);
+                return components[instance].update(props);
             }
         };
     }

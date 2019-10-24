@@ -176,11 +176,15 @@ export default function Vido(state, api) {
       },
 
       change(props) {
-        if (components[instance]) components[instance].change(props);
+        try {
+          components[instance].change(props);
+        } catch (e) {
+          console.error(e.message, instance, components);
+        }
       },
 
       html(props = {}) {
-        if (components[instance]) return components[instance].update(props);
+        return components[instance].update(props);
       }
     };
   }
