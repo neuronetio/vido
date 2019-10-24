@@ -2281,6 +2281,7 @@
             styleMap,
             unsafeHTML,
             until,
+            lastProps: {},
             actions(componentActions, props) { },
             onDestroy() { },
             onChange(props) { },
@@ -2298,11 +2299,15 @@
                 function onChange(fn) {
                     onChangeFunctions.push(fn);
                 }
-                vidoInstance = Object.assign(Object.assign({}, vido), { update, onDestroy, onChange, instance, actions: getActions(instance) });
+                vidoInstance = Object.assign(Object.assign({}, vido), { update,
+                    onDestroy,
+                    onChange,
+                    instance, actions: getActions(instance), lastProps: props });
                 const componentInstanceMethods = getComponentInstanceMethods(instance, vidoInstance);
                 const methods = {
                     instance,
                     vidoInstance,
+                    lastProps: props,
                     destroy() {
                         for (const d of destroyable) {
                             d();
@@ -2318,6 +2323,7 @@
                         for (const fn of onChangeFunctions) {
                             fn(changedProps);
                         }
+                        vidoInstance.lastProps = changedProps;
                     }
                 };
                 components[instance] = methods;

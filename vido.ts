@@ -60,6 +60,7 @@ export default function Vido(state, api) {
     styleMap,
     unsafeHTML,
     until,
+    lastProps: {},
     actions(componentActions, props) {},
     onDestroy() {},
     onChange(props) {},
@@ -78,11 +79,20 @@ export default function Vido(state, api) {
       function onChange(fn) {
         onChangeFunctions.push(fn);
       }
-      vidoInstance = { ...vido, update, onDestroy, onChange, instance, actions: getActions(instance) };
+      vidoInstance = {
+        ...vido,
+        update,
+        onDestroy,
+        onChange,
+        instance,
+        actions: getActions(instance),
+        lastProps: props
+      };
       const componentInstanceMethods = getComponentInstanceMethods(instance, vidoInstance);
       const methods = {
         instance,
         vidoInstance,
+        lastProps: props,
         destroy() {
           for (const d of destroyable) {
             d();
@@ -98,6 +108,7 @@ export default function Vido(state, api) {
           for (const fn of onChangeFunctions) {
             fn(changedProps);
           }
+          vidoInstance.lastProps = changedProps;
         }
       };
       components[instance] = methods;
