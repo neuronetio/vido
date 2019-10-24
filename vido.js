@@ -2265,6 +2265,7 @@
             });
         }
         const vido = {
+            debug: false,
             state,
             api,
             html,
@@ -2299,6 +2300,8 @@
                 }
                 const vidoInstance = Object.assign(Object.assign({}, vido), { update, onDestroy, onChange, instance, actions: getActions(instance) });
                 const methods = {
+                    instance,
+                    vidoInstance,
                     destroy() {
                         for (const d of destroyable) {
                             d();
@@ -2318,6 +2321,11 @@
                 };
                 components[instance] = methods;
                 components[instance].change(props);
+                if (this.debug) {
+                    console.group('component created');
+                    console.log(instance, component, props, components);
+                    console.groupEnd();
+                }
                 return componentInstanceMethods;
             },
             destroyComponent(instance) {
@@ -2331,6 +2339,11 @@
                     return action.instance !== instance;
                 });
                 delete components[instance];
+                if (this.debug) {
+                    console.group('component destroyed');
+                    console.log(`Instance id: ${instance}`);
+                    console.groupEnd();
+                }
             },
             updateTemplate() {
                 shouldUpdateCount++;
@@ -2340,6 +2353,9 @@
                     if (currentShouldUpdateCount === shouldUpdateCount) {
                         self.render();
                         shouldUpdateCount = 0;
+                        if (this.debug) {
+                            console.log('templates updated');
+                        }
                     }
                 });
             },
@@ -2384,18 +2400,31 @@
             return {
                 instance,
                 destroy() {
+                    if (vido.debug) {
+                        console.group('destroying component');
+                        console.log(instance, components[instance], components);
+                        console.log(`Instance id: ${instance}`);
+                        console.groupEnd();
+                    }
                     return vido.destroyComponent(instance);
                 },
                 update() {
+                    if (vido.debug) {
+                        console.group('updating component');
+                        console.log(instance, components[instance], components);
+                        console.log(`Instance id: ${instance}`);
+                        console.groupEnd();
+                    }
                     return vido.updateTemplate();
                 },
                 change(props) {
-                    try {
-                        components[instance].change(props);
+                    if (vido.debug) {
+                        console.group('changing component');
+                        console.log(props, instance, components[instance], components);
+                        console.log(`Instance id: ${instance}`);
+                        console.groupEnd();
                     }
-                    catch (e) {
-                        console.error(e.message, instance, components);
-                    }
+                    components[instance].change(props);
                 },
                 html(props = {}) {
                     return components[instance].update(props);
