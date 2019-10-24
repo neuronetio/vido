@@ -2279,6 +2279,40 @@ function Vido(state, api) {
         actions(componentActions, props) { },
         onDestroy() { },
         onChange(props) { },
+        /**
+         * Reuse existing components when your data was changed
+         *
+         * @param {array} components - array of components
+         * @param {array} dataArray  - any data as array for each component
+         * @param {function} getProps - you can pass params to component from array item ( example: item=>({id:item.id}) )
+         * @param {function} component - what kind of components do you want to create?
+         * @returns {array} of components (with updated/destroyed/created ones)
+         */
+        componentsFromDataArray(components, dataArray, getProps, component) {
+            if (components.length < dataArray.length) {
+                let diff = dataArray.length - components.length;
+                while (diff) {
+                    const item = dataArray[dataArray.length - diff];
+                    components.push(vido.createComponent(component, getProps(item)));
+                    diff--;
+                }
+            }
+            else if (components.length > dataArray.length) {
+                let diff = components.length - dataArray.length;
+                while (diff) {
+                    const index = components.length - diff;
+                    components[index].destroy();
+                    diff--;
+                }
+                components.length = dataArray.length;
+            }
+            let index = 0;
+            for (const item of dataArray) {
+                components[index].change(getProps(item));
+                index++;
+            }
+            return components;
+        },
         createComponent(component, props) {
             const instance = component.name + ':' + componentId++;
             let vidoInstance;
