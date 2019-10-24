@@ -119,15 +119,15 @@ export default function Vido(state, api) {
     },
 
     destroyComponent(instance, vidoInstance) {
-      if (typeof components[instance].destroy === 'function') {
-        components[instance].destroy();
-      }
       actions = actions.filter(action => {
         if (action.instance === instance && typeof action.componentAction.destroy === 'function') {
           action.componentAction.destroy(action.element, action.props);
         }
         return action.instance !== instance;
       });
+      if (typeof components[instance] !== 'undefined' && typeof components[instance].destroy === 'function') {
+        components[instance].destroy();
+      }
       delete components[instance];
       if (vidoInstance.debug) {
         console.groupCollapsed(`component destroyed ${instance}`);
