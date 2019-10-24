@@ -2322,7 +2322,7 @@
                 components[instance] = methods;
                 components[instance].change(props);
                 if (vido.debug) {
-                    console.group('component created');
+                    console.groupCollapsed(`component created ${instance}`);
                     console.log(instance, component, props, components);
                     console.groupEnd();
                 }
@@ -2340,8 +2340,8 @@
                 });
                 delete components[instance];
                 if (vido.debug) {
-                    console.group('component destroyed');
-                    console.log(`Instance id: ${instance}`);
+                    console.groupCollapsed(`component destroyed ${instance}`);
+                    console.trace();
                     console.groupEnd();
                 }
             },
@@ -2354,7 +2354,9 @@
                         self.render();
                         shouldUpdateCount = 0;
                         if (vido.debug) {
-                            console.log('templates updated');
+                            console.groupCollapsed('templates updated');
+                            console.trace();
+                            console.groupEnd();
                         }
                     }
                 });
@@ -2371,6 +2373,12 @@
                     if (typeof action.element.__vido__ === 'undefined') {
                         if (typeof action.componentAction.create === 'function') {
                             const result = action.componentAction.create(action.element, action.props);
+                            if (vido.debug) {
+                                console.groupCollapsed(`create action executed ${action.instance}`);
+                                console.log(action);
+                                console.trace();
+                                console.groupEnd();
+                            }
                             if (typeof result !== 'undefined') {
                                 if (typeof result.update === 'function') {
                                     action.componentAction.update = result.update;
@@ -2384,6 +2392,12 @@
                     else {
                         if (typeof action.componentAction.update === 'function') {
                             action.componentAction.update(action.element, action.props);
+                            if (vido.debug) {
+                                console.groupCollapsed(`update action executed ${action.instance}`);
+                                console.log(action);
+                                console.trace();
+                                console.groupEnd();
+                            }
                         }
                     }
                 }
@@ -2401,7 +2415,7 @@
                 instance,
                 destroy() {
                     if (vido.debug) {
-                        console.group('destroying component');
+                        console.groupCollapsed(`destroying component ${instance}`);
                         console.log(instance, components[instance], components);
                         console.log(`Instance id: ${instance}`);
                         console.groupEnd();
@@ -2410,18 +2424,16 @@
                 },
                 update() {
                     if (vido.debug) {
-                        console.group('updating component');
+                        console.groupCollapsed(`updating component ${instance}`);
                         console.log(instance, components[instance], components);
-                        console.log(`Instance id: ${instance}`);
                         console.groupEnd();
                     }
                     return vido.updateTemplate();
                 },
                 change(props) {
                     if (vido.debug) {
-                        console.group('changing component');
+                        console.groupCollapsed(`changing component ${instance}`);
                         console.log(props, instance, components[instance], components);
-                        console.log(`Instance id: ${instance}`);
                         console.groupEnd();
                     }
                     components[instance].change(props);
