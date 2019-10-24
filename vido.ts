@@ -202,7 +202,7 @@ export default function Vido(state, api) {
         if (vido.debug) {
           console.groupCollapsed(`destroying component ${instance}`);
           console.log(instance, components[instance], components);
-          console.log(`Instance id: ${instance}`);
+          console.trace();
           console.groupEnd();
         }
 
@@ -212,6 +212,7 @@ export default function Vido(state, api) {
         if (vido.debug) {
           console.groupCollapsed(`updating component ${instance}`);
           console.log(instance, components[instance], components);
+          console.trace();
           console.groupEnd();
         }
         return vido.updateTemplate();
@@ -221,6 +222,7 @@ export default function Vido(state, api) {
         if (vido.debug) {
           console.groupCollapsed(`changing component ${instance}`);
           console.log(props, instance, components[instance], components);
+          console.trace();
           console.groupEnd();
         }
         components[instance].change(props);
