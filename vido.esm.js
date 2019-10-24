@@ -2289,7 +2289,7 @@ function Vido(state, api) {
             function onDestroy(fn) {
                 destroyable.push(fn);
             }
-            const onChangeFunctions = [];
+            let onChangeFunctions = [];
             function onChange(fn) {
                 onChangeFunctions.push(fn);
             }
@@ -2306,6 +2306,7 @@ function Vido(state, api) {
                     for (const d of destroyable) {
                         d();
                     }
+                    onChangeFunctions = [];
                 },
                 update: component(vidoInstance, props),
                 change(changedProps) {
