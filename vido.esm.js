@@ -2280,9 +2280,9 @@ function Vido(state, api) {
         onChange(props) { },
         createComponent(component, props) {
             const instance = componentId++;
-            const componentInstanceMethods = getComponentInstanceMethods(instance);
+            let vidoInstance;
             function update() {
-                vido.updateTemplate();
+                vido.updateTemplate(vidoInstance);
             }
             const destroyable = [];
             function onDestroy(fn) {
@@ -2292,7 +2292,8 @@ function Vido(state, api) {
             function onChange(fn) {
                 onChangeFunctions.push(fn);
             }
-            const vidoInstance = Object.assign(Object.assign({}, vido), { update, onDestroy, onChange, instance, actions: getActions(instance) });
+            vidoInstance = Object.assign(Object.assign({}, vido), { update, onDestroy, onChange, instance, actions: getActions(instance) });
+            const componentInstanceMethods = getComponentInstanceMethods(instance, vidoInstance);
             const methods = {
                 instance,
                 vidoInstance,
@@ -2315,14 +2316,14 @@ function Vido(state, api) {
             };
             components[instance] = methods;
             components[instance].change(props);
-            if (vido.debug) {
+            if (vidoInstance.debug) {
                 console.groupCollapsed(`component created ${instance}`);
                 console.log(instance, component, props, components);
                 console.groupEnd();
             }
             return componentInstanceMethods;
         },
-        destroyComponent(instance) {
+        destroyComponent(instance, vidoInstance) {
             if (typeof components[instance].destroy === 'function') {
                 components[instance].destroy();
             }
@@ -2333,13 +2334,13 @@ function Vido(state, api) {
                 return action.instance !== instance;
             });
             delete components[instance];
-            if (vido.debug) {
+            if (vidoInstance.debug) {
                 console.groupCollapsed(`component destroyed ${instance}`);
                 console.trace();
                 console.groupEnd();
             }
         },
-        updateTemplate() {
+        updateTemplate(vidoInstance) {
             shouldUpdateCount++;
             const currentShouldUpdateCount = shouldUpdateCount;
             const self = this;
@@ -2347,7 +2348,7 @@ function Vido(state, api) {
                 if (currentShouldUpdateCount === shouldUpdateCount) {
                     self.render();
                     shouldUpdateCount = 0;
-                    if (vido.debug) {
+                    if (vidoInstance.debug) {
                         console.groupCollapsed('templates updated');
                         console.trace();
                         console.groupEnd();
@@ -2404,38 +2405,39 @@ function Vido(state, api) {
             vido.executeActions();
         }
     };
-    function getComponentInstanceMethods(instance) {
+    function getComponentInstanceMethods(instance, vidoInstance) {
         return {
             instance,
+            vidoInstance,
             destroy() {
-                if (vido.debug) {
+                if (vidoInstance.debug) {
                     console.groupCollapsed(`destroying component ${instance}`);
                     console.log(instance, components[instance], components);
                     console.trace();
                     console.groupEnd();
                 }
-                return vido.destroyComponent(instance);
+                return vido.destroyComponent(instance, vidoInstance);
             },
             update() {
-                if (vido.debug) {
+                if (vidoInstance.debug) {
                     console.groupCollapsed(`updating component ${instance}`);
                     console.log(instance, components[instance], components);
                     console.trace();
                     console.groupEnd();
                 }
-                return vido.updateTemplate();
+                return vido.updateTemplate(vidoInstance);
             },
             change(props) {
-                if (vido.debug) {
+                if (vidoInstance.debug) {
                     console.groupCollapsed(`changing component ${instance}`);
                     console.log(props, instance, components[instance], components);
                     console.trace();
                     console.groupEnd();
                 }
-                components[instance].change(props);
+                components[instance].change(props, vidoInstance);
             },
             html(props = {}) {
-                return components[instance].update(props);
+                return components[instance].update(props, vidoInstance);
             }
         };
     }
