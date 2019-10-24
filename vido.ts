@@ -105,6 +105,7 @@ export default function Vido(state, api) {
       if (vidoInstance.debug) {
         console.groupCollapsed(`component created ${instance}`);
         console.log(instance, component, props, components);
+        console.trace();
         console.groupEnd();
       }
       return componentInstanceMethods;
