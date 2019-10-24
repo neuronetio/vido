@@ -2279,7 +2279,7 @@ function Vido(state, api) {
         onDestroy() { },
         onChange(props) { },
         createComponent(component, props) {
-            const instance = componentId++;
+            const instance = component.name + ':' + componentId++;
             let vidoInstance;
             function update() {
                 vido.updateTemplate(vidoInstance);
