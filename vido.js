@@ -2321,7 +2321,7 @@
                 };
                 components[instance] = methods;
                 components[instance].change(props);
-                if (this.debug) {
+                if (vido.debug) {
                     console.group('component created');
                     console.log(instance, component, props, components);
                     console.groupEnd();
@@ -2339,7 +2339,7 @@
                     return action.instance !== instance;
                 });
                 delete components[instance];
-                if (this.debug) {
+                if (vido.debug) {
                     console.group('component destroyed');
                     console.log(`Instance id: ${instance}`);
                     console.groupEnd();
@@ -2353,7 +2353,7 @@
                     if (currentShouldUpdateCount === shouldUpdateCount) {
                         self.render();
                         shouldUpdateCount = 0;
-                        if (this.debug) {
+                        if (vido.debug) {
                             console.log('templates updated');
                         }
                     }
