@@ -234,11 +234,15 @@ export default function Vido(state, api) {
           console.trace();
           console.groupEnd();
         }
-        components[instance].change(props, vidoInstance);
+        if (typeof components[instance] !== 'undefined') {
+          components[instance].change(props, vidoInstance);
+        }
       },
 
       html(props = {}) {
-        return components[instance].update(props, vidoInstance);
+        if (typeof components[instance] !== 'undefined') {
+          return components[instance].update(props, vidoInstance);
+        }
       }
     };
   }
