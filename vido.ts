@@ -85,9 +85,14 @@ export default function Vido(state, api) {
           }
         },
         update: component(vidoInstance, props),
-        change(props) {
+        change(changedProps) {
+          for (const prop in props) {
+            if (changedProps[prop] === props[prop]) {
+              return;
+            }
+          }
           for (const fn of onChangeFunctions) {
-            fn(props);
+            fn(changedProps);
           }
         }
       };
@@ -171,11 +176,11 @@ export default function Vido(state, api) {
       },
 
       change(props) {
-        components[instance].change(props);
+        if (components[instance]) components[instance].change(props);
       },
 
       html(props = {}) {
-        return components[instance].update(props);
+        if (components[instance]) return components[instance].update(props);
       }
     };
   }
