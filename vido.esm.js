@@ -2345,36 +2345,43 @@ function Vido(state, api) {
         /**
          * Reuse existing components when your data was changed
          *
-         * @param {array} components - array of components
+         * @param {array} currentComponents - array of components
          * @param {array} dataArray  - any data as array for each component
          * @param {function} getProps - you can pass params to component from array item ( example: item=>({id:item.id}) )
          * @param {function} component - what kind of components do you want to create?
          * @returns {array} of components (with updated/destroyed/created ones)
          */
-        componentsFromDataArray(components, dataArray, getProps, component) {
-            if (components.length < dataArray.length) {
-                let diff = dataArray.length - components.length;
+        componentsFromDataArray(currentComponents, dataArray, getProps, component) {
+            const modified = [];
+            if (currentComponents.length < dataArray.length) {
+                let diff = dataArray.length - currentComponents.length;
                 while (diff) {
                     const item = dataArray[dataArray.length - diff];
-                    components.push(vido.createComponent(component, getProps(item)));
+                    const newComponent = vido.createComponent(component, getProps(item));
+                    currentComponents.push(newComponent);
+                    modified.push(newComponent.instance);
                     diff--;
                 }
             }
-            else if (components.length > dataArray.length) {
-                let diff = components.length - dataArray.length;
+            else if (currentComponents.length > dataArray.length) {
+                let diff = currentComponents.length - dataArray.length;
                 while (diff) {
-                    const index = components.length - diff;
-                    components[index].destroy();
+                    const index = currentComponents.length - diff;
+                    modified.push(currentComponents[index].instance);
+                    currentComponents[index].destroy();
                     diff--;
                 }
-                components.length = dataArray.length;
+                currentComponents.length = dataArray.length;
             }
             let index = 0;
-            for (const item of dataArray) {
-                components[index].change(getProps(item));
+            for (const component of currentComponents) {
+                const item = dataArray[index];
+                if (!modified.includes(component.instance)) {
+                    component.change(getProps(item));
+                }
                 index++;
             }
-            return components;
+            return currentComponents;
         },
         createComponent(component, props) {
             const instance = component.name + ':' + componentId++;
@@ -2382,7 +2389,7 @@ function Vido(state, api) {
             function update() {
                 vido.updateTemplate(vidoInstance);
             }
-            const destroyable = [];
+            let destroyable = [];
             function onDestroy(fn) {
                 destroyable.push(fn);
             }
@@ -2394,7 +2401,7 @@ function Vido(state, api) {
                 onDestroy,
                 onChange,
                 instance, actions: getActions(instance), lastProps: props });
-            const componentInstanceMethods = getComponentInstanceMethods(instance, vidoInstance);
+            const componentInstanceMethods = getComponentInstanceMethods(instance, vidoInstance, props);
             const upd = component(vidoInstance, props);
             const methods = {
                 instance,
@@ -2410,8 +2417,8 @@ function Vido(state, api) {
                     for (const d of destroyable) {
                         d();
                     }
-                    onChangeFunctions.length = 0;
-                    destroyable.length = 0;
+                    onChangeFunctions = [];
+                    destroyable = [];
                 },
                 update(props) {
                     if (vidoInstance.debug) {
@@ -2464,9 +2471,7 @@ function Vido(state, api) {
                 }
                 return action.instance !== instance;
             });
-            if (typeof components[instance] !== 'undefined' && typeof components[instance].destroy === 'function') {
-                components[instance].destroy();
-            }
+            components[instance].destroy();
             delete components[instance];
             if (vidoInstance.debug) {
                 console.groupCollapsed(`component destroyed ${instance}`);
@@ -2540,10 +2545,11 @@ function Vido(state, api) {
             vido.executeActions();
         }
     };
-    function getComponentInstanceMethods(instance, vidoInstance) {
+    function getComponentInstanceMethods(instance, vidoInstance, props) {
         return {
             instance,
             vidoInstance,
+            props,
             destroy() {
                 if (vidoInstance.debug) {
                     console.groupCollapsed(`destroying component ${instance}`);
@@ -2562,21 +2568,17 @@ function Vido(state, api) {
                 }
                 return vido.updateTemplate(vidoInstance);
             },
-            change(props) {
+            change(_props) {
                 if (vidoInstance.debug) {
                     console.groupCollapsed(`changing component ${instance}`);
-                    console.log(clone({ props, components: Object.keys(components), actions }));
+                    console.log(clone({ props, _props, components: Object.keys(components), actions }));
                     console.trace();
                     console.groupEnd();
                 }
-                if (typeof components[instance] !== 'undefined') {
-                    components[instance].change(props, vidoInstance);
-                }
+                components[instance].change(_props, vidoInstance);
             },
             html(props = {}) {
-                if (typeof components[instance] !== 'undefined') {
-                    return components[instance].update(props, vidoInstance);
-                }
+                return components[instance].update(props, vidoInstance);
             }
         };
     }
