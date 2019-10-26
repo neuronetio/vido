@@ -2234,8 +2234,10 @@ function mergeDeep(source) {
     if (typeof source.actions !== 'undefined') {
         const actns = source.actions.map(action => {
             const result = Object.assign({}, action);
-            delete result.state;
-            delete result.api;
+            const props = Object.assign({}, result.props);
+            delete props.state;
+            delete props.api;
+            result.props = props;
             return result;
         });
         source.actions = actns;
