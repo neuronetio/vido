@@ -16,6 +16,7 @@ export function mergeDeep(source) {
       const result = { ...action };
       delete result.state;
       delete result.api;
+      return result;
     });
     source.actions = actns;
   }
