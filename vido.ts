@@ -10,21 +10,8 @@ import { styleMap } from 'lit-html/directives/style-map';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import { until } from 'lit-html/directives/until';
 
-const getCircularReplacer = () => {
-  const seen = new WeakSet();
-  return (key, value) => {
-    if (typeof value === 'object' && value !== null) {
-      if (seen.has(value)) {
-        return;
-      }
-      seen.add(value);
-    }
-    return value;
-  };
-};
-
 export function mergeDeep(source) {
-  return JSON.stringify(source, getCircularReplacer, 2);
+  return JSON.parse(JSON.stringify(source));
 }
 
 export default function Vido(state, api) {
@@ -161,7 +148,7 @@ export default function Vido(state, api) {
         update(props) {
           if (vidoInstance.debug) {
             console.groupCollapsed(`component update method fired ${instance}`);
-            console.log(mergeDeep({ props, components: Object.keys(components), onChangeFunctions }));
+            console.log(mergeDeep({ components: Object.keys(components) }));
             console.trace();
             console.groupEnd();
           }

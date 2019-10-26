@@ -2236,20 +2236,8 @@
         }
     });
 
-    const getCircularReplacer = () => {
-        const seen = new WeakSet();
-        return (key, value) => {
-            if (typeof value === 'object' && value !== null) {
-                if (seen.has(value)) {
-                    return;
-                }
-                seen.add(value);
-            }
-            return value;
-        };
-    };
     function mergeDeep(source) {
-        return JSON.stringify(source, getCircularReplacer, 2);
+        return JSON.parse(JSON.stringify(source));
     }
     function Vido(state, api) {
         let componentId = 0;
@@ -2374,7 +2362,7 @@
                     update(props) {
                         if (vidoInstance.debug) {
                             console.groupCollapsed(`component update method fired ${instance}`);
-                            console.log(mergeDeep({ props, components: Object.keys(components), onChangeFunctions }));
+                            console.log(mergeDeep({ components: Object.keys(components) }));
                             console.trace();
                             console.groupEnd();
                         }
