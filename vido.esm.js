@@ -2554,12 +2554,6 @@ function Vido(state, api) {
             },
             html(props = {}) {
                 if (typeof components[instance] !== 'undefined') {
-                    if (vidoInstance.debug) {
-                        console.groupCollapsed(`html component ${instance}`);
-                        console.log(mergeDeep({}, { props, components: Object.keys(components), actions }));
-                        console.trace();
-                        console.groupEnd();
-                    }
                     return components[instance].update(props, vidoInstance);
                 }
             }
