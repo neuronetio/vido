@@ -2343,13 +2343,34 @@
                     vidoInstance,
                     lastProps: props,
                     destroy() {
+                        if (vidoInstance.debug) {
+                            console.groupCollapsed(`component destroy method fired ${instance}`);
+                            console.log(JSON.parse(JSON.stringify({ instance, component, props, components, destroyable })));
+                            console.trace();
+                            console.groupEnd();
+                        }
                         for (const d of destroyable) {
                             d();
                         }
-                        onChangeFunctions = [];
+                        onChangeFunctions.length = 0;
+                        destroyable.length = 0;
                     },
-                    update: component(vidoInstance, props),
+                    update() {
+                        if (vidoInstance.debug) {
+                            console.groupCollapsed(`component update method fired ${instance}`);
+                            console.log(JSON.parse(JSON.stringify({ instance, component, props, components, onChangeFunctions })));
+                            console.trace();
+                            console.groupEnd();
+                        }
+                        return component(vidoInstance, props);
+                    },
                     change(changedProps) {
+                        if (vidoInstance.debug) {
+                            console.groupCollapsed(`component change method fired ${instance}`);
+                            console.log(JSON.parse(JSON.stringify({ instance, component, props, components, onChangeFunctions, changedProps })));
+                            console.trace();
+                            console.groupEnd();
+                        }
                         for (const fn of onChangeFunctions) {
                             fn(changedProps);
                         }
@@ -2360,13 +2381,19 @@
                 components[instance].change(props);
                 if (vidoInstance.debug) {
                     console.groupCollapsed(`component created ${instance}`);
-                    console.log(instance, component, props, components);
+                    console.log(JSON.parse(JSON.stringify({ instance, component, props, components })));
                     console.trace();
                     console.groupEnd();
                 }
                 return componentInstanceMethods;
             },
             destroyComponent(instance, vidoInstance) {
+                if (vidoInstance.debug) {
+                    console.groupCollapsed(`destroying component ${instance}...`);
+                    console.log(JSON.parse(JSON.stringify({ instance, component: components[instance], components, actions })));
+                    console.trace();
+                    console.groupEnd();
+                }
                 actions = actions.filter(action => {
                     if (action.instance === instance && typeof action.componentAction.destroy === 'function') {
                         action.componentAction.destroy(action.element, action.props);
@@ -2379,6 +2406,7 @@
                 delete components[instance];
                 if (vidoInstance.debug) {
                     console.groupCollapsed(`component destroyed ${instance}`);
+                    console.log(JSON.parse(JSON.stringify({ components, actions })));
                     console.trace();
                     console.groupEnd();
                 }
@@ -2413,7 +2441,7 @@
                             const result = action.componentAction.create(action.element, action.props);
                             if (vido.debug) {
                                 console.groupCollapsed(`create action executed ${action.instance}`);
-                                console.log(action);
+                                console.log(JSON.parse(JSON.stringify({ action, actions })));
                                 console.trace();
                                 console.groupEnd();
                             }
@@ -2432,7 +2460,7 @@
                             action.componentAction.update(action.element, action.props);
                             if (vido.debug) {
                                 console.groupCollapsed(`update action executed ${action.instance}`);
-                                console.log(action);
+                                console.log(JSON.parse(JSON.stringify({ action, actions })));
                                 console.trace();
                                 console.groupEnd();
                             }
@@ -2455,7 +2483,7 @@
                 destroy() {
                     if (vidoInstance.debug) {
                         console.groupCollapsed(`destroying component ${instance}`);
-                        console.log(instance, components[instance], components);
+                        console.log(JSON.parse(JSON.stringify({ instance, component: components[instance], components, actions })));
                         console.trace();
                         console.groupEnd();
                     }
@@ -2464,7 +2492,7 @@
                 update() {
                     if (vidoInstance.debug) {
                         console.groupCollapsed(`updating component ${instance}`);
-                        console.log(instance, components[instance], components);
+                        console.log(JSON.parse(JSON.stringify({ instance, component: components[instance], components, actions })));
                         console.trace();
                         console.groupEnd();
                     }
@@ -2473,7 +2501,7 @@
                 change(props) {
                     if (vidoInstance.debug) {
                         console.groupCollapsed(`changing component ${instance}`);
-                        console.log(props, instance, components[instance], components);
+                        console.log(JSON.parse(JSON.stringify({ props, instance, component: components[instance], components, actions })));
                         console.trace();
                         console.groupEnd();
                     }
@@ -2483,6 +2511,12 @@
                 },
                 html(props = {}) {
                     if (typeof components[instance] !== 'undefined') {
+                        if (vidoInstance.debug) {
+                            console.groupCollapsed(`html component ${instance}`);
+                            console.log(JSON.parse(JSON.stringify({ props, instance, component: components[instance], components, actions })));
+                            console.trace();
+                            console.groupEnd();
+                        }
                         return components[instance].update(props, vidoInstance);
                     }
                 }
