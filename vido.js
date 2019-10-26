@@ -2361,7 +2361,7 @@
                     destroy() {
                         if (vidoInstance.debug) {
                             console.groupCollapsed(`component destroy method fired ${instance}`);
-                            console.log(mergeDeep({ props, components: Object.keys(components), destroyable }));
+                            console.log(mergeDeep({ props, components: Object.keys(components), destroyable, actions }));
                             console.trace();
                             console.groupEnd();
                         }
@@ -2374,7 +2374,7 @@
                     update(props) {
                         if (vidoInstance.debug) {
                             console.groupCollapsed(`component update method fired ${instance}`);
-                            console.log(mergeDeep({ components: Object.keys(components) }));
+                            console.log(mergeDeep({ components: Object.keys(components), actions }));
                             console.trace();
                             console.groupEnd();
                         }
@@ -2383,7 +2383,7 @@
                     change(changedProps) {
                         if (vidoInstance.debug) {
                             console.groupCollapsed(`component change method fired ${instance}`);
-                            console.log(mergeDeep({ props, components: Object.keys(components), onChangeFunctions, changedProps }));
+                            console.log(mergeDeep({ props, components: Object.keys(components), onChangeFunctions, changedProps, actions }));
                             console.trace();
                             console.groupEnd();
                         }
