@@ -2379,7 +2379,8 @@ function Vido(state, api) {
             components[instance].change(props);
             if (vidoInstance.debug) {
                 console.groupCollapsed(`component created ${instance}`);
-                console.log(mergeDeep({ props, components: Object.keys(components), actions }));
+                console.log(mergeDeep({ components: Object.keys(components), actions }));
+                console.log('props', props);
                 console.trace();
                 console.groupEnd();
             }
@@ -2499,7 +2500,8 @@ function Vido(state, api) {
             change(props) {
                 if (vidoInstance.debug) {
                     console.groupCollapsed(`changing component ${instance}`);
-                    console.log(mergeDeep({ props, components: Object.keys(components), actions }));
+                    console.log(mergeDeep({ components: Object.keys(components), actions }));
+                    console.log('props', props);
                     console.trace();
                     console.groupEnd();
                 }
