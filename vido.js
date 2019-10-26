@@ -1,8 +1,8 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-    typeof define === 'function' && define.amd ? define(['exports'], factory) :
-    (global = global || self, factory(global.Vido = {}));
-}(this, function (exports) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+    typeof define === 'function' && define.amd ? define(factory) :
+    (global = global || self, global.Vido = factory());
+}(this, function () { 'use strict';
 
     /**
      * @license
@@ -2516,6 +2516,7 @@
                 change(props) {
                     if (vidoInstance.debug) {
                         console.groupCollapsed(`changing component ${instance}`);
+                        console.log(props);
                         console.log(mergeDeep({ props, components: Object.keys(components), actions }));
                         console.trace();
                         console.groupEnd();
@@ -2534,10 +2535,7 @@
         return vido;
     }
 
-    exports.default = Vido;
-    exports.mergeDeep = mergeDeep;
-
-    Object.defineProperty(exports, '__esModule', { value: true });
+    return Vido;
 
 }));
 //# sourceMappingURL=vido.js.map

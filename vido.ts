@@ -10,7 +10,7 @@ import { styleMap } from 'lit-html/directives/style-map';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import { until } from 'lit-html/directives/until';
 
-export function mergeDeep(source) {
+function mergeDeep(source) {
   if (typeof source.actions !== 'undefined') {
     const actns = source.actions.map(action => {
       const result = { ...action };
@@ -308,6 +308,7 @@ export default function Vido(state, api) {
       change(props) {
         if (vidoInstance.debug) {
           console.groupCollapsed(`changing component ${instance}`);
+          console.log(props);
           console.log(mergeDeep({ props, components: Object.keys(components), actions }));
           console.trace();
           console.groupEnd();

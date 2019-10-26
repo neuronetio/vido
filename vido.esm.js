@@ -2510,6 +2510,7 @@ function Vido(state, api) {
             change(props) {
                 if (vidoInstance.debug) {
                     console.groupCollapsed(`changing component ${instance}`);
+                    console.log(props);
                     console.log(mergeDeep({ props, components: Object.keys(components), actions }));
                     console.trace();
                     console.groupEnd();
@@ -2529,5 +2530,4 @@ function Vido(state, api) {
 }
 
 export default Vido;
-export { mergeDeep };
 //# sourceMappingURL=vido.esm.js.map
