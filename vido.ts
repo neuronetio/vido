@@ -215,6 +215,7 @@ export default function Vido(state, api) {
           return upd(props);
         },
         change(changedProps) {
+          props = changedProps;
           if (vidoInstance.debug) {
             console.groupCollapsed(`component change method fired ${instance}`);
             console.log(
