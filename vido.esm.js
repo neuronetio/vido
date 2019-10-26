@@ -2243,7 +2243,7 @@ const getCircularReplacer = () => {
     };
 };
 function mergeDeep(source) {
-    return JSON.parse(JSON.stringify(source, getCircularReplacer));
+    return JSON.stringify(source, getCircularReplacer, 2);
 }
 function Vido(state, api) {
     let componentId = 0;

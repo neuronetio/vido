@@ -24,7 +24,7 @@ const getCircularReplacer = () => {
 };
 
 export function mergeDeep(source) {
-  return JSON.parse(JSON.stringify(source, getCircularReplacer));
+  return JSON.stringify(source, getCircularReplacer, 2);
 }
 
 export default function Vido(state, api) {
