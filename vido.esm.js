@@ -2235,7 +2235,7 @@ const getCircularReplacer = () => {
     return (key, value) => {
         if (typeof value === 'object' && value !== null) {
             if (seen.has(value)) {
-                return;
+                return '[circular]';
             }
             seen.add(value);
         }
