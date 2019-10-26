@@ -10,7 +10,55 @@ import { styleMap } from 'lit-html/directives/style-map';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import { until } from 'lit-html/directives/until';
 
-function mergeDeep(source) {
+/**
+ * Helper function to determine if specified variable is an object
+ *
+ * @param {any} item
+ *
+ * @returns {boolean}
+ */
+function isObject(item) {
+  return item && typeof item === 'object' && !Array.isArray(item);
+}
+
+/**
+ * Helper function which will merge objects recursively - creating brand new one - like clone
+ *
+ * @param {object} target
+ * @params {object} sources
+ *
+ * @returns {object}
+ */
+function mergeDeep(target, ...sources) {
+  const source = sources.shift();
+  if (isObject(target) && isObject(source)) {
+    for (const key in source) {
+      if (isObject(source[key])) {
+        if (typeof target[key] === 'undefined') {
+          target[key] = {};
+        }
+        target[key] = mergeDeep(target[key], source[key]);
+      } else if (Array.isArray(source[key])) {
+        target[key] = [];
+        for (let item of source[key]) {
+          if (isObject(item)) {
+            target[key].push(mergeDeep({}, item));
+            continue;
+          }
+          target[key].push(item);
+        }
+      } else {
+        target[key] = source[key];
+      }
+    }
+  }
+  if (!sources.length) {
+    return target;
+  }
+  return mergeDeep(target, ...sources);
+}
+
+function clone(source) {
   if (typeof source.actions !== 'undefined') {
     const actns = source.actions.map(action => {
       const result = { ...action };
@@ -23,7 +71,7 @@ function mergeDeep(source) {
     });
     source.actions = actns;
   }
-  return JSON.parse(JSON.stringify(source));
+  return mergeDeep({}, source);
 }
 
 export default function Vido(state, api) {
@@ -147,7 +195,7 @@ export default function Vido(state, api) {
         destroy() {
           if (vidoInstance.debug) {
             console.groupCollapsed(`component destroy method fired ${instance}`);
-            console.log(mergeDeep({ props, components: Object.keys(components), destroyable, actions }));
+            console.log(clone({ props, components: Object.keys(components), destroyable, actions }));
             console.trace();
             console.groupEnd();
           }
@@ -160,7 +208,7 @@ export default function Vido(state, api) {
         update(props) {
           if (vidoInstance.debug) {
             console.groupCollapsed(`component update method fired ${instance}`);
-            console.log(mergeDeep({ components: Object.keys(components), actions }));
+            console.log(clone({ components: Object.keys(components), actions }));
             console.trace();
             console.groupEnd();
           }
@@ -170,7 +218,7 @@ export default function Vido(state, api) {
           if (vidoInstance.debug) {
             console.groupCollapsed(`component change method fired ${instance}`);
             console.log(
-              mergeDeep({ props, components: Object.keys(components), onChangeFunctions, changedProps, actions })
+              clone({ props, components: Object.keys(components), onChangeFunctions, changedProps, actions })
             );
             console.trace();
             console.groupEnd();
@@ -185,7 +233,7 @@ export default function Vido(state, api) {
       components[instance].change(props);
       if (vidoInstance.debug) {
         console.groupCollapsed(`component created ${instance}`);
-        console.log(mergeDeep({ props, components: Object.keys(components), actions }));
+        console.log(clone({ props, components: Object.keys(components), actions }));
         console.trace();
         console.groupEnd();
       }
@@ -195,7 +243,7 @@ export default function Vido(state, api) {
     destroyComponent(instance, vidoInstance) {
       if (vidoInstance.debug) {
         console.groupCollapsed(`destroying component ${instance}...`);
-        console.log(mergeDeep({ components: Object.keys(components), actions }));
+        console.log(clone({ components: Object.keys(components), actions }));
         console.trace();
         console.groupEnd();
       }
@@ -211,7 +259,7 @@ export default function Vido(state, api) {
       delete components[instance];
       if (vidoInstance.debug) {
         console.groupCollapsed(`component destroyed ${instance}`);
-        console.log(mergeDeep({ components: Object.keys(components), actions }));
+        console.log(clone({ components: Object.keys(components), actions }));
         console.trace();
         console.groupEnd();
       }
@@ -249,7 +297,7 @@ export default function Vido(state, api) {
             const result = action.componentAction.create(action.element, action.props);
             if (vido.debug) {
               console.groupCollapsed(`create action executed ${action.instance}`);
-              console.log(mergeDeep({ components: Object.keys(components), action, actions }));
+              console.log(clone({ components: Object.keys(components), action, actions }));
               console.trace();
               console.groupEnd();
             }
@@ -267,7 +315,7 @@ export default function Vido(state, api) {
             action.componentAction.update(action.element, action.props);
             if (vido.debug) {
               console.groupCollapsed(`update action executed ${action.instance}`);
-              console.log(mergeDeep({ components: Object.keys(components), action, actions }));
+              console.log(clone({ components: Object.keys(components), action, actions }));
               console.trace();
               console.groupEnd();
             }
@@ -292,7 +340,7 @@ export default function Vido(state, api) {
       destroy() {
         if (vidoInstance.debug) {
           console.groupCollapsed(`destroying component ${instance}`);
-          console.log(mergeDeep({ components: Object.keys(components), actions }));
+          console.log(clone({ components: Object.keys(components), actions }));
           console.trace();
           console.groupEnd();
         }
@@ -301,7 +349,7 @@ export default function Vido(state, api) {
       update() {
         if (vidoInstance.debug) {
           console.groupCollapsed(`updating component ${instance}`);
-          console.log(mergeDeep({ components: Object.keys(components), actions }));
+          console.log(clone({ components: Object.keys(components), actions }));
           console.trace();
           console.groupEnd();
         }
@@ -311,7 +359,7 @@ export default function Vido(state, api) {
       change(props) {
         if (vidoInstance.debug) {
           console.groupCollapsed(`changing component ${instance}`);
-          console.log(mergeDeep({ props, components: Object.keys(components), actions }));
+          console.log(clone({ props, components: Object.keys(components), actions }));
           console.trace();
           console.groupEnd();
         }
