@@ -2394,7 +2394,7 @@
                     destroy() {
                         if (vidoInstance.debug) {
                             console.groupCollapsed(`component destroy method fired ${instance}`);
-                            console.log(mergeDeep({}, { instance, component, props, components, destroyable }));
+                            console.log(mergeDeep({}, { props, components, destroyable }));
                             console.trace();
                             console.groupEnd();
                         }
@@ -2407,7 +2407,7 @@
                     update(props) {
                         if (vidoInstance.debug) {
                             console.groupCollapsed(`component update method fired ${instance}`);
-                            console.log(mergeDeep({}, { instance, component, props, components, onChangeFunctions }));
+                            console.log(mergeDeep({}, { props, components, onChangeFunctions }));
                             console.trace();
                             console.groupEnd();
                         }
@@ -2416,7 +2416,7 @@
                     change(changedProps) {
                         if (vidoInstance.debug) {
                             console.groupCollapsed(`component change method fired ${instance}`);
-                            console.log(mergeDeep({}, { instance, component, props, components, onChangeFunctions, changedProps }));
+                            console.log(mergeDeep({}, { props, components, onChangeFunctions, changedProps }));
                             console.trace();
                             console.groupEnd();
                         }
@@ -2430,7 +2430,7 @@
                 components[instance].change(props);
                 if (vidoInstance.debug) {
                     console.groupCollapsed(`component created ${instance}`);
-                    console.log(mergeDeep({}, { instance, component, props, components }));
+                    console.log(mergeDeep({}, { props, components, actions }));
                     console.trace();
                     console.groupEnd();
                 }
@@ -2439,7 +2439,7 @@
             destroyComponent(instance, vidoInstance) {
                 if (vidoInstance.debug) {
                     console.groupCollapsed(`destroying component ${instance}...`);
-                    console.log(mergeDeep({}, { instance, component: components[instance], components, actions }));
+                    console.log(mergeDeep({}, { components, actions }));
                     console.trace();
                     console.groupEnd();
                 }
@@ -2490,7 +2490,7 @@
                             const result = action.componentAction.create(action.element, action.props);
                             if (vido.debug) {
                                 console.groupCollapsed(`create action executed ${action.instance}`);
-                                console.log(mergeDeep({}, { action, actions }));
+                                console.log(mergeDeep({}, { components, action, actions }));
                                 console.trace();
                                 console.groupEnd();
                             }
@@ -2509,7 +2509,7 @@
                             action.componentAction.update(action.element, action.props);
                             if (vido.debug) {
                                 console.groupCollapsed(`update action executed ${action.instance}`);
-                                console.log(mergeDeep({}, { action, actions }));
+                                console.log(mergeDeep({}, { components, action, actions }));
                                 console.trace();
                                 console.groupEnd();
                             }
@@ -2532,7 +2532,7 @@
                 destroy() {
                     if (vidoInstance.debug) {
                         console.groupCollapsed(`destroying component ${instance}`);
-                        console.log(mergeDeep({}, { instance, component: components[instance], components, actions }));
+                        console.log(mergeDeep({}, { components, actions }));
                         console.trace();
                         console.groupEnd();
                     }
@@ -2541,7 +2541,7 @@
                 update() {
                     if (vidoInstance.debug) {
                         console.groupCollapsed(`updating component ${instance}`);
-                        console.log(mergeDeep({}, { instance, component: components[instance], components, actions }));
+                        console.log(mergeDeep({}, { components, actions }));
                         console.trace();
                         console.groupEnd();
                     }
@@ -2550,7 +2550,7 @@
                 change(props) {
                     if (vidoInstance.debug) {
                         console.groupCollapsed(`changing component ${instance}`);
-                        console.log(mergeDeep({}, { props, instance, component: components[instance], components, actions }));
+                        console.log(mergeDeep({}, { props, components, actions }));
                         console.trace();
                         console.groupEnd();
                     }
@@ -2562,7 +2562,7 @@
                     if (typeof components[instance] !== 'undefined') {
                         if (vidoInstance.debug) {
                             console.groupCollapsed(`html component ${instance}`);
-                            console.log(mergeDeep({}, { props, instance, component: components[instance], components, actions }));
+                            console.log(mergeDeep({}, { props, components, actions }));
                             console.trace();
                             console.groupEnd();
                         }
