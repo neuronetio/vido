@@ -2237,6 +2237,14 @@
     });
 
     function mergeDeep(source) {
+        if (typeof source.actions !== 'undefined') {
+            const actns = source.actions.map(action => {
+                const result = Object.assign({}, action);
+                delete result.state;
+                delete result.api;
+            });
+            source.actions = actns;
+        }
         return JSON.parse(JSON.stringify(source));
     }
     function Vido(state, api) {
@@ -2385,8 +2393,7 @@
                 components[instance].change(props);
                 if (vidoInstance.debug) {
                     console.groupCollapsed(`component created ${instance}`);
-                    console.log(mergeDeep({ components: Object.keys(components), actions }));
-                    console.log('props', props);
+                    console.log(mergeDeep({ props, components: Object.keys(components), actions }));
                     console.trace();
                     console.groupEnd();
                 }
@@ -2506,8 +2513,7 @@
                 change(props) {
                     if (vidoInstance.debug) {
                         console.groupCollapsed(`changing component ${instance}`);
-                        console.log(mergeDeep({ components: Object.keys(components), actions }));
-                        console.log('props', props);
+                        console.log(mergeDeep({ props, components: Object.keys(components), actions }));
                         console.trace();
                         console.groupEnd();
                     }
