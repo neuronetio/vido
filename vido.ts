@@ -17,6 +17,7 @@ function mergeDeep(source) {
       const props = { ...result.props };
       delete props.state;
       delete props.api;
+      delete result.element;
       result.props = props;
       return result;
     });
@@ -308,7 +309,6 @@ export default function Vido(state, api) {
       change(props) {
         if (vidoInstance.debug) {
           console.groupCollapsed(`changing component ${instance}`);
-          console.log(props);
           console.log(mergeDeep({ props, components: Object.keys(components), actions }));
           console.trace();
           console.groupEnd();
