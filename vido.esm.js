@@ -2230,8 +2230,20 @@ const until = directive((...args) => (part) => {
     }
 });
 
+const getCircularReplacer = () => {
+    const seen = new WeakSet();
+    return (key, value) => {
+        if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) {
+                return;
+            }
+            seen.add(value);
+        }
+        return value;
+    };
+};
 function mergeDeep(source) {
-    return JSON.parse(JSON.stringify(source));
+    return JSON.parse(JSON.stringify(source, getCircularReplacer));
 }
 function Vido(state, api) {
     let componentId = 0;
