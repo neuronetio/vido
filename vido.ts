@@ -123,6 +123,7 @@ export default function Vido(state, api) {
         lastProps: props
       };
       const componentInstanceMethods = getComponentInstanceMethods(instance, vidoInstance);
+      const upd = component(vidoInstance, props);
       const methods = {
         instance,
         vidoInstance,
@@ -140,14 +141,14 @@ export default function Vido(state, api) {
           onChangeFunctions.length = 0;
           destroyable.length = 0;
         },
-        update() {
+        update(props) {
           if (vidoInstance.debug) {
             console.groupCollapsed(`component update method fired ${instance}`);
             console.log(JSON.parse(JSON.stringify({ instance, component, props, components, onChangeFunctions })));
             console.trace();
             console.groupEnd();
           }
-          return component(vidoInstance, props);
+          return upd(props);
         },
         change(changedProps) {
           if (vidoInstance.debug) {
