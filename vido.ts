@@ -138,7 +138,7 @@ export default function Vido(state, api) {
      * @param {function} component - what kind of components do you want to create?
      * @returns {array} of components (with updated/destroyed/created ones)
      */
-    componentsFromDataArray(currentComponents, dataArray, getProps, component) {
+    reuseComponents(currentComponents, dataArray, getProps, component) {
       const modified = [];
       if (currentComponents.length < dataArray.length) {
         let diff = dataArray.length - currentComponents.length;
