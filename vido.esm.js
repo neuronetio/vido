@@ -2431,11 +2431,6 @@ function Vido(state, api) {
                 },
                 change(changedProps) {
                     props = changedProps;
-                    for (const action of actions) {
-                        if (action.instance === instance) {
-                            action.props = props;
-                        }
-                    }
                     if (vidoInstance.debug) {
                         console.groupCollapsed(`component change method fired ${instance}`);
                         console.log(clone({ props, components: Object.keys(components), onChangeFunctions, changedProps, actions }));
@@ -2445,7 +2440,6 @@ function Vido(state, api) {
                     for (const fn of onChangeFunctions) {
                         fn(changedProps);
                     }
-                    vidoInstance.lastProps = changedProps;
                 }
             };
             components[instance] = methods;
