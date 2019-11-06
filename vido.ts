@@ -9,6 +9,7 @@ import { repeat } from 'lit-html/directives/repeat';
 import { styleMap } from 'lit-html/directives/style-map';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import { until } from 'lit-html/directives/until';
+import schedule from 'raf-schd';
 
 /**
  * Helper function to determine if specified variable is an object
@@ -78,6 +79,7 @@ export default function Vido(state, api) {
   let componentId = 0;
   const components = {};
   let actions = [];
+  let actionsByInstance = {};
 
   let app, element;
 
@@ -90,14 +92,23 @@ export default function Vido(state, api) {
         const element = part.committer.element;
         for (const create of createFunctions) {
           if (typeof create === 'function') {
-            const exists = actions.find(
-              action =>
-                action.instance === instance && action.componentAction.create === create && action.element === element
-            );
+            let exists;
+            if (typeof actionsByInstance[instance] !== 'undefined')
+              for (const action of actionsByInstance[instance]) {
+                if (action.componentAction.create === create && action.element === element) {
+                  exists = action;
+                  break;
+                }
+              }
             if (!exists) {
               if (typeof element.__vido__ !== 'undefined') delete element.__vido__;
               const componentAction = { create, update() {}, destroy() {} };
-              actions.push({ instance, componentAction, element, props });
+              const action = { instance, componentAction, element, props };
+              actions.push(action);
+              if (typeof actionsByInstance[instance] === 'undefined') {
+                actionsByInstance[instance] = [];
+              }
+              actionsByInstance[instance].push(action);
             } else {
               exists.props = props;
             }
@@ -260,6 +271,7 @@ export default function Vido(state, api) {
         }
         return action.instance !== instance;
       });
+      delete actionsByInstance[instance];
       components[instance].destroy();
       delete components[instance];
       if (vidoInstance.debug) {
@@ -332,10 +344,10 @@ export default function Vido(state, api) {
       }
     },
 
-    render() {
+    render: schedule(() => {
       render(components[app].update(), element);
       vido.executeActions();
-    }
+    })
   };
 
   function getComponentInstanceMethods(instance, vidoInstance, props) {

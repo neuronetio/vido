@@ -2236,6 +2236,39 @@
         }
     });
 
+    var rafSchd = function rafSchd(fn) {
+      var lastArgs = [];
+      var frameId = null;
+
+      var wrapperFn = function wrapperFn() {
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+
+        lastArgs = args;
+
+        if (frameId) {
+          return;
+        }
+
+        frameId = requestAnimationFrame(function () {
+          frameId = null;
+          fn.apply(void 0, lastArgs);
+        });
+      };
+
+      wrapperFn.cancel = function () {
+        if (!frameId) {
+          return;
+        }
+
+        cancelAnimationFrame(frameId);
+        frameId = null;
+      };
+
+      return wrapperFn;
+    };
+
     /**
      * Helper function to determine if specified variable is an object
      *
@@ -2303,6 +2336,7 @@
         let componentId = 0;
         const components = {};
         let actions = [];
+        let actionsByInstance = {};
         let app, element;
         let shouldUpdateCount = 0;
         const resolved = Promise.resolve();
@@ -2312,12 +2346,24 @@
                     const element = part.committer.element;
                     for (const create of createFunctions) {
                         if (typeof create === 'function') {
-                            const exists = actions.find(action => action.instance === instance && action.componentAction.create === create && action.element === element);
+                            let exists;
+                            if (typeof actionsByInstance[instance] !== 'undefined')
+                                for (const action of actionsByInstance[instance]) {
+                                    if (action.componentAction.create === create && action.element === element) {
+                                        exists = action;
+                                        break;
+                                    }
+                                }
                             if (!exists) {
                                 if (typeof element.__vido__ !== 'undefined')
                                     delete element.__vido__;
                                 const componentAction = { create, update() { }, destroy() { } };
-                                actions.push({ instance, componentAction, element, props });
+                                const action = { instance, componentAction, element, props };
+                                actions.push(action);
+                                if (typeof actionsByInstance[instance] === 'undefined') {
+                                    actionsByInstance[instance] = [];
+                                }
+                                actionsByInstance[instance].push(action);
                             }
                             else {
                                 exists.props = props;
@@ -2471,6 +2517,7 @@
                     }
                     return action.instance !== instance;
                 });
+                delete actionsByInstance[instance];
                 components[instance].destroy();
                 delete components[instance];
                 if (vidoInstance.debug) {
@@ -2540,10 +2587,10 @@
                     action.element.__vido__ = { instance: action.instance, props: action.props };
                 }
             },
-            render() {
+            render: rafSchd(() => {
                 render(components[app].update(), element);
                 vido.executeActions();
-            }
+            })
         };
         function getComponentInstanceMethods(instance, vidoInstance, props) {
             return {
