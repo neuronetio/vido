@@ -76,9 +76,8 @@ function clone(source) {
 
 export default function Vido(state, api) {
   let componentId = 0;
-  const components = {};
-  let actions = [];
-  let actionsByInstance = {};
+  const components = new Map();
+  let actionsByInstance = new Map();
 
   let app, element;
 
@@ -86,28 +85,30 @@ export default function Vido(state, api) {
   const resolved = Promise.resolve();
 
   function getActions(instance) {
-    return directive(function actionsDirective(createFunctions, props) {
+    return directive(function actionsByInstanceDirective(createFunctions, props) {
       return function partial(part) {
         const element = part.committer.element;
         for (const create of createFunctions) {
           if (typeof create === 'function') {
             let exists;
-            if (typeof actionsByInstance[instance] !== 'undefined')
-              for (const action of actionsByInstance[instance]) {
+            if (actionsByInstance.has(instance)) {
+              for (const action of actionsByInstance.get(instance)) {
                 if (action.componentAction.create === create && action.element === element) {
                   exists = action;
                   break;
                 }
               }
+            }
             if (!exists) {
               if (typeof element.__vido__ !== 'undefined') delete element.__vido__;
               const componentAction = { create, update() {}, destroy() {} };
               const action = { instance, componentAction, element, props };
-              actions.push(action);
-              if (typeof actionsByInstance[instance] === 'undefined') {
-                actionsByInstance[instance] = [];
+              let byInstance = [];
+              if (actionsByInstance.has(instance)) {
+                byInstance = actionsByInstance.get(instance);
               }
-              actionsByInstance[instance].push(action);
+              byInstance.push(action);
+              actionsByInstance.set(instance, byInstance);
             } else {
               exists.props = props;
             }
@@ -135,7 +136,7 @@ export default function Vido(state, api) {
     unsafeHTML,
     until,
     lastProps: {},
-    actions(componentActions, props) {},
+    actionsByInstance(componentActions, props) {},
     onDestroy() {},
     onChange(props) {},
 
@@ -212,7 +213,7 @@ export default function Vido(state, api) {
         destroy() {
           if (vidoInstance.debug) {
             console.groupCollapsed(`component destroy method fired ${instance}`);
-            console.log(clone({ props, components: Object.keys(components), destroyable, actions }));
+            console.log(clone({ props, components: components.keys(), destroyable, actionsByInstance }));
             console.trace();
             console.groupEnd();
           }
@@ -225,7 +226,7 @@ export default function Vido(state, api) {
         update(props) {
           if (vidoInstance.debug) {
             console.groupCollapsed(`component update method fired ${instance}`);
-            console.log(clone({ components: Object.keys(components), actions }));
+            console.log(clone({ components: components.keys(), actionsByInstance }));
             console.trace();
             console.groupEnd();
           }
@@ -236,7 +237,7 @@ export default function Vido(state, api) {
           if (vidoInstance.debug) {
             console.groupCollapsed(`component change method fired ${instance}`);
             console.log(
-              clone({ props, components: Object.keys(components), onChangeFunctions, changedProps, actions })
+              clone({ props, components: components.keys(), onChangeFunctions, changedProps, actionsByInstance })
             );
             console.trace();
             console.groupEnd();
@@ -246,11 +247,11 @@ export default function Vido(state, api) {
           }
         }
       };
-      components[instance] = methods;
-      components[instance].change(props);
+      components.set(instance, methods);
+      components.get(instance).change(props);
       if (vidoInstance.debug) {
         console.groupCollapsed(`component created ${instance}`);
-        console.log(clone({ props, components: Object.keys(components), actions }));
+        console.log(clone({ props, components: components.keys(), actionsByInstance }));
         console.trace();
         console.groupEnd();
       }
@@ -260,22 +261,16 @@ export default function Vido(state, api) {
     destroyComponent(instance, vidoInstance) {
       if (vidoInstance.debug) {
         console.groupCollapsed(`destroying component ${instance}...`);
-        console.log(clone({ components: Object.keys(components), actions }));
+        console.log(clone({ components: components.keys(), actionsByInstance }));
         console.trace();
         console.groupEnd();
       }
-      actions = actions.filter(action => {
-        if (action.instance === instance && typeof action.componentAction.destroy === 'function') {
-          action.componentAction.destroy(action.element, action.props);
-        }
-        return action.instance !== instance;
-      });
-      delete actionsByInstance[instance];
-      components[instance].destroy();
-      delete components[instance];
+      actionsByInstance.delete(instance);
+      components.get(instance).destroy();
+      components.delete(instance);
       if (vidoInstance.debug) {
         console.groupCollapsed(`component destroyed ${instance}`);
-        console.log(clone({ components: Object.keys(components), actions }));
+        console.log(clone({ components: components.keys(), actionsByInstance }));
         console.trace();
         console.groupEnd();
       }
@@ -307,44 +302,48 @@ export default function Vido(state, api) {
     },
 
     executeActions() {
-      for (const action of actions) {
-        if (typeof action.element.__vido__ === 'undefined') {
-          if (typeof action.componentAction.create === 'function') {
-            const result = action.componentAction.create(action.element, action.props);
-            if (vido.debug) {
-              console.groupCollapsed(`create action executed ${action.instance}`);
-              console.log(clone({ components: Object.keys(components), action, actions }));
-              console.trace();
-              console.groupEnd();
-            }
-            if (typeof result !== 'undefined') {
-              if (typeof result.update === 'function') {
-                action.componentAction.update = result.update;
+      for (const [instance, actions] of actionsByInstance) {
+        for (const action of actions) {
+          if (typeof action.element.__vido__ === 'undefined') {
+            if (typeof action.componentAction.create === 'function') {
+              const result = action.componentAction.create(action.element, action.props);
+              if (vido.debug) {
+                console.groupCollapsed(`create action executed ${action.instance}`);
+                console.log(clone({ components: components.keys(), action, actionsByInstance }));
+                console.trace();
+                console.groupEnd();
               }
-              if (typeof result.destroy === 'function') {
-                action.componentAction.destroy = result.destroy;
+              if (typeof result !== 'undefined') {
+                if (typeof result.update === 'function') {
+                  action.componentAction.update = result.update;
+                }
+                if (typeof result.destroy === 'function') {
+                  action.componentAction.destroy = result.destroy;
+                }
               }
             }
-          }
-        } else {
-          if (typeof action.componentAction.update === 'function') {
-            action.componentAction.update(action.element, action.props);
-            if (vido.debug) {
-              console.groupCollapsed(`update action executed ${action.instance}`);
-              console.log(clone({ components: Object.keys(components), action, actions }));
-              console.trace();
-              console.groupEnd();
+          } else {
+            if (typeof action.componentAction.update === 'function') {
+              action.componentAction.update(action.element, action.props);
+              if (vido.debug) {
+                console.groupCollapsed(`update action executed ${action.instance}`);
+                console.log(clone({ components: components.keys(), action, actionsByInstance }));
+                console.trace();
+                console.groupEnd();
+              }
             }
           }
         }
       }
-      for (const action of actions) {
-        action.element.__vido__ = { instance: action.instance, props: action.props };
+      for (const [instance, actions] of actionsByInstance) {
+        for (const action of actions) {
+          action.element.__vido__ = { instance: action.instance, props: action.props };
+        }
       }
     },
 
     render() {
-      render(components[app].update(), element);
+      render(components.get(app).update(), element);
       vido.executeActions();
     }
   };
@@ -357,7 +356,7 @@ export default function Vido(state, api) {
       destroy() {
         if (vidoInstance.debug) {
           console.groupCollapsed(`destroying component ${instance}`);
-          console.log(clone({ components: Object.keys(components), actions }));
+          console.log(clone({ components: components.keys(), actionsByInstance }));
           console.trace();
           console.groupEnd();
         }
@@ -366,7 +365,7 @@ export default function Vido(state, api) {
       update() {
         if (vidoInstance.debug) {
           console.groupCollapsed(`updating component ${instance}`);
-          console.log(clone({ components: Object.keys(components), actions }));
+          console.log(clone({ components: components.keys(), actionsByInstance }));
           console.trace();
           console.groupEnd();
         }
@@ -376,15 +375,15 @@ export default function Vido(state, api) {
       change(_props) {
         if (vidoInstance.debug) {
           console.groupCollapsed(`changing component ${instance}`);
-          console.log(clone({ props, _props, components: Object.keys(components), actions }));
+          console.log(clone({ props, _props, components: components.keys(), actionsByInstance }));
           console.trace();
           console.groupEnd();
         }
-        components[instance].change(_props, vidoInstance);
+        components.get(instance).change(_props, vidoInstance);
       },
 
       html(props = {}) {
-        return components[instance].update(props, vidoInstance);
+        return components.get(instance).update(props, vidoInstance);
       }
     };
   }
