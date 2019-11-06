@@ -9,7 +9,6 @@ import { repeat } from 'lit-html/directives/repeat';
 import { styleMap } from 'lit-html/directives/style-map';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import { until } from 'lit-html/directives/until';
-import schedule from 'raf-schd';
 
 /**
  * Helper function to determine if specified variable is an object
@@ -344,10 +343,10 @@ export default function Vido(state, api) {
       }
     },
 
-    render: schedule(() => {
+    render() {
       render(components[app].update(), element);
       vido.executeActions();
-    })
+    }
   };
 
   function getComponentInstanceMethods(instance, vidoInstance, props) {

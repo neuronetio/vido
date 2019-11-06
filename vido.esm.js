@@ -2230,39 +2230,6 @@ const until = directive((...args) => (part) => {
     }
 });
 
-var rafSchd = function rafSchd(fn) {
-  var lastArgs = [];
-  var frameId = null;
-
-  var wrapperFn = function wrapperFn() {
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    lastArgs = args;
-
-    if (frameId) {
-      return;
-    }
-
-    frameId = requestAnimationFrame(function () {
-      frameId = null;
-      fn.apply(void 0, lastArgs);
-    });
-  };
-
-  wrapperFn.cancel = function () {
-    if (!frameId) {
-      return;
-    }
-
-    cancelAnimationFrame(frameId);
-    frameId = null;
-  };
-
-  return wrapperFn;
-};
-
 /**
  * Helper function to determine if specified variable is an object
  *
@@ -2581,10 +2548,10 @@ function Vido(state, api) {
                 action.element.__vido__ = { instance: action.instance, props: action.props };
             }
         },
-        render: rafSchd(() => {
+        render() {
             render(components[app].update(), element);
             vido.executeActions();
-        })
+        }
     };
     function getComponentInstanceMethods(instance, vidoInstance, props) {
         return {
