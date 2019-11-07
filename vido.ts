@@ -300,9 +300,9 @@ export default function Vido(state, api) {
       });
     },
 
-    createApp(instance, el) {
-      element = el;
-      const App = this.createComponent(instance);
+    createApp(config) {
+      element = config.element;
+      const App = this.createComponent(config.component, config.props);
       app = App.instance;
       this.render();
       return App;
