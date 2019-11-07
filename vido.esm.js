@@ -2507,7 +2507,7 @@ function Vido(state, api) {
             return App;
         },
         executeActions() {
-            for (const [instance, actions] of actionsByInstance) {
+            for (const actions of actionsByInstance.values()) {
                 for (const action of actions) {
                     if (typeof action.element.__vido__ === 'undefined') {
                         if (typeof action.componentAction.create === 'function') {
@@ -2527,8 +2527,10 @@ function Vido(state, api) {
                                 }
                             }
                         }
+                        action.element.__vido__ = { instance: action.instance, props: action.props };
                     }
                     else {
+                        action.element.__vido__.props = action.props;
                         if (typeof action.componentAction.update === 'function') {
                             action.componentAction.update(action.element, action.props);
                             if (vido.debug) {
@@ -2539,11 +2541,6 @@ function Vido(state, api) {
                             }
                         }
                     }
-                }
-            }
-            for (const [instance, actions] of actionsByInstance) {
-                for (const action of actions) {
-                    action.element.__vido__ = { instance: action.instance, props: action.props };
                 }
             }
         },
