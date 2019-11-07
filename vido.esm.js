@@ -2316,8 +2316,8 @@ function Vido(state, api) {
                             }
                         }
                         if (!exists) {
-                            if (typeof element.__vido__ !== 'undefined')
-                                delete element.__vido__;
+                            if (typeof element.vido !== 'undefined')
+                                delete element.vido;
                             const componentAction = { create, update() { }, destroy() { } };
                             const action = { instance, componentAction, element, props };
                             let byInstance = [];
@@ -2509,7 +2509,7 @@ function Vido(state, api) {
         executeActions() {
             for (const actions of actionsByInstance.values()) {
                 for (const action of actions) {
-                    if (typeof action.element.__vido__ === 'undefined') {
+                    if (typeof action.element.vido === 'undefined') {
                         if (typeof action.componentAction.create === 'function') {
                             const result = action.componentAction.create(action.element, action.props);
                             if (vido.debug) {
@@ -2527,10 +2527,9 @@ function Vido(state, api) {
                                 }
                             }
                         }
-                        action.element.__vido__ = { instance: action.instance, props: action.props };
                     }
                     else {
-                        action.element.__vido__.props = action.props;
+                        action.element.vido = action.props;
                         if (typeof action.componentAction.update === 'function') {
                             action.componentAction.update(action.element, action.props);
                             if (vido.debug) {
@@ -2541,6 +2540,9 @@ function Vido(state, api) {
                             }
                         }
                     }
+                }
+                for (const action of actions) {
+                    action.element.vido = action.props;
                 }
             }
         },
