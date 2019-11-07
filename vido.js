@@ -2479,6 +2479,13 @@
                     console.trace();
                     console.groupEnd();
                 }
+                if (actionsByInstance.has(instance)) {
+                    for (const action of actionsByInstance.get(instance)) {
+                        if (typeof action.componentAction.destroy === 'function') {
+                            action.componentAction.destroy(action.element, action.props);
+                        }
+                    }
+                }
                 actionsByInstance.delete(instance);
                 components.get(instance).destroy();
                 components.delete(instance);
