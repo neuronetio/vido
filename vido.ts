@@ -85,7 +85,7 @@ export default function Vido(state, api) {
   const resolved = Promise.resolve();
 
   function getActions(instance) {
-    return directive(function actionsByInstanceDirective(createFunctions, props) {
+    return directive(function actionsByInstanceDirective(createFunctions, props = {}) {
       return function partial(part) {
         const element = part.committer.element;
         for (const create of createFunctions) {
@@ -181,7 +181,7 @@ export default function Vido(state, api) {
       return currentComponents;
     },
 
-    createComponent(component, props) {
+    createComponent(component, props = {}) {
       const instance = component.name + ':' + componentId++;
       let vidoInstance;
       function update() {
@@ -223,7 +223,7 @@ export default function Vido(state, api) {
           onChangeFunctions = [];
           destroyable = [];
         },
-        update(props) {
+        update(props = {}) {
           if (vidoInstance.debug) {
             console.groupCollapsed(`component update method fired ${instance}`);
             console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -232,7 +232,7 @@ export default function Vido(state, api) {
           }
           return upd(props);
         },
-        change(changedProps) {
+        change(changedProps = {}) {
           props = changedProps;
           if (vidoInstance.debug) {
             console.groupCollapsed(`component change method fired ${instance}`);
@@ -354,7 +354,7 @@ export default function Vido(state, api) {
     }
   };
 
-  function getComponentInstanceMethods(instance, vidoInstance, props) {
+  function getComponentInstanceMethods(instance, vidoInstance, props = {}) {
     return {
       instance,
       vidoInstance,

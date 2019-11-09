@@ -2307,7 +2307,7 @@
         let shouldUpdateCount = 0;
         const resolved = Promise.resolve();
         function getActions(instance) {
-            return directive(function actionsByInstanceDirective(createFunctions, props) {
+            return directive(function actionsByInstanceDirective(createFunctions, props = {}) {
                 return function partial(part) {
                     const element = part.committer.element;
                     for (const create of createFunctions) {
@@ -2403,7 +2403,7 @@
                 }
                 return currentComponents;
             },
-            createComponent(component, props) {
+            createComponent(component, props = {}) {
                 const instance = component.name + ':' + componentId++;
                 let vidoInstance;
                 function update() {
@@ -2440,7 +2440,7 @@
                         onChangeFunctions = [];
                         destroyable = [];
                     },
-                    update(props) {
+                    update(props = {}) {
                         if (vidoInstance.debug) {
                             console.groupCollapsed(`component update method fired ${instance}`);
                             console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -2449,7 +2449,7 @@
                         }
                         return upd(props);
                     },
-                    change(changedProps) {
+                    change(changedProps = {}) {
                         props = changedProps;
                         if (vidoInstance.debug) {
                             console.groupCollapsed(`component change method fired ${instance}`);
@@ -2564,7 +2564,7 @@
                 vido.executeActions();
             }
         };
-        function getComponentInstanceMethods(instance, vidoInstance, props) {
+        function getComponentInstanceMethods(instance, vidoInstance, props = {}) {
             return {
                 instance,
                 vidoInstance,
