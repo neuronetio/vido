@@ -12,6 +12,7 @@ import { until } from 'lit-html/directives/until';
 
 /**
  * Schedule - a throttle function that uses requestAnimationFrame to limit the rate at which a function is called.
+ *
  * @param {function} fn
  * @returns {function}
  */
@@ -31,10 +32,9 @@ function schedule(fn: (argument) => void | any) {
 }
 
 /**
- * Helper function to determine if specified variable is an object
+ * Is object - helper function to determine if specified variable is an object
  *
  * @param {any} item
- *
  * @returns {boolean}
  */
 function isObject(item) {
@@ -42,11 +42,10 @@ function isObject(item) {
 }
 
 /**
- * Helper function which will merge objects recursively - creating brand new one - like clone
+ * Merge deep - helper function which will merge objects recursively - creating brand new one - like clone
  *
  * @param {object} target
  * @params {object} sources
- *
  * @returns {object}
  */
 function mergeDeep(target, ...sources) {
@@ -78,6 +77,12 @@ function mergeDeep(target, ...sources) {
   return mergeDeep(target, ...sources);
 }
 
+/**
+ * Clone helper function
+ *
+ * @param source
+ * @returns {object} cloned source
+ */
 function clone(source) {
   if (typeof source.actions !== 'undefined') {
     const actns = source.actions.map(action => {
@@ -94,13 +99,18 @@ function clone(source) {
   return mergeDeep({}, source);
 }
 
+/**
+ * Vido library
+ *
+ * @param {any} state - state management for the view (can be anything)
+ * @param {any} api - some api's or other globally available services
+ * @returns {object} vido instance
+ */
 export default function Vido(state, api) {
   let componentId = 0;
   const components = new Map();
   let actionsByInstance = new Map();
-
   let app, element;
-
   let shouldUpdateCount = 0;
   const resolved = Promise.resolve();
 
@@ -134,6 +144,7 @@ export default function Vido(state, api) {
                 byInstance = actionsByInstance.get(instance);
               }
               byInstance.push(action);
+              actionsByInstance.set(instance, byInstance);
             } else {
               exists.props = props;
             }
@@ -143,6 +154,7 @@ export default function Vido(state, api) {
     });
   }
 
+  /** vido instance */
   const vido = {
     debug: false,
     state,
@@ -422,6 +434,10 @@ export default function Vido(state, api) {
       instance,
       vidoInstance,
       props,
+
+      /**
+       * Destroy component
+       */
       destroy() {
         if (vidoInstance.debug) {
           console.groupCollapsed(`destroying component ${instance}`);
@@ -431,6 +447,10 @@ export default function Vido(state, api) {
         }
         return vido.destroyComponent(instance, vidoInstance);
       },
+
+      /**
+       * Update template - trigger rendering process
+       */
       update() {
         if (vidoInstance.debug) {
           console.groupCollapsed(`updating component ${instance}`);
@@ -441,18 +461,27 @@ export default function Vido(state, api) {
         return vido.updateTemplate(vidoInstance);
       },
 
-      change(_props) {
+      /**
+       * Change component input properties
+       *
+       * @param {any} newProps
+       */
+      change(newProps) {
         if (vidoInstance.debug) {
           console.groupCollapsed(`changing component ${instance}`);
-          console.log(clone({ props, _props, components: components.keys(), actionsByInstance }));
+          console.log(clone({ props, newProps: newProps, components: components.keys(), actionsByInstance }));
           console.trace();
           console.groupEnd();
         }
-        components.get(instance).change(_props, vidoInstance);
+        components.get(instance).change(newProps, vidoInstance);
       },
 
-      html(props = {}) {
-        return components.get(instance).update(props, vidoInstance);
+      /**
+       * Get component lit-html template
+       * @param {} templateProps
+       */
+      html(templateProps = {}) {
+        return components.get(instance).update(templateProps, vidoInstance);
       }
     };
   }
