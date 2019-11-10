@@ -11,6 +11,26 @@ import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import { until } from 'lit-html/directives/until';
 
 /**
+ * Schedule - a throttle function that uses requestAnimationFrame to limit the rate at which a function is called.
+ * @param {function} fn
+ * @returns {function}
+ */
+function schedule(fn: (argument) => void | any) {
+  let frameId = 0;
+  function wrapperFn(argument) {
+    if (frameId) {
+      return;
+    }
+    function executeFrame() {
+      frameId = 0;
+      fn.apply(undefined, [argument]);
+    }
+    frameId = requestAnimationFrame(executeFrame);
+  }
+  return wrapperFn;
+}
+
+/**
  * Helper function to determine if specified variable is an object
  *
  * @param {any} item
@@ -84,6 +104,12 @@ export default function Vido(state, api) {
   let shouldUpdateCount = 0;
   const resolved = Promise.resolve();
 
+  /**
+   * Get actions for component instance as directives
+   *
+   * @param {string} instance
+   * @returns {function} directive that will execute actions
+   */
   function getActions(instance) {
     return directive(function actionsByInstanceDirective(createFunctions, props = {}) {
       return function partial(part) {
@@ -108,7 +134,6 @@ export default function Vido(state, api) {
                 byInstance = actionsByInstance.get(instance);
               }
               byInstance.push(action);
-              actionsByInstance.set(instance, byInstance);
             } else {
               exists.props = props;
             }
@@ -135,6 +160,7 @@ export default function Vido(state, api) {
     styleMap,
     unsafeHTML,
     until,
+    schedule,
     lastProps: {},
     actionsByInstance(componentActions, props) {},
     onDestroy() {},
@@ -181,6 +207,13 @@ export default function Vido(state, api) {
       return currentComponents;
     },
 
+    /**
+     * Create component
+     *
+     * @param {function} component
+     * @param {any} props
+     * @returns {object} component instance methods
+     */
     createComponent(component, props = {}) {
       const instance = component.name + ':' + componentId++;
       let vidoInstance;
@@ -258,6 +291,12 @@ export default function Vido(state, api) {
       return componentInstanceMethods;
     },
 
+    /**
+     * Destroy component
+     *
+     * @param {string} instance
+     * @param {object} vidoInstance
+     */
     destroyComponent(instance, vidoInstance) {
       if (vidoInstance.debug) {
         console.groupCollapsed(`destroying component ${instance}...`);
@@ -283,6 +322,10 @@ export default function Vido(state, api) {
       }
     },
 
+    /**
+     * Update template - trigger render proccess
+     * @param {object} vidoInstance
+     */
     updateTemplate(vidoInstance) {
       shouldUpdateCount++;
       const currentShouldUpdateCount = shouldUpdateCount;
@@ -300,6 +343,12 @@ export default function Vido(state, api) {
       });
     },
 
+    /**
+     * Create app
+     *
+     * @param config
+     * @returns {object} component instance methods
+     */
     createApp(config) {
       element = config.element;
       const App = this.createComponent(config.component, config.props);
@@ -308,6 +357,9 @@ export default function Vido(state, api) {
       return App;
     },
 
+    /**
+     * Execute actions
+     */
     executeActions() {
       for (const actions of actionsByInstance.values()) {
         for (const action of actions) {
@@ -348,12 +400,23 @@ export default function Vido(state, api) {
       }
     },
 
+    /**
+     * Render view
+     */
     render() {
       render(components.get(app).update(), element);
       vido.executeActions();
     }
   };
 
+  /**
+   * Get component instance methods
+   *
+   * @param {string} instance
+   * @param {object} vidoInstance
+   * @param {any} props
+   * @returns {object} component instance methods
+   */
   function getComponentInstanceMethods(instance, vidoInstance, props = {}) {
     return {
       instance,
