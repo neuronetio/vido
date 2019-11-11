@@ -2387,20 +2387,29 @@ function Vido(state, api) {
     vido.prototype.schedule = schedule;
     vido.prototype.actionsByInstance = (componentActions, props) => { };
     vido.prototype.styleMap = directive((styleInfo) => (part) => {
-        if (Object.keys(styleInfo).length === 0) {
-            previousStyle.set(part, styleInfo);
-            return;
-        }
-        const previous = previousStyle.get(part) || {};
         const style = part.committer.element.style;
+        let previous = previousStyle.get(part);
+        if (previous === undefined) {
+            previous = {};
+        }
         for (const name in styleInfo) {
             const value = styleInfo[name];
-            if (typeof previous[name] !== 'undefined' && previous[name] === value) {
+            if (previous[name] !== undefined && previous[name] === value) {
                 continue;
             }
-            style[name] = value;
+            if (!name.includes('-')) {
+                try {
+                    style[name] = value;
+                }
+                catch (e) {
+                    style.setProperty(name, value);
+                }
+            }
+            else {
+                style.setProperty(name, value);
+            }
         }
-        previousStyle.set(part, styleInfo);
+        previousStyle.set(part, Object.assign({}, styleInfo));
     });
     vido.prototype.onDestroy = function onDestroy(fn) {
         this.destroyable.push(fn);
@@ -2427,7 +2436,7 @@ function Vido(state, api) {
         const dataLen = dataArray.length;
         let leave = false;
         let leaveStartingAt = 0;
-        if (currentComponents.length < dataArray.length) {
+        if (currentLen < dataLen) {
             let diff = dataLen - currentLen;
             while (diff) {
                 const item = dataArray[dataLen - diff];
