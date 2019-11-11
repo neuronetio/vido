@@ -2560,7 +2560,7 @@
                 }
                 return this.updateFunction(props);
             }
-            change(changedProps = {}, options = { leave: false }) {
+            change(changedProps, options = { leave: false }) {
                 const props = changedProps;
                 if (this.vidoInstance.debug) {
                     console.groupCollapsed(`component change method fired ${this.instance}`);
