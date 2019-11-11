@@ -2480,29 +2480,36 @@
          * @param {array} dataArray  - any data as array for each component
          * @param {function} getProps - you can pass params to component from array item ( example: item=>({id:item.id}) )
          * @param {function} component - what kind of components do you want to create?
+         * @param {boolean} leaveTail - leave last elements and do not destroy corresponding components
          * @returns {array} of components (with updated/destroyed/created ones)
          */
-        vido.prototype.reuseComponents = function reuseComponents(currentComponents, dataArray, getProps, component) {
+        vido.prototype.reuseComponents = function reuseComponents(currentComponents, dataArray, getProps, component, leaveTail = true) {
             const modified = [];
+            const currentLen = currentComponents.length;
+            const dataLen = dataArray.length;
             if (currentComponents.length < dataArray.length) {
-                let diff = dataArray.length - currentComponents.length;
+                let diff = dataLen - currentLen;
                 while (diff) {
-                    const item = dataArray[dataArray.length - diff];
+                    const item = dataArray[dataLen - diff];
                     const newComponent = this.createComponent(component, getProps(item));
                     currentComponents.push(newComponent);
                     modified.push(newComponent.instance);
                     diff--;
                 }
             }
-            else if (currentComponents.length > dataArray.length) {
-                let diff = currentComponents.length - dataArray.length;
+            else if (currentLen > dataLen) {
+                let diff = currentLen - dataLen;
                 while (diff) {
-                    const index = currentComponents.length - diff;
+                    const index = currentLen - diff;
                     modified.push(currentComponents[index].instance);
-                    currentComponents[index].destroy();
+                    if (!leaveTail) {
+                        currentComponents[index].destroy();
+                    }
                     diff--;
                 }
-                currentComponents.length = dataArray.length;
+                if (!leaveTail) {
+                    currentComponents.length = dataLen;
+                }
             }
             let index = 0;
             for (const component of currentComponents) {
