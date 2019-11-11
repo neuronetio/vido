@@ -1,4 +1,4 @@
-import { render, html, directive, svg } from 'lit-html';
+import { render, html, directive, svg, AttributeCommitter } from 'lit-html';
 import { asyncAppend } from 'lit-html/directives/async-append';
 import { asyncReplace } from 'lit-html/directives/async-replace';
 import { cache } from 'lit-html/directives/cache';
@@ -85,7 +85,7 @@ function mergeDeep(target, ...sources) {
  */
 function clone(source) {
   if (typeof source.actions !== 'undefined') {
-    const actns = source.actions.map(action => {
+    const actns = source.actions.map((action) => {
       const result = { ...action };
       const props = { ...result.props };
       delete props.state;
@@ -113,6 +113,7 @@ export default function Vido(state, api) {
   let app, element;
   let shouldUpdateCount = 0;
   const resolved = Promise.resolve();
+  const previousStyle = new WeakMap();
 
   /**
    * Get actions for component instance as directives
@@ -245,11 +246,27 @@ export default function Vido(state, api) {
   vido.prototype.guard = guard;
   vido.prototype.ifDefined = ifDefined;
   vido.prototype.repeat = repeat;
-  vido.prototype.styleMap = styleMap;
+  //vido.prototype.styleMap = styleMap;
   vido.prototype.unsafeHTML = unsafeHTML;
   vido.prototype.until = until;
   vido.prototype.schedule = schedule;
   vido.prototype.actionsByInstance = (componentActions, props) => {};
+  vido.prototype.styleMap = directive((styleInfo) => (part) => {
+    if (Object.keys(styleInfo).length === 0) {
+      previousStyle.set(part, styleInfo);
+      return;
+    }
+    const previous = previousStyle.get(part) || {};
+    const style = part.committer.element.style;
+    for (const name in styleInfo) {
+      const value = styleInfo[name];
+      if (typeof previous[name] !== 'undefined' && previous[name] === value) {
+        continue;
+      }
+      style[name] = value;
+    }
+    previousStyle.set(part, styleInfo);
+  });
   vido.prototype.onDestroy = function onDestroy(fn) {
     this.destroyable.push(fn);
   };
