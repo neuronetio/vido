@@ -154,7 +154,7 @@ export default function Vido(state, api) {
     });
   }
 
-  class ComponentMethods {
+  class PublicComponentMethods {
     instance: string;
     vidoInstance: any;
     props: any;
@@ -223,11 +223,16 @@ export default function Vido(state, api) {
    * Create vido instance for component
    */
   function vido() {
+    this.destroyable = [];
+    this.onChangeFunctions = [];
     this.debug = false;
     this.state = state;
     this.api = api;
     this.lastProps = {};
     this.reuseComponents = this.reuseComponents.bind(this);
+    this.onDestroy = this.onDestroy.bind(this);
+    this.onChange = this.onChange.bind(this);
+    this.update = this.update.bind(this);
   }
 
   vido.prototype.html = html;
@@ -245,8 +250,15 @@ export default function Vido(state, api) {
   vido.prototype.until = until;
   vido.prototype.schedule = schedule;
   vido.prototype.actionsByInstance = (componentActions, props) => {};
-  vido.prototype.onDestroy = () => {};
-  vido.prototype.onChange = props => {};
+  vido.prototype.onDestroy = function onDestroy(fn) {
+    this.destroyable.push(fn);
+  };
+  vido.prototype.onChange = function onChange(fn) {
+    this.onChangeFunctions.push(fn);
+  };
+  vido.prototype.update = function update() {
+    this.updateTemplate();
+  };
 
   /**
    * Reuse existing components when your data was changed
@@ -289,6 +301,70 @@ export default function Vido(state, api) {
     return currentComponents;
   };
 
+  class InternalComponentMethods {
+    instance: string;
+    vidoInstance: any;
+    updateFunction: (changedProps: any) => void;
+
+    constructor(instance, vidoInstance, updateFunction) {
+      this.instance = instance;
+      this.vidoInstance = vidoInstance;
+      this.updateFunction = updateFunction;
+    }
+
+    destroy() {
+      if (this.vidoInstance.debug) {
+        console.groupCollapsed(`component destroy method fired ${this.instance}`);
+        console.log(
+          clone({
+            props: this.vidoInstance.props,
+            components: components.keys(),
+            destroyable: this.vidoInstance.destroyable,
+            actionsByInstance
+          })
+        );
+        console.trace();
+        console.groupEnd();
+      }
+      for (const d of this.vidoInstance.destroyable) {
+        d();
+      }
+      this.vidoInstance.onChangeFunctions = [];
+      this.vidoInstance.destroyable = [];
+    }
+
+    update(props = {}) {
+      if (this.vidoInstance.debug) {
+        console.groupCollapsed(`component update method fired ${this.instance}`);
+        console.log(clone({ components: components.keys(), actionsByInstance }));
+        console.trace();
+        console.groupEnd();
+      }
+      return this.updateFunction(props);
+    }
+
+    change(changedProps = {}) {
+      const props = changedProps;
+      if (this.vidoInstance.debug) {
+        console.groupCollapsed(`component change method fired ${this.instance}`);
+        console.log(
+          clone({
+            props,
+            components: components.keys(),
+            onChangeFunctions: this.vidoInstance.onChangeFunctions,
+            changedProps,
+            actionsByInstance
+          })
+        );
+        console.trace();
+        console.groupEnd();
+      }
+      for (const fn of this.vidoInstance.onChangeFunctions) {
+        fn(changedProps);
+      }
+    }
+  }
+
   /**
    * Create component
    *
@@ -299,73 +375,12 @@ export default function Vido(state, api) {
   vido.prototype.createComponent = function createComponent(component, props = {}) {
     const instance = component.name + ':' + componentId++;
     let vidoInstance;
-    function update() {
-      vidoInstance.updateTemplate();
-    }
-    let destroyable = [];
-    function onDestroy(fn) {
-      destroyable.push(fn);
-    }
-    let onChangeFunctions = [];
-    function onChange(fn) {
-      onChangeFunctions.push(fn);
-    }
     vidoInstance = new vido();
     vidoInstance.instance = instance;
-    vidoInstance.update = update;
-    vidoInstance.onDestroy = onDestroy;
-    vidoInstance.onChange = onChange;
     vidoInstance.actions = getActions(instance);
-    vidoInstance.lastProps = props;
-    const componentPublicMethods = new ComponentMethods(instance, vidoInstance, props);
-    const upd = component(vidoInstance, props);
-    /**
-     * Internal methods for component instance
-     */
-    function internalComponentMethods() {
-      this.instance = instance;
-      this.vidoInstance = vidoInstance;
-      this.lastProps = props;
-    }
-    internalComponentMethods.prototype.destroy = () => {
-      if (vidoInstance.debug) {
-        console.groupCollapsed(`component destroy method fired ${instance}`);
-        console.log(clone({ props, components: components.keys(), destroyable, actionsByInstance }));
-        console.trace();
-        console.groupEnd();
-      }
-      for (const d of destroyable) {
-        d();
-      }
-      onChangeFunctions = [];
-      destroyable = [];
-    };
-    internalComponentMethods.prototype.update = (props = {}) => {
-      if (vidoInstance.debug) {
-        console.groupCollapsed(`component update method fired ${instance}`);
-        console.log(clone({ components: components.keys(), actionsByInstance }));
-        console.trace();
-        console.groupEnd();
-      }
-      return upd(props);
-    };
-    internalComponentMethods.prototype.change = (changedProps = {}) => {
-      props = changedProps;
-      if (vidoInstance.debug) {
-        console.groupCollapsed(`component change method fired ${instance}`);
-        console.log(
-          clone({ props, components: components.keys(), onChangeFunctions, changedProps, actionsByInstance })
-        );
-        console.trace();
-        console.groupEnd();
-      }
-      for (const fn of onChangeFunctions) {
-        fn(changedProps);
-      }
-    };
-
-    const methods = new internalComponentMethods();
-    components.set(instance, methods);
+    const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
+    const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props));
+    components.set(instance, internalMethods);
     components.get(instance).change(props);
     if (vidoInstance.debug) {
       console.groupCollapsed(`component created ${instance}`);
@@ -373,7 +388,7 @@ export default function Vido(state, api) {
       console.trace();
       console.groupEnd();
     }
-    return componentPublicMethods;
+    return publicMethods;
   };
 
   /**
@@ -458,11 +473,15 @@ export default function Vido(state, api) {
               console.groupEnd();
             }
             if (typeof result !== 'undefined') {
-              if (typeof result.update === 'function') {
-                action.componentAction.update = result.update;
-              }
-              if (typeof result.destroy === 'function') {
-                action.componentAction.destroy = result.destroy;
+              if (typeof result === 'function') {
+                action.componentAction.destroy = result;
+              } else {
+                if (typeof result.update === 'function') {
+                  action.componentAction.update = result.update;
+                }
+                if (typeof result.destroy === 'function') {
+                  action.componentAction.destroy = result.destroy;
+                }
               }
             }
           }
