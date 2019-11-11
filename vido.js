@@ -2501,15 +2501,15 @@
             }
             else if (currentLen > dataLen) {
                 let diff = currentLen - dataLen;
+                if (leaveTail) {
+                    leave = true;
+                    leaveStartingAt = currentLen - diff;
+                }
                 while (diff) {
                     const index = currentLen - diff;
                     if (!leaveTail) {
                         modified.push(currentComponents[index].instance);
                         currentComponents[index].destroy();
-                    }
-                    else {
-                        leave = true;
-                        leaveStartingAt = index;
                     }
                     diff--;
                 }
