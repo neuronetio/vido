@@ -2417,14 +2417,14 @@
              *
              * @param {any} newProps
              */
-            change(newProps) {
+            change(newProps, options) {
                 if (this.vidoInstance.debug) {
                     console.groupCollapsed(`changing component ${this.instance}`);
                     console.log(clone({ props: this.props, newProps: newProps, components: components.keys(), actionsByInstance }));
                     console.trace();
                     console.groupEnd();
                 }
-                components.get(this.instance).change(newProps, this.vidoInstance);
+                components.get(this.instance).change(newProps, options);
             }
             /**
              * Get component lit-html template
@@ -2488,6 +2488,7 @@
             const currentLen = currentComponents.length;
             const dataLen = dataArray.length;
             let leave = false;
+            let leaveStartingAt = 0;
             if (currentComponents.length < dataArray.length) {
                 let diff = dataLen - currentLen;
                 while (diff) {
@@ -2502,12 +2503,13 @@
                 let diff = currentLen - dataLen;
                 while (diff) {
                     const index = currentLen - diff;
-                    modified.push(currentComponents[index].instance);
                     if (!leaveTail) {
+                        modified.push(currentComponents[index].instance);
                         currentComponents[index].destroy();
                     }
                     else {
                         leave = true;
+                        leaveStartingAt = index;
                     }
                     diff--;
                 }
@@ -2519,7 +2521,7 @@
             for (const component of currentComponents) {
                 const item = dataArray[index];
                 if (!modified.includes(component.instance)) {
-                    component.change(getProps(item), { leave });
+                    component.change(getProps(item), { leave: leave && index >= leaveStartingAt });
                 }
                 index++;
             }
