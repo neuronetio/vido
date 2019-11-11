@@ -2487,6 +2487,7 @@
             const modified = [];
             const currentLen = currentComponents.length;
             const dataLen = dataArray.length;
+            let leave = false;
             if (currentComponents.length < dataArray.length) {
                 let diff = dataLen - currentLen;
                 while (diff) {
@@ -2505,6 +2506,9 @@
                     if (!leaveTail) {
                         currentComponents[index].destroy();
                     }
+                    else {
+                        leave = true;
+                    }
                     diff--;
                 }
                 if (!leaveTail) {
@@ -2515,7 +2519,7 @@
             for (const component of currentComponents) {
                 const item = dataArray[index];
                 if (!modified.includes(component.instance)) {
-                    component.change(getProps(item));
+                    component.change(getProps(item), { leave });
                 }
                 index++;
             }
@@ -2554,7 +2558,7 @@
                 }
                 return this.updateFunction(props);
             }
-            change(changedProps = {}) {
+            change(changedProps = {}, options = { leave: false }) {
                 const props = changedProps;
                 if (this.vidoInstance.debug) {
                     console.groupCollapsed(`component change method fired ${this.instance}`);
@@ -2569,7 +2573,7 @@
                     console.groupEnd();
                 }
                 for (const fn of this.vidoInstance.onChangeFunctions) {
-                    fn(changedProps);
+                    fn(changedProps, options);
                 }
             }
         }

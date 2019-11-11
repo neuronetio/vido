@@ -2481,6 +2481,7 @@ function Vido(state, api) {
         const modified = [];
         const currentLen = currentComponents.length;
         const dataLen = dataArray.length;
+        let leave = false;
         if (currentComponents.length < dataArray.length) {
             let diff = dataLen - currentLen;
             while (diff) {
@@ -2499,6 +2500,9 @@ function Vido(state, api) {
                 if (!leaveTail) {
                     currentComponents[index].destroy();
                 }
+                else {
+                    leave = true;
+                }
                 diff--;
             }
             if (!leaveTail) {
@@ -2509,7 +2513,7 @@ function Vido(state, api) {
         for (const component of currentComponents) {
             const item = dataArray[index];
             if (!modified.includes(component.instance)) {
-                component.change(getProps(item));
+                component.change(getProps(item), { leave });
             }
             index++;
         }
@@ -2548,7 +2552,7 @@ function Vido(state, api) {
             }
             return this.updateFunction(props);
         }
-        change(changedProps = {}) {
+        change(changedProps = {}, options = { leave: false }) {
             const props = changedProps;
             if (this.vidoInstance.debug) {
                 console.groupCollapsed(`component change method fired ${this.instance}`);
@@ -2563,7 +2567,7 @@ function Vido(state, api) {
                 console.groupEnd();
             }
             for (const fn of this.vidoInstance.onChangeFunctions) {
-                fn(changedProps);
+                fn(changedProps, options);
             }
         }
     }
