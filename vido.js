@@ -2392,11 +2392,28 @@
         vido.prototype.until = until;
         vido.prototype.schedule = schedule;
         vido.prototype.actionsByInstance = (componentActions, props) => { };
-        vido.prototype.styleMap = directive((styleInfo) => (part) => {
+        vido.prototype.styleMap = directive((styleInfo, removePrevious = true) => (part) => {
             const style = part.committer.element.style;
             let previous = previousStyle.get(part);
             if (previous === undefined) {
                 previous = {};
+            }
+            if (removePrevious) {
+                for (const name in previous) {
+                    if (styleInfo[name] === undefined) {
+                        if (!name.includes('-')) {
+                            try {
+                                style[name] = null;
+                            }
+                            catch (e) {
+                                style.removeProperty(name);
+                            }
+                        }
+                        else {
+                            style.removeProperty(name);
+                        }
+                    }
+                }
             }
             for (const name in styleInfo) {
                 const value = styleInfo[name];

@@ -1,4 +1,4 @@
-import { render, html, directive, svg, AttributeCommitter } from 'lit-html';
+import { render, html, directive, svg } from 'lit-html';
 import { asyncAppend } from 'lit-html/directives/async-append';
 import { asyncReplace } from 'lit-html/directives/async-replace';
 import { cache } from 'lit-html/directives/cache';
@@ -6,7 +6,6 @@ import { classMap } from 'lit-html/directives/class-map';
 import { guard } from 'lit-html/directives/guard';
 import { ifDefined } from 'lit-html/directives/if-defined';
 import { repeat } from 'lit-html/directives/repeat';
-import { styleMap } from 'lit-html/directives/style-map';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import { until } from 'lit-html/directives/until';
 
@@ -251,11 +250,26 @@ export default function Vido(state, api) {
   vido.prototype.until = until;
   vido.prototype.schedule = schedule;
   vido.prototype.actionsByInstance = (componentActions, props) => {};
-  vido.prototype.styleMap = directive((styleInfo) => (part) => {
+  vido.prototype.styleMap = directive((styleInfo, removePrevious = true) => (part) => {
     const style = part.committer.element.style;
     let previous = previousStyle.get(part);
     if (previous === undefined) {
       previous = {};
+    }
+    if (removePrevious) {
+      for (const name in previous) {
+        if (styleInfo[name] === undefined) {
+          if (!name.includes('-')) {
+            try {
+              style[name] = null;
+            } catch (e) {
+              style.removeProperty(name);
+            }
+          } else {
+            style.removeProperty(name);
+          }
+        }
+      }
     }
     for (const name in styleInfo) {
       const value = styleInfo[name];
