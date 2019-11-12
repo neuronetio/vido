@@ -259,15 +259,7 @@ export default function Vido(state, api) {
     if (removePrevious) {
       for (const name in previous) {
         if (styleInfo[name] === undefined) {
-          if (!name.includes('-')) {
-            try {
-              style[name] = null;
-            } catch (e) {
-              style.removeProperty(name);
-            }
-          } else {
-            style.removeProperty(name);
-          }
+          style.removeProperty(name);
         }
       }
     }
