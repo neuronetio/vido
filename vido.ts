@@ -1,4 +1,4 @@
-import { render, html, directive, svg } from 'lit-html';
+import { render, html, directive, svg, Template } from 'lit-html';
 import { asyncAppend } from 'lit-html/directives/async-append';
 import { asyncReplace } from 'lit-html/directives/async-replace';
 import { cache } from 'lit-html/directives/cache';
@@ -6,8 +6,9 @@ import { classMap } from 'lit-html/directives/class-map';
 import { guard } from 'lit-html/directives/guard';
 import { ifDefined } from 'lit-html/directives/if-defined';
 import { repeat } from 'lit-html/directives/repeat';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html';
+//import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import { until } from 'lit-html/directives/until';
+import { isPrimitive } from 'lit-html/lib/parts';
 
 /**
  * Schedule - a throttle function that uses requestAnimationFrame to limit the rate at which a function is called.
@@ -113,6 +114,9 @@ export default function Vido(state, api) {
   let shouldUpdateCount = 0;
   const resolved = Promise.resolve();
   const previousStyle = new WeakMap();
+  const previousUnsafeValues = new WeakMap();
+  const textNode = document.createTextNode('');
+  const templateNode = document.createElement('template');
 
   /**
    * Get actions for component instance as directives
@@ -122,7 +126,7 @@ export default function Vido(state, api) {
    */
   function getActions(instance) {
     return directive(function actionsByInstanceDirective(createFunctions, props = {}) {
-      return function partial(part) {
+      return function actions(part) {
         const element = part.committer.element;
         for (const create of createFunctions) {
           if (typeof create === 'function') {
@@ -150,6 +154,7 @@ export default function Vido(state, api) {
             }
           }
         }
+        part.setValue('');
       };
     });
   }
@@ -197,7 +202,6 @@ export default function Vido(state, api) {
 
     /**
      * Change component input properties
-     *
      * @param {any} newProps
      */
     change(newProps, options) {
@@ -245,41 +249,63 @@ export default function Vido(state, api) {
   vido.prototype.guard = guard;
   vido.prototype.ifDefined = ifDefined;
   vido.prototype.repeat = repeat;
-  //vido.prototype.styleMap = styleMap;
-  vido.prototype.unsafeHTML = unsafeHTML;
+  //vido.prototype.unsafeHTML = unsafeHTML;
+  vido.prototype.unsafeHTML = directive((value) => (part) => {
+    const previousValue = previousUnsafeValues.get(part);
+    if (
+      previousValue !== undefined &&
+      isPrimitive(value) &&
+      value === previousValue.value &&
+      part.value === previousValue.fragment
+    ) {
+      return;
+    }
+    const template = templateNode.cloneNode() as HTMLTemplateElement;
+    template.innerHTML = value; // innerHTML casts to string internally
+    const fragment = document.importNode(template.content, true);
+    part.setValue(fragment);
+    previousUnsafeValues.set(part, { value, fragment });
+  });
   vido.prototype.until = until;
   vido.prototype.schedule = schedule;
   vido.prototype.actionsByInstance = (componentActions, props) => {};
-  vido.prototype.styleMap = directive((styleInfo, removePrevious = true) => (part) => {
-    const style = part.committer.element.style;
-    let previous = previousStyle.get(part);
-    if (previous === undefined) {
-      previous = {};
-    }
-    if (removePrevious) {
-      for (const name in previous) {
-        if (styleInfo[name] === undefined) {
-          style.removeProperty(name);
+  vido.prototype.text = directive(
+    (text) =>
+      function setText(part) {
+        const node = part.value || textNode.cloneNode();
+        if (node.data !== text) node.data = text;
+        part.setValue(node);
+      }
+  );
+  vido.prototype.styleMap = directive(
+    (styleInfo, removePrevious = true) =>
+      function style(part) {
+        const style = part.committer.element.style;
+        let previous = previousStyle.get(part);
+        if (previous === undefined) {
+          previous = {};
         }
-      }
-    }
-    for (const name in styleInfo) {
-      const value = styleInfo[name];
-      if (previous[name] !== undefined && previous[name] === value) {
-        continue;
-      }
-      if (!name.includes('-')) {
-        try {
-          style[name] = value;
-        } catch (e) {
-          style.setProperty(name, value);
+        if (removePrevious) {
+          for (const name in previous) {
+            if (styleInfo[name] === undefined) {
+              style.removeProperty(name);
+            }
+          }
         }
-      } else {
-        style.setProperty(name, value);
+        for (const name in styleInfo) {
+          const value = styleInfo[name];
+          if (previous[name] !== undefined && previous[name] === value) {
+            continue;
+          }
+          if (!name.includes('-')) {
+            style[name] = value;
+          } else {
+            style.setProperty(name, value);
+          }
+        }
+        previousStyle.set(part, { ...styleInfo });
       }
-    }
-    previousStyle.set(part, { ...styleInfo });
-  });
+  );
   vido.prototype.onDestroy = function onDestroy(fn) {
     this.destroyable.push(fn);
   };
@@ -476,13 +502,12 @@ export default function Vido(state, api) {
    * @param {object} vidoInstance
    */
   vido.prototype.updateTemplate = function updateTemplate() {
-    shouldUpdateCount++;
-    const currentShouldUpdateCount = shouldUpdateCount;
+    const currentShouldUpdateCount = ++shouldUpdateCount;
     const self = this;
     resolved.then(function flush() {
       if (currentShouldUpdateCount === shouldUpdateCount) {
-        self.render();
         shouldUpdateCount = 0;
+        self.render();
         if (self.debug) {
           console.groupCollapsed('templates updated');
           console.trace();
@@ -513,8 +538,15 @@ export default function Vido(state, api) {
     for (const actions of actionsByInstance.values()) {
       for (const action of actions) {
         if (typeof action.element.vido === 'undefined') {
-          if (typeof action.componentAction.create === 'function') {
-            const result = action.componentAction.create(action.element, action.props);
+          const componentAction = action.componentAction;
+          const create = componentAction.create;
+          if (typeof create === 'function') {
+            let result;
+            if (create.prototype?.update === undefined && create.prototype?.destroy === undefined) {
+              result = create(action.element, action.props);
+            } else {
+              result = new create(action.element, action.props);
+            }
             if (this.debug) {
               console.groupCollapsed(`create action executed ${action.instance}`);
               console.log(clone({ components: components.keys(), action, actionsByInstance }));
@@ -523,13 +555,13 @@ export default function Vido(state, api) {
             }
             if (typeof result !== 'undefined') {
               if (typeof result === 'function') {
-                action.componentAction.destroy = result;
+                componentAction.destroy = result;
               } else {
                 if (typeof result.update === 'function') {
-                  action.componentAction.update = result.update;
+                  componentAction.update = result.update.bind(result);
                 }
                 if (typeof result.destroy === 'function') {
-                  action.componentAction.destroy = result.destroy;
+                  componentAction.destroy = result.destroy.bind(result);
                 }
               }
             }
