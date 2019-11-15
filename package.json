@@ -39,6 +39,6 @@
     "typescript": "^3.7.2"
   },
   "dependencies": {
-    "lit-html": "^1.1.2"
+    "lit-html": "github:neuronetio/lit-html#clone-node"
   }
 }

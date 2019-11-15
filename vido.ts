@@ -1,4 +1,4 @@
-import { render, html, directive, svg, Template } from 'lit-html';
+import { render, html, directive, svg } from 'lit-html';
 import { asyncAppend } from 'lit-html/directives/async-append';
 import { asyncReplace } from 'lit-html/directives/async-replace';
 import { cache } from 'lit-html/directives/cache';
@@ -6,9 +6,21 @@ import { classMap } from 'lit-html/directives/class-map';
 import { guard } from 'lit-html/directives/guard';
 import { ifDefined } from 'lit-html/directives/if-defined';
 import { repeat } from 'lit-html/directives/repeat';
-//import { unsafeHTML } from 'lit-html/directives/unsafe-html';
+import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import { until } from 'lit-html/directives/until';
-import { isPrimitive } from 'lit-html/lib/parts';
+
+/* dev imports
+import { render, html, directive, svg } from '../lit-html';
+import { asyncAppend } from '../lit-html/directives/async-append';
+import { asyncReplace } from '../lit-html/directives/async-replace';
+import { cache } from '../lit-html/directives/cache';
+import { classMap } from '../lit-html/directives/class-map';
+import { guard } from '../lit-html/directives/guard';
+import { ifDefined } from '../lit-html/directives/if-defined';
+import { repeat } from '../lit-html/directives/repeat';
+import { unsafeHTML } from '../lit-html/directives/unsafe-html';
+import { until } from '../lit-html/directives/until';
+*/
 
 /**
  * Schedule - a throttle function that uses requestAnimationFrame to limit the rate at which a function is called.
@@ -114,9 +126,6 @@ export default function Vido(state, api) {
   let shouldUpdateCount = 0;
   const resolved = Promise.resolve();
   const previousStyle = new WeakMap();
-  const previousUnsafeValues = new WeakMap();
-  const textNode = document.createTextNode('');
-  const templateNode = document.createElement('template');
 
   /**
    * Get actions for component instance as directives
@@ -249,8 +258,8 @@ export default function Vido(state, api) {
   vido.prototype.guard = guard;
   vido.prototype.ifDefined = ifDefined;
   vido.prototype.repeat = repeat;
-  //vido.prototype.unsafeHTML = unsafeHTML;
-  vido.prototype.unsafeHTML = directive((value) => (part) => {
+  vido.prototype.unsafeHTML = unsafeHTML;
+  /*vido.prototype.unsafeHTML = directive((value) => (part) => {
     const previousValue = previousUnsafeValues.get(part);
     if (
       previousValue !== undefined &&
@@ -265,18 +274,18 @@ export default function Vido(state, api) {
     const fragment = document.importNode(template.content, true);
     part.setValue(fragment);
     previousUnsafeValues.set(part, { value, fragment });
-  });
+  });*/
   vido.prototype.until = until;
   vido.prototype.schedule = schedule;
   vido.prototype.actionsByInstance = (componentActions, props) => {};
-  vido.prototype.text = directive(
+  /*vido.prototype.text = directive(
     (text) =>
       function setText(part) {
-        const node = part.value || textNode.cloneNode();
+        const node = textNode.cloneNode() as Text;
         if (node.data !== text) node.data = text;
         part.setValue(node);
       }
-  );
+  );*/
   vido.prototype.styleMap = directive(
     (styleInfo, removePrevious = true) =>
       function style(part) {
@@ -504,17 +513,13 @@ export default function Vido(state, api) {
   vido.prototype.updateTemplate = function updateTemplate() {
     const currentShouldUpdateCount = ++shouldUpdateCount;
     const self = this;
-    resolved.then(function flush() {
+    function flush() {
       if (currentShouldUpdateCount === shouldUpdateCount) {
         shouldUpdateCount = 0;
         self.render();
-        if (self.debug) {
-          console.groupCollapsed('templates updated');
-          console.trace();
-          console.groupEnd();
-        }
       }
-    });
+    }
+    resolved.then(flush);
   };
 
   /**
@@ -537,7 +542,7 @@ export default function Vido(state, api) {
   vido.prototype.executeActions = function executeActions() {
     for (const actions of actionsByInstance.values()) {
       for (const action of actions) {
-        if (typeof action.element.vido === 'undefined') {
+        if (action.element.vido === undefined) {
           const componentAction = action.componentAction;
           const create = componentAction.create;
           if (typeof create === 'function') {
@@ -547,13 +552,7 @@ export default function Vido(state, api) {
             } else {
               result = new create(action.element, action.props);
             }
-            if (this.debug) {
-              console.groupCollapsed(`create action executed ${action.instance}`);
-              console.log(clone({ components: components.keys(), action, actionsByInstance }));
-              console.trace();
-              console.groupEnd();
-            }
-            if (typeof result !== 'undefined') {
+            if (result !== undefined) {
               if (typeof result === 'function') {
                 componentAction.destroy = result;
               } else {
@@ -570,12 +569,6 @@ export default function Vido(state, api) {
           action.element.vido = action.props;
           if (typeof action.componentAction.update === 'function') {
             action.componentAction.update(action.element, action.props);
-            if (this.debug) {
-              console.groupCollapsed(`update action executed ${action.instance}`);
-              console.log(clone({ components: components.keys(), action, actionsByInstance }));
-              console.trace();
-              console.groupEnd();
-            }
           }
         }
       }
