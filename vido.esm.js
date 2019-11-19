@@ -11,7 +11,6 @@
  * subject to an additional IP rights grant found at
  * http://polymer.github.io/PATENTS.txt
  */
-const directives = new WeakMap();
 /**
  * Brands a function as a directive factory function so that lit-html will call
  * the function during template rendering, rather than passing as a value.
@@ -54,11 +53,26 @@ const directives = new WeakMap();
  */
 const directive = (f) => ((...args) => {
     const d = f(...args);
-    directives.set(d, true);
+    // @ts-ignore
+    d.isDirective = true;
     return d;
 });
+class Directive {
+    constructor() {
+        this.isDirective = true;
+        this.isClass = true;
+    }
+    // @ts-ignore
+    body(part) {
+    }
+    runPart(part) {
+        return this.body(part);
+    }
+}
 const isDirective = (o) => {
-    return typeof o === 'function' && directives.has(o);
+    return o !== undefined && o !== null &&
+        // tslint:disable-next-line:no-any
+        typeof o.isDirective === 'boolean';
 };
 
 /**
@@ -374,13 +388,9 @@ class TemplateInstance {
         for (const part of this.__parts) {
             if (part !== undefined) {
                 part.setValue(values[i]);
-            }
-            i++;
-        }
-        for (const part of this.__parts) {
-            if (part !== undefined) {
                 part.commit();
             }
+            i++;
         }
     }
     _clone() {
@@ -750,7 +760,14 @@ class AttributePart {
         while (isDirective(this.value)) {
             const directive = this.value;
             this.value = noChange;
-            directive(this);
+            // @ts-ignore
+            if (directive.isClass) {
+                // @ts-ignore
+                directive.runPart(this);
+            }
+            else {
+                directive(this);
+            }
         }
         if (this.value === noChange) {
             return;
@@ -818,7 +835,14 @@ class NodePart {
         while (isDirective(this.__pendingValue)) {
             const directive = this.__pendingValue;
             this.__pendingValue = noChange;
-            directive(this);
+            // @ts-ignore
+            if (directive.isClass) {
+                // @ts-ignore
+                directive.runPart(this);
+            }
+            else {
+                directive(this);
+            }
         }
         const value = this.__pendingValue;
         if (value === noChange) {
@@ -988,7 +1012,14 @@ class BooleanAttributePart {
         while (isDirective(this.__pendingValue)) {
             const directive = this.__pendingValue;
             this.__pendingValue = noChange;
-            directive(this);
+            // @ts-ignore
+            if (directive.isClass) {
+                // @ts-ignore
+                directive.runPart(this);
+            }
+            else {
+                directive(this);
+            }
         }
         if (this.__pendingValue === noChange) {
             return;
@@ -1077,7 +1108,14 @@ class EventPart {
         while (isDirective(this.__pendingValue)) {
             const directive = this.__pendingValue;
             this.__pendingValue = noChange;
-            directive(this);
+            // @ts-ignore
+            if (directive.isClass) {
+                // @ts-ignore
+                directive.runPart(this);
+            }
+            else {
+                directive(this);
+            }
         }
         if (this.__pendingValue === noChange) {
             return;
@@ -2270,18 +2308,18 @@ const until = directive((...args) => (part) => {
     }
 });
 
-/* dev imports
-import { render, html, directive, svg } from '../lit-html';
-import { asyncAppend } from '../lit-html/directives/async-append';
-import { asyncReplace } from '../lit-html/directives/async-replace';
-import { cache } from '../lit-html/directives/cache';
-import { classMap } from '../lit-html/directives/class-map';
-import { guard } from '../lit-html/directives/guard';
-import { ifDefined } from '../lit-html/directives/if-defined';
-import { repeat } from '../lit-html/directives/repeat';
-import { unsafeHTML } from '../lit-html/directives/unsafe-html';
-import { until } from '../lit-html/directives/until';
+/*import { render, html, directive, svg } from 'lit-html';
+import { asyncAppend } from 'lit-html/directives/async-append';
+import { asyncReplace } from 'lit-html/directives/async-replace';
+import { cache } from 'lit-html/directives/cache';
+import { classMap } from 'lit-html/directives/class-map';
+import { guard } from 'lit-html/directives/guard';
+import { ifDefined } from 'lit-html/directives/if-defined';
+import { repeat } from 'lit-html/directives/repeat';
+import { unsafeHTML } from 'lit-html/directives/unsafe-html';
+import { until } from 'lit-html/directives/until';
 */
+//*/
 /**
  * Schedule - a throttle function that uses requestAnimationFrame to limit the rate at which a function is called.
  *
@@ -2383,7 +2421,6 @@ function Vido(state, api) {
     let app, element;
     let shouldUpdateCount = 0;
     const resolved = Promise.resolve();
-    const previousStyle = new WeakMap();
     /**
      * Get actions for component instance as directives
      *
@@ -2526,41 +2563,38 @@ function Vido(state, api) {
     vido.prototype.until = until;
     vido.prototype.schedule = schedule;
     vido.prototype.actionsByInstance = (componentActions, props) => { };
-    /*vido.prototype.text = directive(
-      (text) =>
-        function setText(part) {
-          const node = textNode.cloneNode() as Text;
-          if (node.data !== text) node.data = text;
-          part.setValue(node);
+    class StyleMap extends Directive {
+        constructor(styleInfo) {
+            super();
+            this.previous = {};
+            this.style = Object.assign({}, styleInfo);
         }
-    );*/
-    vido.prototype.styleMap = directive((styleInfo, removePrevious = true) => function style(part) {
-        const style = part.committer.element.style;
-        let previous = previousStyle.get(part);
-        if (previous === undefined) {
-            previous = {};
-        }
-        if (removePrevious) {
+        body(part) {
+            // @ts-ignore
+            const style = part.committer.element.style;
+            let previous = this.previous;
             for (const name in previous) {
-                if (styleInfo[name] === undefined) {
+                if (this.style[name] === undefined) {
                     style.removeProperty(name);
                 }
             }
+            for (const name in this.style) {
+                const value = this.style[name];
+                const prev = previous[name];
+                if (prev !== undefined && prev === value) {
+                    continue;
+                }
+                if (!name.includes('-')) {
+                    style[name] = value;
+                }
+                else {
+                    style.setProperty(name, value);
+                }
+            }
+            this.previous = Object.assign({}, this.style);
         }
-        for (const name in styleInfo) {
-            const value = styleInfo[name];
-            if (previous[name] !== undefined && previous[name] === value) {
-                continue;
-            }
-            if (!name.includes('-')) {
-                style[name] = value;
-            }
-            else {
-                style.setProperty(name, value);
-            }
-        }
-        previousStyle.set(part, Object.assign({}, styleInfo));
-    });
+    }
+    vido.prototype.StyleMap = StyleMap;
     vido.prototype.onDestroy = function onDestroy(fn) {
         this.destroyable.push(fn);
     };

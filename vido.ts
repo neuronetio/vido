@@ -1,4 +1,4 @@
-import { render, html, directive, svg } from 'lit-html';
+/*import { render, html, directive, svg } from 'lit-html';
 import { asyncAppend } from 'lit-html/directives/async-append';
 import { asyncReplace } from 'lit-html/directives/async-replace';
 import { cache } from 'lit-html/directives/cache';
@@ -8,9 +8,9 @@ import { ifDefined } from 'lit-html/directives/if-defined';
 import { repeat } from 'lit-html/directives/repeat';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import { until } from 'lit-html/directives/until';
-
-/* dev imports
-import { render, html, directive, svg } from '../lit-html';
+*/
+//* dev imports
+import { render, html, directive, svg, Part } from '../lit-html';
 import { asyncAppend } from '../lit-html/directives/async-append';
 import { asyncReplace } from '../lit-html/directives/async-replace';
 import { cache } from '../lit-html/directives/cache';
@@ -20,7 +20,8 @@ import { ifDefined } from '../lit-html/directives/if-defined';
 import { repeat } from '../lit-html/directives/repeat';
 import { unsafeHTML } from '../lit-html/directives/unsafe-html';
 import { until } from '../lit-html/directives/until';
-*/
+import { Directive } from '../lit-html/lib/directive';
+//*/
 
 /**
  * Schedule - a throttle function that uses requestAnimationFrame to limit the rate at which a function is called.
@@ -278,43 +279,47 @@ export default function Vido(state, api) {
   vido.prototype.until = until;
   vido.prototype.schedule = schedule;
   vido.prototype.actionsByInstance = (componentActions, props) => {};
-  /*vido.prototype.text = directive(
-    (text) =>
-      function setText(part) {
-        const node = textNode.cloneNode() as Text;
-        if (node.data !== text) node.data = text;
-        part.setValue(node);
+
+  interface StyleInfo {
+    [key: string]: string;
+  }
+
+  class StyleMap extends Directive {
+    previous: {};
+    style: {};
+
+    constructor(styleInfo: StyleInfo) {
+      super();
+      this.previous = {};
+      this.style = { ...styleInfo };
+    }
+
+    body(part: Part) {
+      // @ts-ignore
+      const style = part.committer.element.style;
+      let previous = this.previous;
+      for (const name in previous) {
+        if (this.style[name] === undefined) {
+          style.removeProperty(name);
+        }
       }
-  );*/
-  vido.prototype.styleMap = directive(
-    (styleInfo, removePrevious = true) =>
-      function style(part) {
-        const style = part.committer.element.style;
-        let previous = previousStyle.get(part);
-        if (previous === undefined) {
-          previous = {};
+      for (const name in this.style) {
+        const value = this.style[name];
+        const prev = previous[name];
+        if (prev !== undefined && prev === value) {
+          continue;
         }
-        if (removePrevious) {
-          for (const name in previous) {
-            if (styleInfo[name] === undefined) {
-              style.removeProperty(name);
-            }
-          }
+        if (!name.includes('-')) {
+          style[name] = value;
+        } else {
+          style.setProperty(name, value);
         }
-        for (const name in styleInfo) {
-          const value = styleInfo[name];
-          if (previous[name] !== undefined && previous[name] === value) {
-            continue;
-          }
-          if (!name.includes('-')) {
-            style[name] = value;
-          } else {
-            style.setProperty(name, value);
-          }
-        }
-        previousStyle.set(part, { ...styleInfo });
       }
-  );
+      this.previous = { ...this.style };
+    }
+  }
+
+  vido.prototype.StyleMap = StyleMap;
   vido.prototype.onDestroy = function onDestroy(fn) {
     this.destroyable.push(fn);
   };
