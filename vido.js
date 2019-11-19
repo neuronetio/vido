@@ -2314,18 +2314,19 @@
         }
     });
 
-    /*import { render, html, directive, svg } from 'lit-html';
-    import { asyncAppend } from 'lit-html/directives/async-append';
-    import { asyncReplace } from 'lit-html/directives/async-replace';
-    import { cache } from 'lit-html/directives/cache';
-    import { classMap } from 'lit-html/directives/class-map';
-    import { guard } from 'lit-html/directives/guard';
-    import { ifDefined } from 'lit-html/directives/if-defined';
-    import { repeat } from 'lit-html/directives/repeat';
-    import { unsafeHTML } from 'lit-html/directives/unsafe-html';
-    import { until } from 'lit-html/directives/until';
+    /* dev imports
+    import { render, html, directive, svg, Part } from '../lit-html';
+    import { asyncAppend } from '../lit-html/directives/async-append';
+    import { asyncReplace } from '../lit-html/directives/async-replace';
+    import { cache } from '../lit-html/directives/cache';
+    import { classMap } from '../lit-html/directives/class-map';
+    import { guard } from '../lit-html/directives/guard';
+    import { ifDefined } from '../lit-html/directives/if-defined';
+    import { repeat } from '../lit-html/directives/repeat';
+    import { unsafeHTML } from '../lit-html/directives/unsafe-html';
+    import { until } from '../lit-html/directives/until';
+    import { Directive } from '../lit-html/lib/directive';
     */
-    //*/
     /**
      * Schedule - a throttle function that uses requestAnimationFrame to limit the rate at which a function is called.
      *

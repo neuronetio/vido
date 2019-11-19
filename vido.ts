@@ -1,4 +1,4 @@
-/*import { render, html, directive, svg } from 'lit-html';
+import { render, html, directive, svg, Directive, Part } from 'lit-html';
 import { asyncAppend } from 'lit-html/directives/async-append';
 import { asyncReplace } from 'lit-html/directives/async-replace';
 import { cache } from 'lit-html/directives/cache';
@@ -8,8 +8,8 @@ import { ifDefined } from 'lit-html/directives/if-defined';
 import { repeat } from 'lit-html/directives/repeat';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import { until } from 'lit-html/directives/until';
-*/
-//* dev imports
+
+/* dev imports
 import { render, html, directive, svg, Part } from '../lit-html';
 import { asyncAppend } from '../lit-html/directives/async-append';
 import { asyncReplace } from '../lit-html/directives/async-replace';
@@ -21,7 +21,7 @@ import { repeat } from '../lit-html/directives/repeat';
 import { unsafeHTML } from '../lit-html/directives/unsafe-html';
 import { until } from '../lit-html/directives/until';
 import { Directive } from '../lit-html/lib/directive';
-//*/
+*/
 
 /**
  * Schedule - a throttle function that uses requestAnimationFrame to limit the rate at which a function is called.
@@ -126,7 +126,6 @@ export default function Vido(state, api) {
   let app, element;
   let shouldUpdateCount = 0;
   const resolved = Promise.resolve();
-  const previousStyle = new WeakMap();
 
   /**
    * Get actions for component instance as directives
