@@ -290,7 +290,7 @@ export default function Vido(state, api) {
     constructor(styleInfo: StyleInfo) {
       super();
       this.previous = {};
-      this.style = { ...styleInfo };
+      this.style = styleInfo;
     }
 
     body(part: Part) {

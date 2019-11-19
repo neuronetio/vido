@@ -2568,7 +2568,7 @@ function Vido(state, api) {
         constructor(styleInfo) {
             super();
             this.previous = {};
-            this.style = Object.assign({}, styleInfo);
+            this.style = styleInfo;
         }
         body(part) {
             // @ts-ignore
