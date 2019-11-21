@@ -2563,19 +2563,30 @@ function Vido(state, api) {
     vido.prototype.until = until;
     vido.prototype.schedule = schedule;
     vido.prototype.actionsByInstance = (componentActions, props) => { };
+    const toRemove = [], toUpdate = [];
     class StyleMap extends Directive {
-        constructor(styleInfo) {
+        constructor(styleInfo, detach = false) {
             super();
             this.previous = {};
             this.style = styleInfo;
+            this.detach = detach;
+        }
+        setStyle(styleInfo) {
+            this.style = styleInfo;
+        }
+        setDetach(detach) {
+            this.detach = detach;
         }
         body(part) {
+            toRemove.length = 0;
+            toUpdate.length = 0;
             // @ts-ignore
-            const style = part.committer.element.style;
+            const element = part.committer.element;
+            const style = element.style;
             let previous = this.previous;
             for (const name in previous) {
                 if (this.style[name] === undefined) {
-                    style.removeProperty(name);
+                    toRemove.push(name);
                 }
             }
             for (const name in this.style) {
@@ -2584,17 +2595,63 @@ function Vido(state, api) {
                 if (prev !== undefined && prev === value) {
                     continue;
                 }
-                if (!name.includes('-')) {
-                    style[name] = value;
-                }
-                else {
-                    style.setProperty(name, value);
-                }
+                toUpdate.push(name);
             }
-            this.previous = Object.assign({}, this.style);
+            if (toRemove.length || toUpdate.length) {
+                let parent, nextSibling;
+                if (this.detach) {
+                    parent = element.parentNode;
+                    if (parent) {
+                        nextSibling = element.nextSibling;
+                        element.remove();
+                    }
+                }
+                for (const name of toRemove) {
+                    style.removeProperty(name);
+                }
+                for (const name of toUpdate) {
+                    const value = this.style[name];
+                    if (!name.includes('-')) {
+                        style[name] = value;
+                    }
+                    else {
+                        style.setProperty(name, value);
+                    }
+                }
+                if (this.detach && parent) {
+                    parent.insertBefore(element, nextSibling);
+                }
+                this.previous = Object.assign({}, this.style);
+            }
         }
     }
     vido.prototype.StyleMap = StyleMap;
+    const detached = new WeakMap();
+    class Detach extends Directive {
+        constructor(ifFn) {
+            super();
+            this.ifFn = ifFn;
+        }
+        body(part) {
+            const detach = this.ifFn();
+            const element = part.committer.element;
+            if (detach) {
+                if (!detached.has(part)) {
+                    const nextSibling = element.nextSibling;
+                    detached.set(part, { element, nextSibling });
+                }
+                element.remove();
+            }
+            else {
+                const data = detached.get(part);
+                if (typeof data !== 'undefined' && data !== null) {
+                    data.nextSibling.parentNode.insertBefore(data.element, data.nextSibling);
+                    detached.delete(part);
+                }
+            }
+        }
+    }
+    vido.prototype.Detach = Detach;
     vido.prototype.onDestroy = function onDestroy(fn) {
         this.destroyable.push(fn);
     };
