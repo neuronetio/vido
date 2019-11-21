@@ -2428,47 +2428,62 @@
         let app, element;
         let shouldUpdateCount = 0;
         const resolved = Promise.resolve();
-        /**
-         * Get actions for component instance as directives
-         *
-         * @param {string} instance
-         * @returns {function} directive that will execute actions
-         */
-        function getActions(instance) {
-            return directive(function actionsByInstanceDirective(createFunctions, props = {}) {
-                return function actions(part) {
-                    const element = part.committer.element;
-                    for (const create of createFunctions) {
-                        if (typeof create === 'function') {
-                            let exists;
-                            if (actionsByInstance.has(instance)) {
-                                for (const action of actionsByInstance.get(instance)) {
-                                    if (action.componentAction.create === create && action.element === element) {
-                                        exists = action;
-                                        break;
-                                    }
+        class ActionsCollector extends Directive {
+            constructor(instance) {
+                super();
+                this.instance = instance;
+            }
+            set(actions, props, debug = false) {
+                this.actions = actions;
+                this.props = props; // must be mutable! (do not do this {...props})
+                // because we will modify action props with onChange and can reuse existin instance
+                if (debug) {
+                    console.log(this);
+                }
+                return this;
+            }
+            body(part) {
+                const element = part.committer.element;
+                for (const create of this.actions) {
+                    if (typeof create !== 'undefined') {
+                        let exists;
+                        if (actionsByInstance.has(this.instance)) {
+                            for (const action of actionsByInstance.get(this.instance)) {
+                                if (action.componentAction.create === create && action.element === element) {
+                                    exists = action;
+                                    break;
                                 }
-                            }
-                            if (!exists) {
-                                if (typeof element.vido !== 'undefined')
-                                    delete element.vido;
-                                const componentAction = { create, update() { }, destroy() { } };
-                                const action = { instance, componentAction, element, props };
-                                let byInstance = [];
-                                if (actionsByInstance.has(instance)) {
-                                    byInstance = actionsByInstance.get(instance);
-                                }
-                                byInstance.push(action);
-                                actionsByInstance.set(instance, byInstance);
-                            }
-                            else {
-                                exists.props = props;
                             }
                         }
+                        if (!exists) {
+                            // @ts-ignore
+                            if (typeof element.vido !== 'undefined')
+                                delete element.vido;
+                            const componentAction = { create, update() { }, destroy() { } };
+                            const action = { instance: this.instance, componentAction, element, props: this.props };
+                            let byInstance = [];
+                            if (actionsByInstance.has(this.instance)) {
+                                byInstance = actionsByInstance.get(this.instance);
+                            }
+                            byInstance.push(action);
+                            actionsByInstance.set(this.instance, byInstance);
+                        }
+                        else {
+                            exists.props = this.props;
+                        }
                     }
-                    part.setValue('');
-                };
-            });
+                }
+            }
+        }
+        class InstanceActionsCollector {
+            constructor(instance) {
+                this.instance = instance;
+            }
+            create(actions, props) {
+                const actionsInstance = new ActionsCollector(this.instance);
+                actionsInstance.set(actions, props);
+                return actionsInstance;
+            }
         }
         class PublicComponentMethods {
             constructor(instance, vidoInstance, props = {}) {
@@ -2551,22 +2566,6 @@
         vido.prototype.ifDefined = ifDefined;
         vido.prototype.repeat = repeat;
         vido.prototype.unsafeHTML = unsafeHTML;
-        /*vido.prototype.unsafeHTML = directive((value) => (part) => {
-          const previousValue = previousUnsafeValues.get(part);
-          if (
-            previousValue !== undefined &&
-            isPrimitive(value) &&
-            value === previousValue.value &&
-            part.value === previousValue.fragment
-          ) {
-            return;
-          }
-          const template = templateNode.cloneNode() as HTMLTemplateElement;
-          template.innerHTML = value; // innerHTML casts to string internally
-          const fragment = document.importNode(template.content, true);
-          part.setValue(fragment);
-          previousUnsafeValues.set(part, { value, fragment });
-        });*/
         vido.prototype.until = until;
         vido.prototype.schedule = schedule;
         vido.prototype.actionsByInstance = (componentActions, props) => { };
@@ -2729,7 +2728,7 @@
             let vidoInstance;
             vidoInstance = new vido();
             vidoInstance.instance = instance;
-            vidoInstance.actions = getActions(instance);
+            vidoInstance.Actions = new InstanceActionsCollector(instance);
             const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
             const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props));
             components.set(instance, internalMethods);
@@ -2810,7 +2809,7 @@
                     if (action.element.vido === undefined) {
                         const componentAction = action.componentAction;
                         const create = componentAction.create;
-                        if (typeof create === 'function') {
+                        if (typeof create !== 'undefined') {
                             let result;
                             if (((_a = create.prototype) === null || _a === void 0 ? void 0 : _a.update) === undefined && ((_b = create.prototype) === null || _b === void 0 ? void 0 : _b.destroy) === undefined) {
                                 result = create(action.element, action.props);
