@@ -1,5 +1,5 @@
 class Action {
-  isClass: boolean = true;
+  isAction: boolean = true;
 }
-Action.prototype.isClass = true;
+Action.prototype.isAction = true;
 export default Action;

@@ -297,6 +297,7 @@ export default function Vido(state, api) {
             let result;
             if (
               create.prototype?.isAction !== true &&
+              create.isAction === undefined &&
               create.prototype?.update === undefined &&
               create.prototype?.destroy === undefined
             ) {

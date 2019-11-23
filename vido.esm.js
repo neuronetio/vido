@@ -2433,10 +2433,10 @@ class StyleMap extends Directive {
 
 class Action {
     constructor() {
-        this.isClass = true;
+        this.isAction = true;
     }
 }
-Action.prototype.isClass = true;
+Action.prototype.isAction = true;
 
 const defaultOptions = {
     element: document.createTextNode(''),
@@ -3141,6 +3141,7 @@ function Vido(state, api) {
                     if (typeof create !== 'undefined') {
                         let result;
                         if (((_a = create.prototype) === null || _a === void 0 ? void 0 : _a.isAction) !== true &&
+                            create.isAction === undefined &&
                             ((_b = create.prototype) === null || _b === void 0 ? void 0 : _b.update) === undefined &&
                             ((_c = create.prototype) === null || _c === void 0 ? void 0 : _c.destroy) === undefined) {
                             result = create(action.element, action.props);
