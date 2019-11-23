@@ -17,6 +17,9 @@ import getInternalComponentMethods from './InternalComponentMethods';
 import { schedule, clone } from './helpers';
 import Action from './Action';
 
+import * as lithtml from 'lit-html';
+export { lithtml, Action, Directive };
+
 /* dev imports
 import { render, html, directive, svg, Part } from '../lit-html';
 import { asyncAppend } from '../lit-html/directives/async-append';

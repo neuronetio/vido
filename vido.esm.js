@@ -1321,6 +1321,40 @@ const html = (strings, ...values) => new TemplateResult(strings, values, 'html',
  */
 const svg = (strings, ...values) => new SVGTemplateResult(strings, values, 'svg', defaultTemplateProcessor);
 
+var litHtml = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    html: html,
+    svg: svg,
+    DefaultTemplateProcessor: DefaultTemplateProcessor,
+    defaultTemplateProcessor: defaultTemplateProcessor,
+    directive: directive,
+    Directive: Directive,
+    isDirective: isDirective,
+    removeNodes: removeNodes,
+    reparentNodes: reparentNodes,
+    noChange: noChange,
+    nothing: nothing,
+    AttributeCommitter: AttributeCommitter,
+    AttributePart: AttributePart,
+    BooleanAttributePart: BooleanAttributePart,
+    EventPart: EventPart,
+    isIterable: isIterable,
+    isPrimitive: isPrimitive,
+    NodePart: NodePart,
+    PropertyCommitter: PropertyCommitter,
+    PropertyPart: PropertyPart,
+    parts: parts,
+    render: render,
+    templateCaches: templateCaches,
+    templateFactory: templateFactory,
+    TemplateInstance: TemplateInstance,
+    SVGTemplateResult: SVGTemplateResult,
+    TemplateResult: TemplateResult,
+    createMarker: createMarker,
+    isTemplatePartActive: isTemplatePartActive,
+    Template: Template
+});
+
 /**
  * @license
  * Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
@@ -3152,4 +3186,5 @@ function Vido(state, api) {
 }
 
 export default Vido;
+export { Action, Directive, litHtml as lithtml };
 //# sourceMappingURL=vido.esm.js.map

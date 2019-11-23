@@ -1,8 +1,8 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-    typeof define === 'function' && define.amd ? define(factory) :
-    (global = global || self, global.Vido = factory());
-}(this, function () { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+    (global = global || self, factory(global.Vido = {}));
+}(this, function (exports) { 'use strict';
 
     /**
      * @license
@@ -1326,6 +1326,40 @@
      * render to and update a container.
      */
     const svg = (strings, ...values) => new SVGTemplateResult(strings, values, 'svg', defaultTemplateProcessor);
+
+    var litHtml = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        html: html,
+        svg: svg,
+        DefaultTemplateProcessor: DefaultTemplateProcessor,
+        defaultTemplateProcessor: defaultTemplateProcessor,
+        directive: directive,
+        Directive: Directive,
+        isDirective: isDirective,
+        removeNodes: removeNodes,
+        reparentNodes: reparentNodes,
+        noChange: noChange,
+        nothing: nothing,
+        AttributeCommitter: AttributeCommitter,
+        AttributePart: AttributePart,
+        BooleanAttributePart: BooleanAttributePart,
+        EventPart: EventPart,
+        isIterable: isIterable,
+        isPrimitive: isPrimitive,
+        NodePart: NodePart,
+        PropertyCommitter: PropertyCommitter,
+        PropertyPart: PropertyPart,
+        parts: parts,
+        render: render,
+        templateCaches: templateCaches,
+        templateFactory: templateFactory,
+        TemplateInstance: TemplateInstance,
+        SVGTemplateResult: SVGTemplateResult,
+        TemplateResult: TemplateResult,
+        createMarker: createMarker,
+        isTemplatePartActive: isTemplatePartActive,
+        Template: Template
+    });
 
     /**
      * @license
@@ -3157,7 +3191,12 @@
         return new vido();
     }
 
-    return Vido;
+    exports.Action = Action;
+    exports.Directive = Directive;
+    exports.default = Vido;
+    exports.lithtml = litHtml;
+
+    Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
 //# sourceMappingURL=vido.js.map
