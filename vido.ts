@@ -18,7 +18,24 @@ import { schedule, clone } from './helpers';
 import Action from './Action';
 
 import * as lithtml from 'lit-html';
-export { lithtml, Action, Directive };
+export {
+  lithtml,
+  Action,
+  Directive,
+  schedule,
+  Detach,
+  StyleMap,
+  PointerAction,
+  asyncAppend,
+  asyncReplace,
+  cache,
+  classMap,
+  guard,
+  ifDefined,
+  repeat,
+  unsafeHTML,
+  until
+};
 
 /* dev imports
 import { render, html, directive, svg, Part } from '../lit-html';

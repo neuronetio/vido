@@ -3186,5 +3186,5 @@ function Vido(state, api) {
 }
 
 export default Vido;
-export { Action, Directive, litHtml as lithtml };
+export { Action, Detach, Directive, PointerAction, StyleMap, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, litHtml as lithtml, repeat, schedule, unsafeHTML, until };
 //# sourceMappingURL=vido.esm.js.map

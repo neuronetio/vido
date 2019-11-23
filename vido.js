@@ -3192,9 +3192,22 @@
     }
 
     exports.Action = Action;
+    exports.Detach = Detach;
     exports.Directive = Directive;
+    exports.PointerAction = PointerAction;
+    exports.StyleMap = StyleMap;
+    exports.asyncAppend = asyncAppend;
+    exports.asyncReplace = asyncReplace;
+    exports.cache = cache;
+    exports.classMap = classMap;
     exports.default = Vido;
+    exports.guard = guard;
+    exports.ifDefined = ifDefined;
     exports.lithtml = litHtml;
+    exports.repeat = repeat;
+    exports.schedule = schedule;
+    exports.unsafeHTML = unsafeHTML;
+    exports.until = until;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
