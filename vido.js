@@ -2314,19 +2314,478 @@
         }
     });
 
-    /* dev imports
-    import { render, html, directive, svg, Part } from '../lit-html';
-    import { asyncAppend } from '../lit-html/directives/async-append';
-    import { asyncReplace } from '../lit-html/directives/async-replace';
-    import { cache } from '../lit-html/directives/cache';
-    import { classMap } from '../lit-html/directives/class-map';
-    import { guard } from '../lit-html/directives/guard';
-    import { ifDefined } from '../lit-html/directives/if-defined';
-    import { repeat } from '../lit-html/directives/repeat';
-    import { unsafeHTML } from '../lit-html/directives/unsafe-html';
-    import { until } from '../lit-html/directives/until';
-    import { Directive } from '../lit-html/lib/directive';
-    */
+    const detached = new WeakMap();
+    class Detach extends Directive {
+        constructor(ifFn) {
+            super();
+            this.ifFn = ifFn;
+        }
+        body(part) {
+            const detach = this.ifFn();
+            const element = part.committer.element;
+            if (detach) {
+                if (!detached.has(part)) {
+                    const nextSibling = element.nextSibling;
+                    detached.set(part, { element, nextSibling });
+                }
+                element.remove();
+            }
+            else {
+                const data = detached.get(part);
+                if (typeof data !== 'undefined' && data !== null) {
+                    data.nextSibling.parentNode.insertBefore(data.element, data.nextSibling);
+                    detached.delete(part);
+                }
+            }
+        }
+    }
+
+    const toRemove = [], toUpdate = [];
+    class StyleMap extends Directive {
+        constructor(styleInfo, detach = false) {
+            super();
+            this.previous = {};
+            this.style = styleInfo;
+            this.detach = detach;
+        }
+        setStyle(styleInfo) {
+            this.style = styleInfo;
+        }
+        setDetach(detach) {
+            this.detach = detach;
+        }
+        body(part) {
+            toRemove.length = 0;
+            toUpdate.length = 0;
+            // @ts-ignore
+            const element = part.committer.element;
+            const style = element.style;
+            let previous = this.previous;
+            for (const name in previous) {
+                if (this.style[name] === undefined) {
+                    toRemove.push(name);
+                }
+            }
+            for (const name in this.style) {
+                const value = this.style[name];
+                const prev = previous[name];
+                if (prev !== undefined && prev === value) {
+                    continue;
+                }
+                toUpdate.push(name);
+            }
+            if (toRemove.length || toUpdate.length) {
+                let parent, nextSibling;
+                if (this.detach) {
+                    parent = element.parentNode;
+                    if (parent) {
+                        nextSibling = element.nextSibling;
+                        element.remove();
+                    }
+                }
+                for (const name of toRemove) {
+                    style.removeProperty(name);
+                }
+                for (const name of toUpdate) {
+                    const value = this.style[name];
+                    if (!name.includes('-')) {
+                        style[name] = value;
+                    }
+                    else {
+                        style.setProperty(name, value);
+                    }
+                }
+                if (this.detach && parent) {
+                    parent.insertBefore(element, nextSibling);
+                }
+                this.previous = Object.assign({}, this.style);
+            }
+        }
+    }
+
+    class Action {
+        constructor() {
+            this.isClass = true;
+        }
+    }
+    Action.prototype.isClass = true;
+
+    const defaultOptions = {
+        element: document.createTextNode(''),
+        axis: 'xy',
+        threshold: 10,
+        onDown(data) { },
+        onMove(data) { },
+        onUp(data) { },
+        onWheel(data) { }
+    };
+    class PointerAction extends Action {
+        constructor(element, data) {
+            super();
+            this.moving = '';
+            this.initialX = 0;
+            this.initialY = 0;
+            this.lastY = 0;
+            this.lastX = 0;
+            this.onPointerStart = this.onPointerStart.bind(this);
+            this.onPointerMove = this.onPointerMove.bind(this);
+            this.onPointerEnd = this.onPointerEnd.bind(this);
+            this.onWheel = this.onWheel.bind(this);
+            this.options = Object.assign(Object.assign({}, defaultOptions), data.pointerOptions);
+            element.addEventListener('touchstart', this.onPointerStart);
+            element.addEventListener('mousedown', this.onPointerStart);
+            document.addEventListener('touchmove', this.onPointerMove);
+            document.addEventListener('touchend', this.onPointerEnd);
+            document.addEventListener('mousemove', this.onPointerMove);
+            document.addEventListener('mouseup', this.onPointerEnd);
+        }
+        normalizeMouseWheelEvent(event) {
+            // @ts-ignore
+            let x = event.deltaX || 0;
+            // @ts-ignore
+            let y = event.deltaY || 0;
+            // @ts-ignore
+            let z = event.deltaZ || 0;
+            // @ts-ignore
+            const mode = event.deltaMode;
+            // @ts-ignore
+            const lineHeight = parseInt(getComputedStyle(event.target).getPropertyValue('line-height'));
+            let scale = 1;
+            switch (mode) {
+                case 1:
+                    scale = lineHeight;
+                    break;
+                case 2:
+                    // @ts-ignore
+                    scale = window.height;
+                    break;
+            }
+            x *= scale;
+            y *= scale;
+            z *= scale;
+            return { x, y, z, event };
+        }
+        onWheel(event) {
+            const normalized = this.normalizeMouseWheelEvent(event);
+            this.options.onWheel(normalized);
+        }
+        normalizePointerEvent(event) {
+            let x = 0, y = 0;
+            switch (event.type) {
+                case 'mousedown':
+                case 'mousemove':
+                case 'mouseup':
+                    x = event.x;
+                    y = event.y;
+                    break;
+                case 'touchstart':
+                case 'touchmove':
+                    x = event.touches[0].screenX;
+                    y = event.touches[0].screenY;
+                    break;
+                case 'touchend':
+                    x = event.changedTouches[0].screenX;
+                    y = event.changedTouches[0].screenY;
+                    break;
+            }
+            return { x, y, event };
+        }
+        onPointerStart(event) {
+            if (event.type === 'mousedown' && event.button !== 0)
+                return;
+            this.moving = 'xy';
+            const normalized = this.normalizePointerEvent(event);
+            this.lastX = normalized.x;
+            this.lastY = normalized.y;
+            this.initialX = normalized.x;
+            this.initialY = normalized.y;
+            this.options.onDown({ x: normalized.x, y: normalized.y, event });
+        }
+        handleX(normalized) {
+            let movementX = normalized.x - this.lastX;
+            this.lastY = normalized.y;
+            this.lastX = normalized.x;
+            return movementX;
+        }
+        handleY(normalized) {
+            let movementY = normalized.y - this.lastY;
+            this.lastY = normalized.y;
+            this.lastX = normalized.x;
+            return movementY;
+        }
+        onPointerMove(event) {
+            if (this.moving === '' || (event.type === 'mousemove' && event.button !== 0))
+                return;
+            const normalized = this.normalizePointerEvent(event);
+            if (this.options.axis === 'x|y') {
+                let movementX = 0, movementY = 0;
+                if (this.moving === 'x' ||
+                    (this.moving === 'xy' && Math.abs(normalized.x - this.initialX) > this.options.threshold)) {
+                    this.moving = 'x';
+                    movementX = this.handleX(normalized);
+                }
+                if (this.moving === 'y' ||
+                    (this.moving === 'xy' && Math.abs(normalized.y - this.initialY) > this.options.threshold)) {
+                    this.moving = 'y';
+                    movementY = this.handleY(normalized);
+                }
+                this.options.onMove({
+                    movementX,
+                    movementY,
+                    x: normalized.x,
+                    y: normalized.y,
+                    initialX: this.initialX,
+                    initialY: this.initialY,
+                    lastX: this.lastX,
+                    lastY: this.lastY,
+                    event
+                });
+            }
+            else if (this.options.axis === 'xy') {
+                let movementX = 0, movementY = 0;
+                if (Math.abs(normalized.x - this.initialX) > this.options.threshold) {
+                    movementX = this.handleX(normalized);
+                }
+                if (Math.abs(normalized.y - this.initialY) > this.options.threshold) {
+                    movementY = this.handleY(normalized);
+                }
+                this.options.onMove({
+                    movementX,
+                    movementY,
+                    x: normalized.x,
+                    y: normalized.y,
+                    initialX: this.initialX,
+                    initialY: this.initialY,
+                    lastX: this.lastX,
+                    lastY: this.lastY,
+                    event
+                });
+            }
+            else if (this.options.axis === 'x') {
+                if (this.moving === 'x' ||
+                    (this.moving === 'xy' && Math.abs(normalized.x - this.initialX) > this.options.threshold)) {
+                    this.moving = 'x';
+                    this.options.onMove({
+                        movementX: this.handleX(normalized),
+                        movementY: 0,
+                        initialX: this.initialX,
+                        initialY: this.initialY,
+                        lastX: this.lastX,
+                        lastY: this.lastY,
+                        event
+                    });
+                }
+            }
+            else if (this.options.axis === 'y') {
+                let movementY = 0;
+                if (this.moving === 'y' ||
+                    (this.moving === 'xy' && Math.abs(normalized.y - this.initialY) > this.options.threshold)) {
+                    this.moving = 'y';
+                    movementY = this.handleY(normalized);
+                }
+                this.options.onMove({
+                    movementX: 0,
+                    movementY,
+                    x: normalized.x,
+                    y: normalized.y,
+                    initialX: this.initialX,
+                    initialY: this.initialY,
+                    lastX: this.lastX,
+                    lastY: this.lastY,
+                    event
+                });
+            }
+        }
+        onPointerEnd(event) {
+            this.moving = '';
+            const normalized = this.normalizePointerEvent(event);
+            this.options.onUp({
+                movementX: 0,
+                movementY: 0,
+                x: normalized.x,
+                y: normalized.y,
+                initialX: this.initialX,
+                initialY: this.initialY,
+                lastX: this.lastX,
+                lastY: this.lastY,
+                event
+            });
+            this.lastY = 0;
+            this.lastX = 0;
+        }
+        destroy(element) {
+            element.removeEventListener('touchstart', this.onPointerStart);
+            element.removeEventListener('mousedown', this.onPointerStart);
+            document.removeEventListener('touchmove', this.onPointerMove);
+            document.removeEventListener('touchend', this.onPointerEnd);
+            document.removeEventListener('mousemove', this.onPointerMove);
+            document.removeEventListener('mouseup', this.onPointerEnd);
+        }
+    }
+
+    function getPublicComponentMethods(components, actionsByInstance, clone) {
+        return class PublicComponentMethods {
+            constructor(instance, vidoInstance, props = {}) {
+                this.instance = instance;
+                this.vidoInstance = vidoInstance;
+                this.props = props;
+                this.destroy = this.destroy.bind(this);
+                this.update = this.update.bind(this);
+                this.change = this.change.bind(this);
+                this.html = this.html.bind(this);
+            }
+            /**
+             * Destroy component
+             */
+            destroy() {
+                if (this.vidoInstance.debug) {
+                    console.groupCollapsed(`destroying component ${this.instance}`);
+                    console.log(clone({ components: components.keys(), actionsByInstance }));
+                    console.trace();
+                    console.groupEnd();
+                }
+                return this.vidoInstance.destroyComponent(this.instance, this.vidoInstance);
+            }
+            /**
+             * Update template - trigger rendering process
+             */
+            update() {
+                if (this.vidoInstance.debug) {
+                    console.groupCollapsed(`updating component ${this.instance}`);
+                    console.log(clone({ components: components.keys(), actionsByInstance }));
+                    console.trace();
+                    console.groupEnd();
+                }
+                return this.vidoInstance.updateTemplate(this.vidoInstance);
+            }
+            /**
+             * Change component input properties
+             * @param {any} newProps
+             */
+            change(newProps, options) {
+                if (this.vidoInstance.debug) {
+                    console.groupCollapsed(`changing component ${this.instance}`);
+                    console.log(clone({ props: this.props, newProps: newProps, components: components.keys(), actionsByInstance }));
+                    console.trace();
+                    console.groupEnd();
+                }
+                components.get(this.instance).change(newProps, options);
+            }
+            /**
+             * Get component lit-html template
+             * @param {} templateProps
+             */
+            html(templateProps = {}) {
+                return components.get(this.instance).update(templateProps, this.vidoInstance);
+            }
+        };
+    }
+
+    function getActionsCollector(actionsByInstance) {
+        return class ActionsCollector extends Directive {
+            constructor(instance) {
+                super();
+                this.instance = instance;
+            }
+            set(actions, props, debug = false) {
+                this.actions = actions;
+                this.props = props; // must be mutable! (do not do this {...props})
+                // because we will modify action props with onChange and can reuse existin instance
+                if (debug) {
+                    console.log(this);
+                }
+                return this;
+            }
+            body(part) {
+                const element = part.committer.element;
+                for (const create of this.actions) {
+                    if (typeof create !== 'undefined') {
+                        let exists;
+                        if (actionsByInstance.has(this.instance)) {
+                            for (const action of actionsByInstance.get(this.instance)) {
+                                if (action.componentAction.create === create && action.element === element) {
+                                    exists = action;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!exists) {
+                            // @ts-ignore
+                            if (typeof element.vido !== 'undefined')
+                                delete element.vido;
+                            const componentAction = { create, update() { }, destroy() { } };
+                            const action = { instance: this.instance, componentAction, element, props: this.props };
+                            let byInstance = [];
+                            if (actionsByInstance.has(this.instance)) {
+                                byInstance = actionsByInstance.get(this.instance);
+                            }
+                            byInstance.push(action);
+                            actionsByInstance.set(this.instance, byInstance);
+                        }
+                        else {
+                            exists.props = this.props;
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    function getInternalComponentMethods(components, actionsByInstance, clone) {
+        return class InternalComponentMethods {
+            constructor(instance, vidoInstance, updateFunction) {
+                this.instance = instance;
+                this.vidoInstance = vidoInstance;
+                this.updateFunction = updateFunction;
+            }
+            destroy() {
+                if (this.vidoInstance.debug) {
+                    console.groupCollapsed(`component destroy method fired ${this.instance}`);
+                    console.log(clone({
+                        props: this.vidoInstance.props,
+                        components: components.keys(),
+                        destroyable: this.vidoInstance.destroyable,
+                        actionsByInstance
+                    }));
+                    console.trace();
+                    console.groupEnd();
+                }
+                for (const d of this.vidoInstance.destroyable) {
+                    d();
+                }
+                this.vidoInstance.onChangeFunctions = [];
+                this.vidoInstance.destroyable = [];
+            }
+            update(props = {}) {
+                if (this.vidoInstance.debug) {
+                    console.groupCollapsed(`component update method fired ${this.instance}`);
+                    console.log(clone({ components: components.keys(), actionsByInstance }));
+                    console.trace();
+                    console.groupEnd();
+                }
+                return this.updateFunction(props);
+            }
+            change(changedProps, options = { leave: false }) {
+                const props = changedProps;
+                if (this.vidoInstance.debug) {
+                    console.groupCollapsed(`component change method fired ${this.instance}`);
+                    console.log(clone({
+                        props,
+                        components: components.keys(),
+                        onChangeFunctions: this.vidoInstance.onChangeFunctions,
+                        changedProps,
+                        actionsByInstance
+                    }));
+                    console.trace();
+                    console.groupEnd();
+                }
+                for (const fn of this.vidoInstance.onChangeFunctions) {
+                    fn(changedProps, options);
+                }
+            }
+        };
+    }
+
     /**
      * Schedule - a throttle function that uses requestAnimationFrame to limit the rate at which a function is called.
      *
@@ -2414,6 +2873,20 @@
         }
         return mergeDeep({}, source);
     }
+
+    /* dev imports
+    import { render, html, directive, svg, Part } from '../lit-html';
+    import { asyncAppend } from '../lit-html/directives/async-append';
+    import { asyncReplace } from '../lit-html/directives/async-replace';
+    import { cache } from '../lit-html/directives/cache';
+    import { classMap } from '../lit-html/directives/class-map';
+    import { guard } from '../lit-html/directives/guard';
+    import { ifDefined } from '../lit-html/directives/if-defined';
+    import { repeat } from '../lit-html/directives/repeat';
+    import { unsafeHTML } from '../lit-html/directives/unsafe-html';
+    import { until } from '../lit-html/directives/until';
+    import { Directive } from '../lit-html/lib/directive';
+    */
     /**
      * Vido library
      *
@@ -2428,53 +2901,8 @@
         let app, element;
         let shouldUpdateCount = 0;
         const resolved = Promise.resolve();
-        class ActionsCollector extends Directive {
-            constructor(instance) {
-                super();
-                this.instance = instance;
-            }
-            set(actions, props, debug = false) {
-                this.actions = actions;
-                this.props = props; // must be mutable! (do not do this {...props})
-                // because we will modify action props with onChange and can reuse existin instance
-                if (debug) {
-                    console.log(this);
-                }
-                return this;
-            }
-            body(part) {
-                const element = part.committer.element;
-                for (const create of this.actions) {
-                    if (typeof create !== 'undefined') {
-                        let exists;
-                        if (actionsByInstance.has(this.instance)) {
-                            for (const action of actionsByInstance.get(this.instance)) {
-                                if (action.componentAction.create === create && action.element === element) {
-                                    exists = action;
-                                    break;
-                                }
-                            }
-                        }
-                        if (!exists) {
-                            // @ts-ignore
-                            if (typeof element.vido !== 'undefined')
-                                delete element.vido;
-                            const componentAction = { create, update() { }, destroy() { } };
-                            const action = { instance: this.instance, componentAction, element, props: this.props };
-                            let byInstance = [];
-                            if (actionsByInstance.has(this.instance)) {
-                                byInstance = actionsByInstance.get(this.instance);
-                            }
-                            byInstance.push(action);
-                            actionsByInstance.set(this.instance, byInstance);
-                        }
-                        else {
-                            exists.props = this.props;
-                        }
-                    }
-                }
-            }
-        }
+        const additionalMethods = {};
+        const ActionsCollector = getActionsCollector(actionsByInstance);
         class InstanceActionsCollector {
             constructor(instance) {
                 this.instance = instance;
@@ -2485,61 +2913,7 @@
                 return actionsInstance;
             }
         }
-        class PublicComponentMethods {
-            constructor(instance, vidoInstance, props = {}) {
-                this.instance = instance;
-                this.vidoInstance = vidoInstance;
-                this.props = props;
-                this.destroy = this.destroy.bind(this);
-                this.update = this.update.bind(this);
-                this.change = this.change.bind(this);
-                this.html = this.html.bind(this);
-            }
-            /**
-             * Destroy component
-             */
-            destroy() {
-                if (this.vidoInstance.debug) {
-                    console.groupCollapsed(`destroying component ${this.instance}`);
-                    console.log(clone({ components: components.keys(), actionsByInstance }));
-                    console.trace();
-                    console.groupEnd();
-                }
-                return this.vidoInstance.destroyComponent(this.instance, this.vidoInstance);
-            }
-            /**
-             * Update template - trigger rendering process
-             */
-            update() {
-                if (this.vidoInstance.debug) {
-                    console.groupCollapsed(`updating component ${this.instance}`);
-                    console.log(clone({ components: components.keys(), actionsByInstance }));
-                    console.trace();
-                    console.groupEnd();
-                }
-                return this.vidoInstance.updateTemplate(this.vidoInstance);
-            }
-            /**
-             * Change component input properties
-             * @param {any} newProps
-             */
-            change(newProps, options) {
-                if (this.vidoInstance.debug) {
-                    console.groupCollapsed(`changing component ${this.instance}`);
-                    console.log(clone({ props: this.props, newProps: newProps, components: components.keys(), actionsByInstance }));
-                    console.trace();
-                    console.groupEnd();
-                }
-                components.get(this.instance).change(newProps, options);
-            }
-            /**
-             * Get component lit-html template
-             * @param {} templateProps
-             */
-            html(templateProps = {}) {
-                return components.get(this.instance).update(templateProps, this.vidoInstance);
-            }
-        }
+        const PublicComponentMethods = getPublicComponentMethods(components, actionsByInstance, clone);
         /**
          * Create vido instance for component
          */
@@ -2554,6 +2928,9 @@
             this.onDestroy = this.onDestroy.bind(this);
             this.onChange = this.onChange.bind(this);
             this.update = this.update.bind(this);
+            for (const name in additionalMethods) {
+                this[name] = additionalMethods[name];
+            }
         }
         vido.prototype.html = html;
         vido.prototype.svg = svg;
@@ -2569,95 +2946,13 @@
         vido.prototype.until = until;
         vido.prototype.schedule = schedule;
         vido.prototype.actionsByInstance = (componentActions, props) => { };
-        const toRemove = [], toUpdate = [];
-        class StyleMap extends Directive {
-            constructor(styleInfo, detach = false) {
-                super();
-                this.previous = {};
-                this.style = styleInfo;
-                this.detach = detach;
-            }
-            setStyle(styleInfo) {
-                this.style = styleInfo;
-            }
-            setDetach(detach) {
-                this.detach = detach;
-            }
-            body(part) {
-                toRemove.length = 0;
-                toUpdate.length = 0;
-                // @ts-ignore
-                const element = part.committer.element;
-                const style = element.style;
-                let previous = this.previous;
-                for (const name in previous) {
-                    if (this.style[name] === undefined) {
-                        toRemove.push(name);
-                    }
-                }
-                for (const name in this.style) {
-                    const value = this.style[name];
-                    const prev = previous[name];
-                    if (prev !== undefined && prev === value) {
-                        continue;
-                    }
-                    toUpdate.push(name);
-                }
-                if (toRemove.length || toUpdate.length) {
-                    let parent, nextSibling;
-                    if (this.detach) {
-                        parent = element.parentNode;
-                        if (parent) {
-                            nextSibling = element.nextSibling;
-                            element.remove();
-                        }
-                    }
-                    for (const name of toRemove) {
-                        style.removeProperty(name);
-                    }
-                    for (const name of toUpdate) {
-                        const value = this.style[name];
-                        if (!name.includes('-')) {
-                            style[name] = value;
-                        }
-                        else {
-                            style.setProperty(name, value);
-                        }
-                    }
-                    if (this.detach && parent) {
-                        parent.insertBefore(element, nextSibling);
-                    }
-                    this.previous = Object.assign({}, this.style);
-                }
-            }
-        }
         vido.prototype.StyleMap = StyleMap;
-        const detached = new WeakMap();
-        class Detach extends Directive {
-            constructor(ifFn) {
-                super();
-                this.ifFn = ifFn;
-            }
-            body(part) {
-                const detach = this.ifFn();
-                const element = part.committer.element;
-                if (detach) {
-                    if (!detached.has(part)) {
-                        const nextSibling = element.nextSibling;
-                        detached.set(part, { element, nextSibling });
-                    }
-                    element.remove();
-                }
-                else {
-                    const data = detached.get(part);
-                    if (typeof data !== 'undefined' && data !== null) {
-                        data.nextSibling.parentNode.insertBefore(data.element, data.nextSibling);
-                        detached.delete(part);
-                    }
-                }
-            }
-        }
         vido.prototype.Detach = Detach;
+        vido.prototype.PointerAction = PointerAction;
+        vido.prototype.addMethod = function addMethod(name, body) {
+            additionalMethods[name] = body;
+        };
+        vido.prototype.Action = Action;
         vido.prototype.onDestroy = function onDestroy(fn) {
             this.destroyable.push(fn);
         };
@@ -2721,58 +3016,7 @@
             }
             return currentComponents;
         };
-        class InternalComponentMethods {
-            constructor(instance, vidoInstance, updateFunction) {
-                this.instance = instance;
-                this.vidoInstance = vidoInstance;
-                this.updateFunction = updateFunction;
-            }
-            destroy() {
-                if (this.vidoInstance.debug) {
-                    console.groupCollapsed(`component destroy method fired ${this.instance}`);
-                    console.log(clone({
-                        props: this.vidoInstance.props,
-                        components: components.keys(),
-                        destroyable: this.vidoInstance.destroyable,
-                        actionsByInstance
-                    }));
-                    console.trace();
-                    console.groupEnd();
-                }
-                for (const d of this.vidoInstance.destroyable) {
-                    d();
-                }
-                this.vidoInstance.onChangeFunctions = [];
-                this.vidoInstance.destroyable = [];
-            }
-            update(props = {}) {
-                if (this.vidoInstance.debug) {
-                    console.groupCollapsed(`component update method fired ${this.instance}`);
-                    console.log(clone({ components: components.keys(), actionsByInstance }));
-                    console.trace();
-                    console.groupEnd();
-                }
-                return this.updateFunction(props);
-            }
-            change(changedProps, options = { leave: false }) {
-                const props = changedProps;
-                if (this.vidoInstance.debug) {
-                    console.groupCollapsed(`component change method fired ${this.instance}`);
-                    console.log(clone({
-                        props,
-                        components: components.keys(),
-                        onChangeFunctions: this.vidoInstance.onChangeFunctions,
-                        changedProps,
-                        actionsByInstance
-                    }));
-                    console.trace();
-                    console.groupEnd();
-                }
-                for (const fn of this.vidoInstance.onChangeFunctions) {
-                    fn(changedProps, options);
-                }
-            }
-        }
+        const InternalComponentMethods = getInternalComponentMethods(components, actionsByInstance, clone);
         /**
          * Create component
          *
@@ -2860,7 +3104,7 @@
          * Execute actions
          */
         vido.prototype.executeActions = function executeActions() {
-            var _a, _b;
+            var _a, _b, _c;
             for (const actions of actionsByInstance.values()) {
                 for (const action of actions) {
                     if (action.element.vido === undefined) {
@@ -2868,7 +3112,9 @@
                         const create = componentAction.create;
                         if (typeof create !== 'undefined') {
                             let result;
-                            if (((_a = create.prototype) === null || _a === void 0 ? void 0 : _a.update) === undefined && ((_b = create.prototype) === null || _b === void 0 ? void 0 : _b.destroy) === undefined) {
+                            if (((_a = create.prototype) === null || _a === void 0 ? void 0 : _a.isAction) !== true &&
+                                ((_b = create.prototype) === null || _b === void 0 ? void 0 : _b.update) === undefined &&
+                                ((_c = create.prototype) === null || _c === void 0 ? void 0 : _c.destroy) === undefined) {
                                 result = create(action.element, action.props);
                             }
                             else {
