@@ -2715,13 +2715,11 @@ function getActionsCollector(actionsByInstance) {
             super();
             this.instance = instance;
         }
-        set(actions, props, debug = false) {
+        set(actions, props) {
             this.actions = actions;
-            this.props = props; // must be mutable! (do not do this {...props})
+            this.props = props;
+            // props must be mutable! (do not do this -> {...props})
             // because we will modify action props with onChange and can reuse existin instance
-            if (debug) {
-                console.log(this);
-            }
             return this;
         }
         body(part) {

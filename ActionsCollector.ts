@@ -11,13 +11,11 @@ export default function getActionsCollector(actionsByInstance) {
       this.instance = instance;
     }
 
-    set(actions: unknown[], props: object, debug: boolean = false) {
+    set(actions: unknown[], props: object) {
       this.actions = actions;
-      this.props = props; // must be mutable! (do not do this {...props})
+      this.props = props;
+      // props must be mutable! (do not do this -> {...props})
       // because we will modify action props with onChange and can reuse existin instance
-      if (debug) {
-        console.log(this);
-      }
       return this;
     }
 
