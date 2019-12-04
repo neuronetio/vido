@@ -156,7 +156,9 @@ export default function Vido(state, api) {
     const currentLen = currentComponents.length;
     const dataLen = dataArray.length;
     let leave = false;
-    if (dataArray === undefined || dataArray.length === 0) leave = true;
+    if (leaveTail && (dataArray === undefined || dataArray.length === 0)) {
+      leave = true;
+    }
     let leaveStartingAt = 0;
     if (currentLen < dataLen) {
       let diff = dataLen - currentLen;
@@ -210,6 +212,7 @@ export default function Vido(state, api) {
     let vidoInstance;
     vidoInstance = new vido();
     vidoInstance.instance = instance;
+    vidoInstance.name = component.name;
     vidoInstance.Actions = new InstanceActionsCollector(instance);
     const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
     const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props));

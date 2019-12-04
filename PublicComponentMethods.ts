@@ -3,9 +3,11 @@ export default function getPublicComponentMethods(components, actionsByInstance,
     instance: string;
     vidoInstance: any;
     props: any;
+    name: string;
 
     constructor(instance, vidoInstance, props = {}) {
       this.instance = instance;
+      this.name = vidoInstance.name;
       this.vidoInstance = vidoInstance;
       this.props = props;
       this.destroy = this.destroy.bind(this);

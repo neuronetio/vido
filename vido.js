@@ -2661,6 +2661,7 @@
         return class PublicComponentMethods {
             constructor(instance, vidoInstance, props = {}) {
                 this.instance = instance;
+                this.name = vidoInstance.name;
                 this.vidoInstance = vidoInstance;
                 this.props = props;
                 this.destroy = this.destroy.bind(this);
@@ -3009,8 +3010,9 @@
             const currentLen = currentComponents.length;
             const dataLen = dataArray.length;
             let leave = false;
-            if (dataArray === undefined || dataArray.length === 0)
+            if (leaveTail && (dataArray === undefined || dataArray.length === 0)) {
                 leave = true;
+            }
             let leaveStartingAt = 0;
             if (currentLen < dataLen) {
                 let diff = dataLen - currentLen;
@@ -3063,6 +3065,7 @@
             let vidoInstance;
             vidoInstance = new vido();
             vidoInstance.instance = instance;
+            vidoInstance.name = component.name;
             vidoInstance.Actions = new InstanceActionsCollector(instance);
             const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
             const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props));
