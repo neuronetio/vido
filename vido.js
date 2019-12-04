@@ -3009,6 +3009,8 @@
             const currentLen = currentComponents.length;
             const dataLen = dataArray.length;
             let leave = false;
+            if (dataArray === undefined || dataArray.length === 0)
+                leave = true;
             let leaveStartingAt = 0;
             if (currentLen < dataLen) {
                 let diff = dataLen - currentLen;
