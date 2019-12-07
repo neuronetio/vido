@@ -53,7 +53,7 @@
  */
 const directive = (f) => ((...args) => {
     const d = f(...args);
-    // @ts-ignore
+    // tslint:disable-next-line:no-any
     d.isDirective = true;
     return d;
 });
@@ -62,8 +62,8 @@ class Directive {
         this.isDirective = true;
         this.isClass = true;
     }
-    // @ts-ignore
-    body(part) {
+    body(_part) {
+        // body of the directive
     }
     runPart(part) {
         return this.body(part);
@@ -228,7 +228,13 @@ class Template {
                         const attributeValue = node.getAttribute(attributeLookupName);
                         node.removeAttribute(attributeLookupName);
                         const statics = attributeValue.split(markerRegex);
-                        this.parts.push({ type: 'attribute', index, name, strings: statics });
+                        this.parts.push({
+                            type: 'attribute',
+                            index,
+                            name,
+                            strings: statics,
+                            sanitizer: undefined
+                        });
                         partIndex += statics.length - 1;
                     }
                 }
@@ -357,7 +363,9 @@ const createMarker = () => markerNode.cloneNode();
  *    * (") then any non-("), or
  *    * (') then any non-(')
  */
-const lastAttributeNameRegex = /([ \x09\x0a\x0c\x0d])([^\0-\x1F\x7F-\x9F "'>=/]+)([ \x09\x0a\x0c\x0d]*=[ \x09\x0a\x0c\x0d]*(?:[^ \x09\x0a\x0c\x0d"'`<>=]*|"[^"]*|'[^']*))$/;
+const lastAttributeNameRegex = 
+// eslint-disable-next-line no-control-regex
+/([ \x09\x0a\x0c\x0d])([^\0-\x1F\x7F-\x9F "'>=/]+)([ \x09\x0a\x0c\x0d]*=[ \x09\x0a\x0c\x0d]*(?:[^ \x09\x0a\x0c\x0d"'`<>=]*|"[^"]*|'[^']*))$/;
 
 /**
  * @license
@@ -388,9 +396,13 @@ class TemplateInstance {
         for (const part of this.__parts) {
             if (part !== undefined) {
                 part.setValue(values[i]);
-                part.commit();
             }
             i++;
+        }
+        for (const part of this.__parts) {
+            if (part !== undefined) {
+                part.commit();
+            }
         }
     }
     _clone() {
@@ -470,12 +482,12 @@ class TemplateInstance {
             }
             // We've arrived at our part's node.
             if (part.type === 'node') {
-                const part = this.processor.handleTextExpression(this.options);
-                part.insertAfterNode(node.previousSibling);
-                this.__parts.push(part);
+                const textPart = this.processor.handleTextExpression(this.options, part);
+                textPart.insertAfterNode(node.previousSibling);
+                this.__parts.push(textPart);
             }
             else {
-                this.__parts.push(...this.processor.handleAttributeExpressions(node, part.name, part.strings, this.options));
+                this.__parts.push(...this.processor.handleAttributeExpressions(node, part.name, part.strings, this.options, part));
             }
             partIndex++;
         }
@@ -508,7 +520,7 @@ let policy;
  * same as the argument.
  */
 function convertConstantTemplateStringToTrustedHTML(value) {
-    // tslint:disable-next-line
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w = window;
     // TrustedTypes have been renamed to trustedTypes
     // (https://github.com/WICG/trusted-types/issues/177)
@@ -641,19 +653,22 @@ const isPrimitive = (value) => {
 };
 const isIterable = (value) => {
     return Array.isArray(value) ||
-        // tslint:disable-next-line:no-any
+        // tslint:disable-next-line: no-any
         !!(value && value[Symbol.iterator]);
 };
+const identityFunction = (value) => value;
+const noopSanitizer = (_node, _name, _type) => identityFunction;
 /**
- * A global callback used to sanitize any value before inserting it into the
- * DOM.
+ * A global callback used to get a sanitizer for a given field.
  */
-let sanitizeDOMValueImpl;
-const sanitizeDOMValue = (value, name, type, node) => {
-    if (sanitizeDOMValueImpl !== undefined) {
-        return sanitizeDOMValueImpl(value, name, type, node);
+let sanitizerFactory = noopSanitizer;
+/** Sets the global sanitizer factory. */
+const setSanitizerFactory = (newSanitizer) => {
+    if (sanitizerFactory !== noopSanitizer) {
+        throw new Error(`Attempted to overwrite existing lit-html security policy.` +
+            ` setSanitizeDOMValueFactory should be called at most once.`);
     }
-    return value;
+    sanitizerFactory = newSanitizer;
 };
 /**
  * Used to clone text node instead of each time creating new one which is slower
@@ -665,12 +680,22 @@ const emptyTextNode = document.createTextNode('');
  * for an attribute.
  */
 class AttributeCommitter {
-    constructor(element, name, strings) {
+    constructor(element, name, strings, 
+    // Next breaking change, consider making this param required.
+    templatePart, kind = 'attribute') {
         this.dirty = true;
         this.element = element;
         this.name = name;
         this.strings = strings;
         this.parts = [];
+        let sanitizer = templatePart && templatePart.sanitizer;
+        if (sanitizer === undefined) {
+            sanitizer = sanitizerFactory(element, name, kind);
+            if (templatePart !== undefined) {
+                templatePart.sanitizer = sanitizer;
+            }
+        }
+        this.sanitizer = sanitizer;
         for (let i = 0; i < strings.length - 1; i++) {
             this.parts[i] = this._createPart();
         }
@@ -728,7 +753,7 @@ class AttributeCommitter {
         if (this.dirty) {
             this.dirty = false;
             let value = this._getValue();
-            value = sanitizeDOMValue(value, this.name, 'attribute', this.element);
+            value = this.sanitizer(value);
             if (typeof value === 'symbol') {
                 // Native Symbols throw if they're coerced to string.
                 value = String(value);
@@ -760,9 +785,9 @@ class AttributePart {
         while (isDirective(this.value)) {
             const directive = this.value;
             this.value = noChange;
-            // @ts-ignore
+            // tslint:disable-next-line: no-any
             if (directive.isClass) {
-                // @ts-ignore
+                // tslint:disable-next-line: no-any
                 directive.runPart(this);
             }
             else {
@@ -784,10 +809,20 @@ class AttributePart {
  * as well as arrays and iterables of those types.
  */
 class NodePart {
-    constructor(options) {
+    constructor(options, templatePart) {
         this.value = undefined;
         this.__pendingValue = undefined;
+        /**
+         * The sanitizer to use when writing text contents into this NodePart.
+         *
+         * We have to initialize this here rather than at the template literal level
+         * because the security of text content depends on the context into which
+         * it's written. e.g. the same text has different security requirements
+         * when a child of a <script> vs a <style> vs a <div>.
+         */
+        this.textSanitizer = undefined;
         this.options = options;
+        this.templatePart = templatePart;
     }
     /**
      * Appends this part into a container.
@@ -835,9 +870,9 @@ class NodePart {
         while (isDirective(this.__pendingValue)) {
             const directive = this.__pendingValue;
             this.__pendingValue = noChange;
-            // @ts-ignore
+            // tslint:disable-next-line: no-any
             if (directive.isClass) {
-                // @ts-ignore
+                // tslint:disable-next-line: no-any
                 directive.runPart(this);
             }
             else {
@@ -889,7 +924,10 @@ class NodePart {
             node.nodeType === 3 /* Node.TEXT_NODE */) {
             // If we only have a single text node between the markers, we can just
             // set its value, rather than replacing it.
-            const renderedValue = sanitizeDOMValue(value, 'data', 'property', node);
+            if (this.textSanitizer === undefined) {
+                this.textSanitizer = sanitizerFactory(node, 'data', 'property');
+            }
+            const renderedValue = this.textSanitizer(value);
             node.data = typeof renderedValue === 'string' ?
                 renderedValue :
                 String(renderedValue);
@@ -901,7 +939,10 @@ class NodePart {
             // into the document, then we can sanitize its contentx.
             const textNode = emptyTextNode.cloneNode();
             this.__commitNode(textNode);
-            const renderedValue = sanitizeDOMValue(value, 'textContent', 'property', textNode);
+            if (this.textSanitizer === undefined) {
+                this.textSanitizer = sanitizerFactory(textNode, 'data', 'property');
+            }
+            const renderedValue = this.textSanitizer(value);
             textNode.data = typeof renderedValue === 'string' ? renderedValue :
                 String(renderedValue);
         }
@@ -920,10 +961,10 @@ class NodePart {
             // this is known to be unsafe. So in the case where the user is in
             // "secure mode" (i.e. when there's a sanitizeDOMValue set), we just want
             // to forbid this because it's not a use case we want to support.
-            // We check for sanitizeDOMValue is to prevent this from
-            // being a breaking change to the library.
+            // We only apply this policy when sanitizerFactory has been set to
+            // prevent this from being a breaking change to the library.
             const parent = this.endNode.parentNode;
-            if (sanitizeDOMValueImpl !== undefined && parent.nodeName === 'STYLE' ||
+            if (sanitizerFactory !== noopSanitizer && parent.nodeName === 'STYLE' ||
                 parent.nodeName === 'SCRIPT') {
                 this.__commitText('/* lit-html will not write ' +
                     'TemplateResults to scripts and styles */');
@@ -964,7 +1005,7 @@ class NodePart {
             itemPart = itemParts[partIndex];
             // If no existing part, create a new one
             if (itemPart === undefined) {
-                itemPart = new NodePart(this.options);
+                itemPart = new NodePart(this.options, this.templatePart);
                 itemParts.push(itemPart);
                 if (partIndex === 0) {
                     itemPart.appendIntoPart(this);
@@ -1012,9 +1053,9 @@ class BooleanAttributePart {
         while (isDirective(this.__pendingValue)) {
             const directive = this.__pendingValue;
             this.__pendingValue = noChange;
-            // @ts-ignore
+            // tslint:disable-next-line: no-any
             if (directive.isClass) {
-                // @ts-ignore
+                // tslint:disable-next-line: no-any
                 directive.runPart(this);
             }
             else {
@@ -1047,8 +1088,10 @@ class BooleanAttributePart {
  * a string first.
  */
 class PropertyCommitter extends AttributeCommitter {
-    constructor(element, name, strings) {
-        super(element, name, strings);
+    constructor(element, name, strings, 
+    // Next breaking change, consider making this param required.
+    templatePart) {
+        super(element, name, strings, templatePart, 'property');
         this.single =
             (strings.length === 2 && strings[0] === '' && strings[1] === '');
     }
@@ -1065,8 +1108,8 @@ class PropertyCommitter extends AttributeCommitter {
         if (this.dirty) {
             this.dirty = false;
             let value = this._getValue();
-            value = sanitizeDOMValue(value, this.name, 'property', this.element);
-            // tslint:disable-next-line:no-any
+            value = this.sanitizer(value);
+            // tslint:disable-next-line: no-any
             this.element[this.name] = value;
         }
     }
@@ -1085,12 +1128,12 @@ try {
             return false;
         }
     };
-    // tslint:disable-next-line:no-any
+    // tslint:disable-next-line: no-any
     window.addEventListener('test', options, options);
-    // tslint:disable-next-line:no-any
+    // tslint:disable-next-line: no-any
     window.removeEventListener('test', options, options);
 }
-catch (_e) {
+catch (_e) { // eslint-disable-line no-empty
 }
 class EventPart {
     constructor(element, eventName, eventContext) {
@@ -1108,9 +1151,9 @@ class EventPart {
         while (isDirective(this.__pendingValue)) {
             const directive = this.__pendingValue;
             this.__pendingValue = noChange;
-            // @ts-ignore
+            // tslint:disable-next-line: no-any
             if (directive.isClass) {
-                // @ts-ignore
+                // tslint:disable-next-line: no-any
                 directive.runPart(this);
             }
             else {
@@ -1181,10 +1224,10 @@ class DefaultTemplateProcessor {
      * @param strings The string literals. There are always at least two strings,
      *   event for fully-controlled bindings with a single expression.
      */
-    handleAttributeExpressions(element, name, strings, options) {
+    handleAttributeExpressions(element, name, strings, options, templatePart) {
         const prefix = name[0];
         if (prefix === '.') {
-            const committer = new PropertyCommitter(element, name.slice(1), strings);
+            const committer = new PropertyCommitter(element, name.slice(1), strings, templatePart);
             return committer.parts;
         }
         if (prefix === '@') {
@@ -1193,15 +1236,15 @@ class DefaultTemplateProcessor {
         if (prefix === '?') {
             return [new BooleanAttributePart(element, name.slice(1), strings)];
         }
-        const committer = new AttributeCommitter(element, name, strings);
+        const committer = new AttributeCommitter(element, name, strings, templatePart);
         return committer.parts;
     }
     /**
      * Create parts for a text-position binding.
      * @param templateFactory
      */
-    handleTextExpression(options) {
-        return new NodePart(options);
+    handleTextExpression(options, nodeTemplatePart) {
+        return new NodePart(options, nodeTemplatePart);
     }
 }
 const defaultTemplateProcessor = new DefaultTemplateProcessor();
@@ -1286,7 +1329,7 @@ const render = (result, container, options) => {
     let part = parts.get(container);
     if (part === undefined) {
         removeNodes(container, container.firstChild);
-        parts.set(container, part = new NodePart(Object.assign({ templateFactory }, options)));
+        parts.set(container, part = new NodePart(Object.assign({ templateFactory }, options), undefined));
         part.appendInto(container);
     }
     part.setValue(result);
@@ -1343,6 +1386,8 @@ var litHtml = /*#__PURE__*/Object.freeze({
     NodePart: NodePart,
     PropertyCommitter: PropertyCommitter,
     PropertyPart: PropertyPart,
+    get sanitizerFactory () { return sanitizerFactory; },
+    setSanitizerFactory: setSanitizerFactory,
     parts: parts,
     render: render,
     templateCaches: templateCaches,
@@ -1446,7 +1491,7 @@ const asyncAppend = directive((value, mapper) => async (part) => {
                 itemPart.endNode = itemStartNode;
                 part.endNode.parentNode.insertBefore(itemStartNode, part.endNode);
             }
-            itemPart = new NodePart(part.options);
+            itemPart = new NodePart(part.options, part.templatePart);
             itemPart.insertAfterNode(itemStartNode);
             itemPart.setValue(v);
             itemPart.commit();
@@ -1512,7 +1557,7 @@ const asyncReplace = directive((value, mapper) => async (part) => {
     }
     // We nest a new part to keep track of previous item values separately
     // of the iterable as a value itself.
-    const itemPart = new NodePart(part.options);
+    const itemPart = new NodePart(part.options, part.templatePart);
     part.value = value;
     let i = 0;
     try {
@@ -1684,7 +1729,6 @@ const classMap = directive((classInfo) => (part) => {
         const value = classInfo[name];
         // We explicitly want a loose truthy check of `value` because it seems more
         // convenient that '' and 0 are skipped.
-        // tslint:disable-next-line: triple-equals
         if (value != previousClasses.has(name)) {
             if (value) {
                 classList.add(name);
@@ -1814,11 +1858,10 @@ const ifDefined = directive((value) => (part) => {
 // TODO(kschaaf): Refactor into Part API?
 const createAndInsertPart = (containerPart, beforePart) => {
     const container = containerPart.startNode.parentNode;
-    const beforeNode = beforePart === undefined ? containerPart.endNode :
-        beforePart.startNode;
+    const beforeNode = beforePart == null ? containerPart.endNode : beforePart.startNode;
     const startNode = container.insertBefore(createMarker(), beforeNode);
     container.insertBefore(createMarker(), beforeNode);
-    const newPart = new NodePart(containerPart.options);
+    const newPart = new NodePart(containerPart.options, undefined);
     newPart.insertAfterNode(startNode);
     return newPart;
 };
