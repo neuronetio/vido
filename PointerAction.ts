@@ -19,6 +19,8 @@ const defaultOptions = {
   onWheel(data) {}
 };
 
+const pointerEventsExists = typeof PointerEvent !== 'undefined';
+
 export default class PointerAction extends Action {
   moving: string = '';
   initialX: number = 0;
@@ -34,9 +36,19 @@ export default class PointerAction extends Action {
     this.onPointerUp = this.onPointerUp.bind(this);
     this.onWheel = this.onWheel.bind(this);
     this.options = { ...defaultOptions, ...data.pointerOptions } as Options;
-    element.addEventListener('pointerdown', this.onPointerStart);
-    document.addEventListener('pointermove', this.onPointerMove);
-    document.addEventListener('pointerup', this.onPointerUp);
+    if (pointerEventsExists) {
+      element.addEventListener('pointerdown', this.onPointerStart);
+      document.addEventListener('pointermove', this.onPointerMove);
+      document.addEventListener('pointerup', this.onPointerUp);
+    } else {
+      element.addEventListener('mousedown', this.onPointerStart);
+      document.addEventListener('mousemove', this.onPointerMove);
+      document.addEventListener('mouseup', this.onPointerUp);
+      element.addEventListener('touchstart', this.onPointerStart);
+      document.addEventListener('touchmove', this.onPointerMove);
+      document.addEventListener('touchup', this.onPointerUp);
+      document.addEventListener('touchcancel', this.onPointerUp);
+    }
   }
 
   normalizeMouseWheelEvent(event) {
@@ -246,8 +258,18 @@ export default class PointerAction extends Action {
   }
 
   destroy(element) {
-    element.removeEventListener('pointerdown', this.onPointerStart);
-    document.removeEventListener('pointermove', this.onPointerMove);
-    document.removeEventListener('pointerup', this.onPointerUp);
+    if (pointerEventsExists) {
+      element.removeEventListener('pointerdown', this.onPointerStart);
+      document.removeEventListener('pointermove', this.onPointerMove);
+      document.removeEventListener('pointerup', this.onPointerUp);
+    } else {
+      element.removeEventListener('mousedown', this.onPointerStart);
+      document.removeEventListener('mousemove', this.onPointerMove);
+      document.removeEventListener('mouseup', this.onPointerUp);
+      element.removeEventListener('touchstart', this.onPointerStart);
+      document.removeEventListener('touchmove', this.onPointerMove);
+      document.removeEventListener('touchup', this.onPointerUp);
+      document.removeEventListener('touchcancel', this.onPointerUp);
+    }
   }
 }
