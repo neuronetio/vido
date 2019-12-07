@@ -31,21 +31,21 @@ export default class PointerAction extends Action {
 
   constructor(element, data) {
     super();
-    this.onPointerStart = this.onPointerStart.bind(this);
+    this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
     this.onPointerUp = this.onPointerUp.bind(this);
     this.onWheel = this.onWheel.bind(this);
     this.options = { ...defaultOptions, ...data.pointerOptions } as Options;
     if (pointerEventsExists) {
-      element.addEventListener('pointerdown', this.onPointerStart);
+      element.addEventListener('pointerdown', this.onPointerDown);
       document.addEventListener('pointermove', this.onPointerMove);
       document.addEventListener('pointerup', this.onPointerUp);
     } else {
-      element.addEventListener('touchstart', this.onPointerStart);
+      element.addEventListener('touchstart', this.onPointerDown);
       document.addEventListener('touchmove', this.onPointerMove);
       document.addEventListener('touchup', this.onPointerUp);
       document.addEventListener('touchcancel', this.onPointerUp);
-      element.addEventListener('mousedown', this.onPointerStart);
+      element.addEventListener('mousedown', this.onPointerDown);
       document.addEventListener('mousemove', this.onPointerMove);
       document.addEventListener('mouseup', this.onPointerUp);
     }
@@ -124,15 +124,15 @@ export default class PointerAction extends Action {
     return result;
   }
 
-  onPointerStart(event) {
-    if ((event.type === 'mousedown' || event.type === 'pointerdown') && event.button !== 0) return;
+  onPointerDown(event) {
+    if (event.type === 'mousedown' && event.button !== 0) return;
     this.moving = 'xy';
     const normalized = this.normalizePointerEvent(event);
     this.lastX = normalized.x;
     this.lastY = normalized.y;
     this.initialX = normalized.x;
     this.initialY = normalized.y;
-    this.options.onDown({ x: normalized.x, y: normalized.y, event });
+    this.options.onDown(normalized);
   }
 
   handleX(normalized) {
@@ -150,8 +150,7 @@ export default class PointerAction extends Action {
   }
 
   onPointerMove(event) {
-    if (this.moving === '' || ((event.type === 'pointermove' || event.type === 'mousemove') && event.button !== 0))
-      return;
+    if (this.moving === '' || (event.type === 'mousemove' && event.button !== 0)) return;
     const normalized = this.normalizePointerEvent(event);
     if (this.options.axis === 'x|y') {
       let movementX = 0,
@@ -260,14 +259,14 @@ export default class PointerAction extends Action {
 
   destroy(element) {
     if (pointerEventsExists) {
-      element.removeEventListener('pointerdown', this.onPointerStart);
+      element.removeEventListener('pointerdown', this.onPointerDown);
       document.removeEventListener('pointermove', this.onPointerMove);
       document.removeEventListener('pointerup', this.onPointerUp);
     } else {
-      element.removeEventListener('mousedown', this.onPointerStart);
+      element.removeEventListener('mousedown', this.onPointerDown);
       document.removeEventListener('mousemove', this.onPointerMove);
       document.removeEventListener('mouseup', this.onPointerUp);
-      element.removeEventListener('touchstart', this.onPointerStart);
+      element.removeEventListener('touchstart', this.onPointerDown);
       document.removeEventListener('touchmove', this.onPointerMove);
       document.removeEventListener('touchup', this.onPointerUp);
       document.removeEventListener('touchcancel', this.onPointerUp);
