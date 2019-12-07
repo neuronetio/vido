@@ -19,14 +19,17 @@ const defaultOptions = {
   onWheel(data) {}
 };
 
-const pointerEventsExists = typeof PointerEvent !== 'undefined';
+const pointerEventsExists = false; //typeof PointerEvent !== 'undefined';
+let id = 0;
 
 export default class PointerAction extends Action {
+  id: number;
   moving: string = '';
   initialX: number = 0;
   initialY: number = 0;
   lastY: number = 0;
   lastX: number = 0;
+  element: HTMLElement;
   options: Options;
 
   constructor(element, data) {
@@ -35,6 +38,8 @@ export default class PointerAction extends Action {
     this.onPointerMove = this.onPointerMove.bind(this);
     this.onPointerUp = this.onPointerUp.bind(this);
     this.onWheel = this.onWheel.bind(this);
+    this.element = element;
+    this.id = ++id;
     this.options = { ...defaultOptions, ...data.pointerOptions } as Options;
     if (pointerEventsExists) {
       element.addEventListener('pointerdown', this.onPointerDown);
@@ -42,11 +47,11 @@ export default class PointerAction extends Action {
       document.addEventListener('pointerup', this.onPointerUp);
     } else {
       element.addEventListener('touchstart', this.onPointerDown);
-      document.addEventListener('touchmove', this.onPointerMove);
-      document.addEventListener('touchup', this.onPointerUp);
+      document.addEventListener('touchmove', this.onPointerMove, { passive: false });
+      document.addEventListener('touchend', this.onPointerUp);
       document.addEventListener('touchcancel', this.onPointerUp);
       element.addEventListener('mousedown', this.onPointerDown);
-      document.addEventListener('mousemove', this.onPointerMove);
+      document.addEventListener('mousemove', this.onPointerMove, { passive: false });
       document.addEventListener('mouseup', this.onPointerUp);
     }
   }
@@ -84,7 +89,7 @@ export default class PointerAction extends Action {
   }
 
   normalizePointerEvent(event) {
-    let result = { x: 0, y: 0, pageX: 0, pageY: 0, clientX: 0, clientY: 0, screenX: 0, screenY: 0 };
+    let result = { x: 0, y: 0, pageX: 0, pageY: 0, clientX: 0, clientY: 0, screenX: 0, screenY: 0, event };
     switch (event.type) {
       case 'wheel':
         const wheel = this.normalizeMouseWheelEvent(event);
@@ -268,7 +273,7 @@ export default class PointerAction extends Action {
       document.removeEventListener('mouseup', this.onPointerUp);
       element.removeEventListener('touchstart', this.onPointerDown);
       document.removeEventListener('touchmove', this.onPointerMove);
-      document.removeEventListener('touchup', this.onPointerUp);
+      document.removeEventListener('touchend', this.onPointerUp);
       document.removeEventListener('touchcancel', this.onPointerUp);
     }
   }

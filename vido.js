@@ -2453,7 +2453,7 @@
         onUp(data) { },
         onWheel(data) { }
     };
-    const pointerEventsExists = typeof PointerEvent !== 'undefined';
+    let id = 0;
     class PointerAction extends Action {
         constructor(element, data) {
             super();
@@ -2466,19 +2466,16 @@
             this.onPointerMove = this.onPointerMove.bind(this);
             this.onPointerUp = this.onPointerUp.bind(this);
             this.onWheel = this.onWheel.bind(this);
+            this.element = element;
+            this.id = ++id;
             this.options = Object.assign(Object.assign({}, defaultOptions), data.pointerOptions);
-            if (pointerEventsExists) {
-                element.addEventListener('pointerdown', this.onPointerDown);
-                document.addEventListener('pointermove', this.onPointerMove);
-                document.addEventListener('pointerup', this.onPointerUp);
-            }
-            else {
+            {
                 element.addEventListener('touchstart', this.onPointerDown);
-                document.addEventListener('touchmove', this.onPointerMove);
-                document.addEventListener('touchup', this.onPointerUp);
+                document.addEventListener('touchmove', this.onPointerMove, { passive: false });
+                document.addEventListener('touchend', this.onPointerUp);
                 document.addEventListener('touchcancel', this.onPointerUp);
                 element.addEventListener('mousedown', this.onPointerDown);
-                document.addEventListener('mousemove', this.onPointerMove);
+                document.addEventListener('mousemove', this.onPointerMove, { passive: false });
                 document.addEventListener('mouseup', this.onPointerUp);
             }
         }
@@ -2513,7 +2510,7 @@
             this.options.onWheel(normalized);
         }
         normalizePointerEvent(event) {
-            let result = { x: 0, y: 0, pageX: 0, pageY: 0, clientX: 0, clientY: 0, screenX: 0, screenY: 0 };
+            let result = { x: 0, y: 0, pageX: 0, pageY: 0, clientX: 0, clientY: 0, screenX: 0, screenY: 0, event };
             switch (event.type) {
                 case 'wheel':
                     const wheel = this.normalizeMouseWheelEvent(event);
@@ -2676,18 +2673,13 @@
             this.lastX = 0;
         }
         destroy(element) {
-            if (pointerEventsExists) {
-                element.removeEventListener('pointerdown', this.onPointerDown);
-                document.removeEventListener('pointermove', this.onPointerMove);
-                document.removeEventListener('pointerup', this.onPointerUp);
-            }
-            else {
+            {
                 element.removeEventListener('mousedown', this.onPointerDown);
                 document.removeEventListener('mousemove', this.onPointerMove);
                 document.removeEventListener('mouseup', this.onPointerUp);
                 element.removeEventListener('touchstart', this.onPointerDown);
                 document.removeEventListener('touchmove', this.onPointerMove);
-                document.removeEventListener('touchup', this.onPointerUp);
+                document.removeEventListener('touchend', this.onPointerUp);
                 document.removeEventListener('touchcancel', this.onPointerUp);
             }
         }
