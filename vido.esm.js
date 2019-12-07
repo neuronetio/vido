@@ -2467,13 +2467,13 @@ class PointerAction extends Action {
             document.addEventListener('pointerup', this.onPointerUp);
         }
         else {
-            element.addEventListener('mousedown', this.onPointerStart);
-            document.addEventListener('mousemove', this.onPointerMove);
-            document.addEventListener('mouseup', this.onPointerUp);
             element.addEventListener('touchstart', this.onPointerStart);
             document.addEventListener('touchmove', this.onPointerMove);
             document.addEventListener('touchup', this.onPointerUp);
             document.addEventListener('touchcancel', this.onPointerUp);
+            element.addEventListener('mousedown', this.onPointerStart);
+            document.addEventListener('mousemove', this.onPointerMove);
+            document.addEventListener('mouseup', this.onPointerUp);
         }
     }
     normalizeMouseWheelEvent(event) {

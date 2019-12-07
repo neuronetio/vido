@@ -2,7 +2,7 @@
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
     (global = global || self, factory(global.Vido = {}));
-}(this, function (exports) { 'use strict';
+}(this, (function (exports) { 'use strict';
 
     /**
      * @license
@@ -2473,13 +2473,13 @@
                 document.addEventListener('pointerup', this.onPointerUp);
             }
             else {
-                element.addEventListener('mousedown', this.onPointerStart);
-                document.addEventListener('mousemove', this.onPointerMove);
-                document.addEventListener('mouseup', this.onPointerUp);
                 element.addEventListener('touchstart', this.onPointerStart);
                 document.addEventListener('touchmove', this.onPointerMove);
                 document.addEventListener('touchup', this.onPointerUp);
                 document.addEventListener('touchcancel', this.onPointerUp);
+                element.addEventListener('mousedown', this.onPointerStart);
+                document.addEventListener('mousemove', this.onPointerMove);
+                document.addEventListener('mouseup', this.onPointerUp);
             }
         }
         normalizeMouseWheelEvent(event) {
@@ -3251,5 +3251,5 @@
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));
 //# sourceMappingURL=vido.js.map
