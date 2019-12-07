@@ -125,7 +125,7 @@ export default class PointerAction extends Action {
   }
 
   onPointerStart(event) {
-    if (event.type === 'mousedown' && event.button !== 0) return;
+    if ((event.type === 'mousedown' || event.type === 'pointerdown') && event.button !== 0) return;
     this.moving = 'xy';
     const normalized = this.normalizePointerEvent(event);
     this.lastX = normalized.x;
@@ -150,7 +150,8 @@ export default class PointerAction extends Action {
   }
 
   onPointerMove(event) {
-    if (this.moving === '' || (event.type === 'mousemove' && event.button !== 0)) return;
+    if (this.moving === '' || ((event.type === 'pointermove' || event.type === 'mousemove') && event.button !== 0))
+      return;
     const normalized = this.normalizePointerEvent(event);
     if (this.options.axis === 'x|y') {
       let movementX = 0,

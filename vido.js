@@ -2553,7 +2553,7 @@
             return result;
         }
         onPointerStart(event) {
-            if (event.type === 'mousedown' && event.button !== 0)
+            if ((event.type === 'mousedown' || event.type === 'pointerdown') && event.button !== 0)
                 return;
             this.moving = 'xy';
             const normalized = this.normalizePointerEvent(event);
@@ -2576,7 +2576,7 @@
             return movementY;
         }
         onPointerMove(event) {
-            if (this.moving === '' || (event.type === 'mousemove' && event.button !== 0))
+            if (this.moving === '' || ((event.type === 'pointermove' || event.type === 'mousemove') && event.button !== 0))
                 return;
             const normalized = this.normalizePointerEvent(event);
             if (this.options.axis === 'x|y') {
