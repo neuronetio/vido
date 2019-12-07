@@ -2447,6 +2447,7 @@ const defaultOptions = {
     onUp(data) { },
     onWheel(data) { }
 };
+const pointerEventsExists = typeof PointerEvent !== 'undefined';
 let id = 0;
 class PointerAction extends Action {
     constructor(element, data) {
@@ -2463,7 +2464,12 @@ class PointerAction extends Action {
         this.element = element;
         this.id = ++id;
         this.options = Object.assign(Object.assign({}, defaultOptions), data.pointerOptions);
-        {
+        if (pointerEventsExists) {
+            element.addEventListener('pointerdown', this.onPointerDown);
+            document.addEventListener('pointermove', this.onPointerMove);
+            document.addEventListener('pointerup', this.onPointerUp);
+        }
+        else {
             element.addEventListener('touchstart', this.onPointerDown);
             document.addEventListener('touchmove', this.onPointerMove, { passive: false });
             document.addEventListener('touchend', this.onPointerUp);
@@ -2667,7 +2673,12 @@ class PointerAction extends Action {
         this.lastX = 0;
     }
     destroy(element) {
-        {
+        if (pointerEventsExists) {
+            element.removeEventListener('pointerdown', this.onPointerDown);
+            document.removeEventListener('pointermove', this.onPointerMove);
+            document.removeEventListener('pointerup', this.onPointerUp);
+        }
+        else {
             element.removeEventListener('mousedown', this.onPointerDown);
             document.removeEventListener('mousemove', this.onPointerMove);
             document.removeEventListener('mouseup', this.onPointerUp);

@@ -19,7 +19,7 @@ const defaultOptions = {
   onWheel(data) {}
 };
 
-const pointerEventsExists = false; //typeof PointerEvent !== 'undefined';
+const pointerEventsExists = typeof PointerEvent !== 'undefined';
 let id = 0;
 
 export default class PointerAction extends Action {
