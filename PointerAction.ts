@@ -31,15 +31,12 @@ export default class PointerAction extends Action {
     super();
     this.onPointerStart = this.onPointerStart.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
-    this.onPointerEnd = this.onPointerEnd.bind(this);
+    this.onPointerUp = this.onPointerUp.bind(this);
     this.onWheel = this.onWheel.bind(this);
     this.options = { ...defaultOptions, ...data.pointerOptions } as Options;
-    element.addEventListener('touchstart', this.onPointerStart);
-    element.addEventListener('mousedown', this.onPointerStart);
-    document.addEventListener('touchmove', this.onPointerMove);
-    document.addEventListener('touchend', this.onPointerEnd);
-    document.addEventListener('mousemove', this.onPointerMove);
-    document.addEventListener('mouseup', this.onPointerEnd);
+    element.addEventListener('pointerdown', this.onPointerStart);
+    document.addEventListener('pointermove', this.onPointerMove);
+    document.addEventListener('pointerup', this.onPointerUp);
   }
 
   normalizeMouseWheelEvent(event) {
@@ -75,26 +72,44 @@ export default class PointerAction extends Action {
   }
 
   normalizePointerEvent(event) {
-    let x = 0,
-      y = 0;
+    let result = { x: 0, y: 0, pageX: 0, pageY: 0, clientX: 0, clientY: 0, screenX: 0, screenY: 0 };
     switch (event.type) {
-      case 'mousedown':
-      case 'mousemove':
-      case 'mouseup':
-        x = event.x;
-        y = event.y;
+      case 'wheel':
+        const wheel = this.normalizeMouseWheelEvent(event);
+        result.x = wheel.x;
+        result.y = wheel.y;
+        result.pageX = result.x;
+        result.pageY = result.y;
+        result.screenX = result.x;
+        result.screenY = result.y;
+        result.clientX = result.x;
+        result.clientY = result.y;
         break;
       case 'touchstart':
       case 'touchmove':
-        x = event.touches[0].screenX;
-        y = event.touches[0].screenY;
-        break;
       case 'touchend':
-        x = event.changedTouches[0].screenX;
-        y = event.changedTouches[0].screenY;
+      case 'touchcancel':
+        result.x = event.changedTouches[0].screenX;
+        result.y = event.changedTouches[0].screenY;
+        result.pageX = event.changedTouches[0].pageX;
+        result.pageY = event.changedTouches[0].pageY;
+        result.screenX = event.changedTouches[0].screenX;
+        result.screenY = event.changedTouches[0].screenY;
+        result.clientX = event.changedTouches[0].clientX;
+        result.clientY = event.changedTouches[0].clientY;
+        break;
+      default:
+        result.x = event.x;
+        result.y = event.y;
+        result.pageX = event.pageX;
+        result.pageY = event.pageY;
+        result.screenX = event.screenX;
+        result.screenY = event.screenY;
+        result.clientX = event.clientX;
+        result.clientY = event.clientY;
         break;
     }
-    return { x, y, event };
+    return result;
   }
 
   onPointerStart(event) {
@@ -212,7 +227,7 @@ export default class PointerAction extends Action {
     }
   }
 
-  onPointerEnd(event) {
+  onPointerUp(event) {
     this.moving = '';
     const normalized = this.normalizePointerEvent(event);
     this.options.onUp({
@@ -231,11 +246,8 @@ export default class PointerAction extends Action {
   }
 
   destroy(element) {
-    element.removeEventListener('touchstart', this.onPointerStart);
-    element.removeEventListener('mousedown', this.onPointerStart);
-    document.removeEventListener('touchmove', this.onPointerMove);
-    document.removeEventListener('touchend', this.onPointerEnd);
-    document.removeEventListener('mousemove', this.onPointerMove);
-    document.removeEventListener('mouseup', this.onPointerEnd);
+    element.removeEventListener('pointerdown', this.onPointerStart);
+    document.removeEventListener('pointermove', this.onPointerMove);
+    document.removeEventListener('pointerup', this.onPointerUp);
   }
 }
