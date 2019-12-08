@@ -3136,7 +3136,7 @@ function Vido(state, api) {
      * @param {any} props
      * @returns {object} component instance methods
      */
-    vido.prototype.createComponent = function createComponent(component, props = {}) {
+    function createComponent(component, props = {}) {
         const instance = component.name + ':' + componentId++;
         let vidoInstance;
         vidoInstance = new vido();
@@ -3154,6 +3154,25 @@ function Vido(state, api) {
             console.groupEnd();
         }
         return publicMethods;
+    }
+    vido.prototype.createComponent = createComponent;
+    vido.prototype.Slot = class Slot extends Directive {
+        constructor(components, props) {
+            super();
+            this.components = [];
+            if (typeof components === undefined) {
+                return undefined;
+            }
+            this.props = props;
+            if (Array.isArray(components)) {
+                for (const component of components) {
+                    this.components.push(createComponent(component, props));
+                }
+            }
+        }
+        body(part) {
+            part.setValue(this.components.map((component) => component.html()));
+        }
     };
     /**
      * Destroy component

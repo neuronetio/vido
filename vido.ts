@@ -1,4 +1,4 @@
-import { render, html, directive, svg, Directive, Part, AttributePart } from 'lit-html';
+import { render, html, directive, svg, Directive, NodePart } from 'lit-html';
 import { asyncAppend } from 'lit-html/directives/async-append';
 import { asyncReplace } from 'lit-html/directives/async-replace';
 import { cache } from 'lit-html/directives/cache';
@@ -207,7 +207,7 @@ export default function Vido(state, api) {
    * @param {any} props
    * @returns {object} component instance methods
    */
-  vido.prototype.createComponent = function createComponent(component, props = {}) {
+  function createComponent(component, props = {}) {
     const instance = component.name + ':' + componentId++;
     let vidoInstance;
     vidoInstance = new vido();
@@ -225,6 +225,29 @@ export default function Vido(state, api) {
       console.groupEnd();
     }
     return publicMethods;
+  }
+  vido.prototype.createComponent = createComponent;
+
+  vido.prototype.Slot = class Slot extends Directive {
+    components = [];
+    props: unknown;
+
+    constructor(components: unknown, props: unknown) {
+      super();
+      if (typeof components === undefined) {
+        return undefined;
+      }
+      this.props = props;
+      if (Array.isArray(components)) {
+        for (const component of components) {
+          this.components.push(createComponent(component, props));
+        }
+      }
+    }
+
+    body(part: NodePart) {
+      part.setValue(this.components.map((component) => component.html()));
+    }
   };
 
   /**
