@@ -248,6 +248,20 @@ export default function Vido(state, api) {
     body(part: NodePart) {
       part.setValue(this.components.map((component) => component.html()));
     }
+
+    change(changedProps: unknown, options: any) {
+      for (const component of this.components) {
+        component.change(changedProps, options);
+      }
+    }
+
+    getComponents() {
+      return this.components;
+    }
+
+    setComponents(components: unknown[]) {
+      this.components = components;
+    }
   };
 
   /**

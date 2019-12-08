@@ -3173,6 +3173,17 @@ function Vido(state, api) {
         body(part) {
             part.setValue(this.components.map((component) => component.html()));
         }
+        change(changedProps, options) {
+            for (const component of this.components) {
+                component.change(changedProps, options);
+            }
+        }
+        getComponents() {
+            return this.components;
+        }
+        setComponents(components) {
+            this.components = components;
+        }
     };
     /**
      * Destroy component
