@@ -2,16 +2,16 @@ import { Directive, AttributePart } from 'lit-html';
 
 export default function getActionsCollector(actionsByInstance) {
   return class ActionsCollector extends Directive {
-    instance: string;
-    actions: unknown[];
-    props: unknown;
+    private instance: string;
+    private actions: unknown[];
+    private props: unknown;
 
     constructor(instance) {
       super();
       this.instance = instance;
     }
 
-    set(actions: unknown[], props: object) {
+    public set(actions: unknown[], props: object) {
       this.actions = actions;
       this.props = props;
       // props must be mutable! (do not do this -> {...props})
@@ -19,7 +19,7 @@ export default function getActionsCollector(actionsByInstance) {
       return this;
     }
 
-    body(part: AttributePart) {
+    public body(part: AttributePart) {
       const element = part.committer.element as HTMLElement;
       for (const create of this.actions) {
         if (typeof create !== 'undefined') {

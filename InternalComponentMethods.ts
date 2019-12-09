@@ -1,8 +1,8 @@
 export default function getInternalComponentMethods(components, actionsByInstance, clone) {
   return class InternalComponentMethods {
-    instance: string;
-    vidoInstance: any;
-    updateFunction: (changedProps: any) => void;
+    public instance: string;
+    public vidoInstance: any;
+    public updateFunction: (changedProps: any) => void;
 
     constructor(instance, vidoInstance, updateFunction) {
       this.instance = instance;
@@ -10,7 +10,7 @@ export default function getInternalComponentMethods(components, actionsByInstanc
       this.updateFunction = updateFunction;
     }
 
-    destroy() {
+    public destroy() {
       if (this.vidoInstance.debug) {
         console.groupCollapsed(`component destroy method fired ${this.instance}`);
         console.log(
@@ -31,7 +31,7 @@ export default function getInternalComponentMethods(components, actionsByInstanc
       this.vidoInstance.destroyable = [];
     }
 
-    update(props = {}) {
+    public update(props = {}) {
       if (this.vidoInstance.debug) {
         console.groupCollapsed(`component update method fired ${this.instance}`);
         console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -41,7 +41,7 @@ export default function getInternalComponentMethods(components, actionsByInstanc
       return this.updateFunction(props);
     }
 
-    change(changedProps, options = { leave: false }) {
+    public change(changedProps, options = { leave: false }) {
       const props = changedProps;
       if (this.vidoInstance.debug) {
         console.groupCollapsed(`component change method fired ${this.instance}`);

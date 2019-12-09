@@ -70,11 +70,13 @@ export default function Vido(state, api) {
   const ActionsCollector = getActionsCollector(actionsByInstance);
 
   class InstanceActionsCollector {
-    instance: string;
+    public instance: string;
+
     constructor(instance: string) {
       this.instance = instance;
     }
-    create(actions: unknown[], props: object) {
+
+    public create(actions: unknown[], props: object) {
       const actionsInstance = new ActionsCollector(this.instance);
       actionsInstance.set(actions, props);
       return actionsInstance;
@@ -228,16 +230,14 @@ export default function Vido(state, api) {
   }
   vido.prototype.createComponent = createComponent;
 
-  vido.prototype.Slot = class Slot extends Directive {
-    components = [];
-    props: unknown;
+  class Slot extends Directive {
+    private components = [];
 
     constructor(components: unknown, props: unknown) {
       super();
       if (typeof components === undefined) {
         return undefined;
       }
-      this.props = props;
       if (Array.isArray(components)) {
         for (const component of components) {
           this.components.push(createComponent(component, props));
@@ -245,24 +245,67 @@ export default function Vido(state, api) {
       }
     }
 
-    body(part: NodePart) {
+    public body(part: NodePart) {
       part.setValue(this.components.map((component) => component.html()));
     }
 
-    change(changedProps: unknown, options: any) {
+    public change(changedProps: unknown, options: any) {
       for (const component of this.components) {
         component.change(changedProps, options);
       }
     }
 
-    getComponents() {
+    public getComponents() {
       return this.components;
     }
 
-    setComponents(components: unknown[]) {
+    public setComponents(components: unknown[]) {
       this.components = components;
     }
-  };
+
+    public destroy() {
+      for (const component of this.components) {
+        component.destroy();
+      }
+    }
+  }
+  vido.prototype.Slot = Slot;
+
+  class Slots {
+    private slots = {};
+
+    public addSlot(name: string, slot: unknown) {
+      if (this.slots[name] === undefined) {
+        this.slots[name] = [];
+      }
+      this.slots[name].push(slot);
+    }
+
+    public change(changedProps: unknown, options: any) {
+      for (const name in this.slots) {
+        for (const slot of this.slots[name]) {
+          slot.change(changedProps, options);
+        }
+      }
+    }
+
+    public destroy() {
+      for (const name in this.slots) {
+        for (const slot of this.slots[name]) {
+          slot.destroy();
+        }
+      }
+    }
+
+    public get(name: string) {
+      return this.slots[name];
+    }
+
+    public set(name: string, value: unknown) {
+      this.slots[name] = value;
+    }
+  }
+  vido.prototype.Slots = Slots;
 
   /**
    * Destroy component

@@ -3162,14 +3162,13 @@
             return publicMethods;
         }
         vido.prototype.createComponent = createComponent;
-        vido.prototype.Slot = class Slot extends Directive {
+        class Slot extends Directive {
             constructor(components, props) {
                 super();
                 this.components = [];
                 if (typeof components === undefined) {
                     return undefined;
                 }
-                this.props = props;
                 if (Array.isArray(components)) {
                     for (const component of components) {
                         this.components.push(createComponent(component, props));
@@ -3190,7 +3189,45 @@
             setComponents(components) {
                 this.components = components;
             }
-        };
+            destroy() {
+                for (const component of this.components) {
+                    component.destroy();
+                }
+            }
+        }
+        vido.prototype.Slot = Slot;
+        class Slots {
+            constructor() {
+                this.slots = {};
+            }
+            addSlot(name, slot) {
+                if (this.slots[name] === undefined) {
+                    this.slots[name] = [];
+                }
+                this.slots[name].push(slot);
+            }
+            change(changedProps, options) {
+                for (const name in this.slots) {
+                    for (const slot of this.slots[name]) {
+                        slot.change(changedProps, options);
+                    }
+                }
+            }
+            destroy() {
+                for (const name in this.slots) {
+                    for (const slot of this.slots[name]) {
+                        slot.destroy();
+                    }
+                }
+            }
+            get(name) {
+                return this.slots[name];
+            }
+            set(name, value) {
+                this.slots[name] = value;
+            }
+        }
+        vido.prototype.Slots = Slots;
         /**
          * Destroy component
          *

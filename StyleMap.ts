@@ -7,9 +7,9 @@ const toRemove = [],
   toUpdate = [];
 
 export default class StyleMap extends Directive {
-  previous: {};
-  style: {};
-  detach: boolean;
+  private previous: {};
+  private style: {};
+  private detach: boolean;
 
   constructor(styleInfo: StyleInfo, detach: boolean = false) {
     super();
@@ -18,15 +18,15 @@ export default class StyleMap extends Directive {
     this.detach = detach;
   }
 
-  setStyle(styleInfo: StyleInfo) {
+  public setStyle(styleInfo: StyleInfo) {
     this.style = styleInfo;
   }
 
-  setDetach(detach) {
+  public setDetach(detach) {
     this.detach = detach;
   }
 
-  body(part: Part) {
+  public body(part: Part) {
     toRemove.length = 0;
     toUpdate.length = 0;
     // @ts-ignore

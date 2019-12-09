@@ -23,14 +23,14 @@ const pointerEventsExists = typeof PointerEvent !== 'undefined';
 let id = 0;
 
 export default class PointerAction extends Action {
-  id: number;
-  moving: string = '';
-  initialX: number = 0;
-  initialY: number = 0;
-  lastY: number = 0;
-  lastX: number = 0;
-  element: HTMLElement;
-  options: Options;
+  private id: number;
+  private moving: string = '';
+  private initialX: number = 0;
+  private initialY: number = 0;
+  private lastY: number = 0;
+  private lastX: number = 0;
+  private element: HTMLElement;
+  private options: Options;
 
   constructor(element, data) {
     super();
@@ -56,7 +56,7 @@ export default class PointerAction extends Action {
     }
   }
 
-  normalizeMouseWheelEvent(event) {
+  private normalizeMouseWheelEvent(event) {
     // @ts-ignore
     let x = event.deltaX || 0;
     // @ts-ignore
@@ -83,12 +83,12 @@ export default class PointerAction extends Action {
     return { x, y, z, event };
   }
 
-  onWheel(event) {
+  public onWheel(event) {
     const normalized = this.normalizeMouseWheelEvent(event);
     this.options.onWheel(normalized);
   }
 
-  normalizePointerEvent(event) {
+  private normalizePointerEvent(event) {
     let result = { x: 0, y: 0, pageX: 0, pageY: 0, clientX: 0, clientY: 0, screenX: 0, screenY: 0, event };
     switch (event.type) {
       case 'wheel':
@@ -129,7 +129,7 @@ export default class PointerAction extends Action {
     return result;
   }
 
-  onPointerDown(event) {
+  private onPointerDown(event) {
     if (event.type === 'mousedown' && event.button !== 0) return;
     this.moving = 'xy';
     const normalized = this.normalizePointerEvent(event);
@@ -140,21 +140,21 @@ export default class PointerAction extends Action {
     this.options.onDown(normalized);
   }
 
-  handleX(normalized) {
+  private handleX(normalized) {
     let movementX = normalized.x - this.lastX;
     this.lastY = normalized.y;
     this.lastX = normalized.x;
     return movementX;
   }
 
-  handleY(normalized) {
+  private handleY(normalized) {
     let movementY = normalized.y - this.lastY;
     this.lastY = normalized.y;
     this.lastX = normalized.x;
     return movementY;
   }
 
-  onPointerMove(event) {
+  private onPointerMove(event) {
     if (this.moving === '' || (event.type === 'mousemove' && event.button !== 0)) return;
     const normalized = this.normalizePointerEvent(event);
     if (this.options.axis === 'x|y') {
@@ -244,7 +244,7 @@ export default class PointerAction extends Action {
     }
   }
 
-  onPointerUp(event) {
+  private onPointerUp(event) {
     this.moving = '';
     const normalized = this.normalizePointerEvent(event);
     this.options.onUp({
@@ -262,7 +262,7 @@ export default class PointerAction extends Action {
     this.lastX = 0;
   }
 
-  destroy(element) {
+  public destroy(element) {
     if (pointerEventsExists) {
       element.removeEventListener('pointerdown', this.onPointerDown);
       document.removeEventListener('pointermove', this.onPointerMove);

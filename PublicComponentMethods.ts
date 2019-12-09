@@ -1,9 +1,9 @@
 export default function getPublicComponentMethods(components, actionsByInstance, clone) {
   return class PublicComponentMethods {
-    instance: string;
-    vidoInstance: any;
-    props: any;
-    name: string;
+    public instance: string;
+    public vidoInstance: any;
+    public props: any;
+    public name: string;
 
     constructor(instance, vidoInstance, props = {}) {
       this.instance = instance;
@@ -19,7 +19,7 @@ export default function getPublicComponentMethods(components, actionsByInstance,
     /**
      * Destroy component
      */
-    destroy() {
+    public destroy() {
       if (this.vidoInstance.debug) {
         console.groupCollapsed(`destroying component ${this.instance}`);
         console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -32,7 +32,7 @@ export default function getPublicComponentMethods(components, actionsByInstance,
     /**
      * Update template - trigger rendering process
      */
-    update() {
+    public update() {
       if (this.vidoInstance.debug) {
         console.groupCollapsed(`updating component ${this.instance}`);
         console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -46,7 +46,7 @@ export default function getPublicComponentMethods(components, actionsByInstance,
      * Change component input properties
      * @param {any} newProps
      */
-    change(newProps, options) {
+    public change(newProps, options) {
       if (this.vidoInstance.debug) {
         console.groupCollapsed(`changing component ${this.instance}`);
         console.log(clone({ props: this.props, newProps: newProps, components: components.keys(), actionsByInstance }));
@@ -60,7 +60,7 @@ export default function getPublicComponentMethods(components, actionsByInstance,
      * Get component lit-html template
      * @param {} templateProps
      */
-    html(templateProps = {}) {
+    public html(templateProps = {}) {
       return components.get(this.instance).update(templateProps, this.vidoInstance);
     }
   };

@@ -3,14 +3,14 @@ import { AttributePart, Directive } from 'lit-html';
 const detached = new WeakMap();
 
 export default class Detach extends Directive {
-  ifFn: () => boolean;
+  private ifFn: () => boolean;
 
   constructor(ifFn: () => boolean) {
     super();
     this.ifFn = ifFn;
   }
 
-  body(part: AttributePart) {
+  public body(part: AttributePart) {
     const detach = this.ifFn();
     const element = part.committer.element;
     if (detach) {
