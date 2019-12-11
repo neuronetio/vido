@@ -71,9 +71,6 @@
         body(_part) {
             // body of the directive
         }
-        runPart(part) {
-            return this.body(part);
-        }
     }
     const isDirective = (o) => {
         return o !== undefined && o !== null &&
@@ -794,7 +791,7 @@
                 // tslint:disable-next-line: no-any
                 if (directive.isClass) {
                     // tslint:disable-next-line: no-any
-                    directive.runPart(this);
+                    directive.body(this);
                 }
                 else {
                     directive(this);
@@ -879,7 +876,7 @@
                 // tslint:disable-next-line: no-any
                 if (directive.isClass) {
                     // tslint:disable-next-line: no-any
-                    directive.runPart(this);
+                    directive.body(this);
                 }
                 else {
                     directive(this);
@@ -1062,7 +1059,7 @@
                 // tslint:disable-next-line: no-any
                 if (directive.isClass) {
                     // tslint:disable-next-line: no-any
-                    directive.runPart(this);
+                    directive.body(this);
                 }
                 else {
                     directive(this);
@@ -1165,7 +1162,7 @@
                 // tslint:disable-next-line: no-any
                 if (directive.isClass) {
                     // tslint:disable-next-line: no-any
-                    directive.runPart(this);
+                    directive.body(this);
                 }
                 else {
                     directive(this);
@@ -1363,7 +1360,7 @@
     // IMPORTANT: do not change the property name or the assignment expression.
     // This line will be used in regexes to search for lit-html usage.
     // TODO(justinfagnani): inject version number at build time
-    (window['litHtmlVersions'] || (window['litHtmlVersions'] = [])).push('1.1.3');
+    (window['litHtmlVersions'] || (window['litHtmlVersions'] = [])).push('1.1.4');
     /**
      * Interprets a template literal as an HTML template that can efficiently
      * render to and update a container.
@@ -3142,7 +3139,11 @@
                 }
                 index++;
             }
-            return currentComponents;
+            return function destroy() {
+                for (const component of currentComponents) {
+                    component.destroy();
+                }
+            };
         };
         const InternalComponentMethods = getInternalComponentMethods(components, actionsByInstance, clone);
         /**
@@ -3173,7 +3174,7 @@
         }
         vido.prototype.createComponent = createComponent;
         class Slot extends Directive {
-            constructor(components, props, content = null) {
+            constructor(components, props = {}, content = null) {
                 super();
                 this.components = [];
                 if (Array.isArray(components)) {

@@ -39,6 +39,6 @@
     "typescript": "^3.7.3"
   },
   "dependencies": {
-    "lit-html-optimised": "^1.1.3"
+    "lit-html-optimised": "^1.1.4"
   }
 }

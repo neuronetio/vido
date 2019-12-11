@@ -197,7 +197,11 @@ export default function Vido(state, api) {
       }
       index++;
     }
-    return currentComponents;
+    return function destroy() {
+      for (const component of currentComponents) {
+        component.destroy();
+      }
+    };
   };
 
   const InternalComponentMethods = getInternalComponentMethods(components, actionsByInstance, clone);
@@ -238,7 +242,7 @@ export default function Vido(state, api) {
   class Slot extends Directive {
     private components = [];
 
-    constructor(components: unknown, props: unknown, content: any = null) {
+    constructor(components: unknown[], props: unknown = {}, content: any = null) {
       super();
       if (Array.isArray(components)) {
         for (const component of components) {
