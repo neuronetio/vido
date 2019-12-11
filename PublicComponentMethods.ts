@@ -1,9 +1,9 @@
 export default function getPublicComponentMethods(components, actionsByInstance, clone) {
   return class PublicComponentMethods {
     public instance: string;
-    public vidoInstance: any;
-    public props: any;
     public name: string;
+    public vidoInstance: any;
+    private props: any;
 
     constructor(instance, vidoInstance, props = {}) {
       this.instance = instance;

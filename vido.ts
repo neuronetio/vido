@@ -1,13 +1,13 @@
-import { render, html, directive, svg, Directive, NodePart } from 'lit-html';
-import { asyncAppend } from 'lit-html/directives/async-append';
-import { asyncReplace } from 'lit-html/directives/async-replace';
-import { cache } from 'lit-html/directives/cache';
-import { classMap } from 'lit-html/directives/class-map';
-import { guard } from 'lit-html/directives/guard';
-import { ifDefined } from 'lit-html/directives/if-defined';
-import { repeat } from 'lit-html/directives/repeat';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html';
-import { until } from 'lit-html/directives/until';
+import { render, html, directive, svg, Directive, NodePart } from 'lit-html-optimised';
+import { asyncAppend } from 'lit-html-optimised/directives/async-append';
+import { asyncReplace } from 'lit-html-optimised/directives/async-replace';
+import { cache } from 'lit-html-optimised/directives/cache';
+import { classMap } from 'lit-html-optimised/directives/class-map';
+import { guard } from 'lit-html-optimised/directives/guard';
+import { ifDefined } from 'lit-html-optimised/directives/if-defined';
+import { repeat } from 'lit-html-optimised/directives/repeat';
+import { unsafeHTML } from 'lit-html-optimised/directives/unsafe-html';
+import { until } from 'lit-html-optimised/directives/until';
 import Detach from './Detach';
 import StyleMap from './StyleMap';
 import PointerAction from './PointerAction';
@@ -17,7 +17,7 @@ import getInternalComponentMethods from './InternalComponentMethods';
 import { schedule, clone } from './helpers';
 import Action from './Action';
 
-import * as lithtml from 'lit-html';
+import * as lithtml from 'lit-html-optimised';
 export {
   lithtml,
   Action,
@@ -209,7 +209,7 @@ export default function Vido(state, api) {
    * @param {any} props
    * @returns {object} component instance methods
    */
-  function createComponent(component, props = {}) {
+  function createComponent(component, props = {}, content = null) {
     const instance = component.name + ':' + componentId++;
     let vidoInstance;
     vidoInstance = new vido();
@@ -217,7 +217,12 @@ export default function Vido(state, api) {
     vidoInstance.name = component.name;
     vidoInstance.Actions = new InstanceActionsCollector(instance);
     const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
-    const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props));
+    const internalMethods = new InternalComponentMethods(
+      instance,
+      vidoInstance,
+      component(vidoInstance, props, content),
+      content
+    );
     components.set(instance, internalMethods);
     components.get(instance).change(props);
     if (vidoInstance.debug) {
@@ -233,14 +238,11 @@ export default function Vido(state, api) {
   class Slot extends Directive {
     private components = [];
 
-    constructor(components: unknown, props: unknown) {
+    constructor(components: unknown, props: unknown, content: any = null) {
       super();
-      if (typeof components === undefined) {
-        return undefined;
-      }
       if (Array.isArray(components)) {
         for (const component of components) {
-          this.components.push(createComponent(component, props));
+          this.components.push(createComponent(component, props, content));
         }
       }
     }

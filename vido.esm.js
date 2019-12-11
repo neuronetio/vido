@@ -1,3 +1,5 @@
+import { Directive as Directive$1 } from 'lit-html';
+
 /**
  * @license
  * Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
@@ -2386,7 +2388,7 @@ const until = directive((...args) => (part) => {
 });
 
 const detached = new WeakMap();
-class Detach extends Directive {
+class Detach extends Directive$1 {
     constructor(ifFn) {
         super();
         this.ifFn = ifFn;
@@ -2412,7 +2414,7 @@ class Detach extends Directive {
 }
 
 const toRemove = [], toUpdate = [];
-class StyleMap extends Directive {
+class StyleMap extends Directive$1 {
     constructor(styleInfo, detach = false) {
         super();
         this.previous = {};
@@ -2793,7 +2795,7 @@ function getPublicComponentMethods(components, actionsByInstance, clone) {
 }
 
 function getActionsCollector(actionsByInstance) {
-    return class ActionsCollector extends Directive {
+    return class ActionsCollector extends Directive$1 {
         constructor(instance) {
             super();
             this.instance = instance;
@@ -2842,12 +2844,14 @@ function getActionsCollector(actionsByInstance) {
 
 function getInternalComponentMethods(components, actionsByInstance, clone) {
     return class InternalComponentMethods {
-        constructor(instance, vidoInstance, updateFunction) {
+        constructor(instance, vidoInstance, renderFunction, content) {
             this.instance = instance;
             this.vidoInstance = vidoInstance;
-            this.updateFunction = updateFunction;
+            this.renderFunction = renderFunction;
+            this.content = content;
         }
         destroy() {
+            var _a;
             if (this.vidoInstance.debug) {
                 console.groupCollapsed(`component destroy method fired ${this.instance}`);
                 console.log(clone({
@@ -2858,6 +2862,9 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
                 }));
                 console.trace();
                 console.groupEnd();
+            }
+            if (typeof ((_a = this.content) === null || _a === void 0 ? void 0 : _a.destroy) === 'function') {
+                this.content.destroy();
             }
             for (const d of this.vidoInstance.destroyable) {
                 d();
@@ -2872,7 +2879,7 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
                 console.trace();
                 console.groupEnd();
             }
-            return this.updateFunction(props);
+            return this.renderFunction(props);
         }
         change(changedProps, options = { leave: false }) {
             const props = changedProps;
@@ -3136,7 +3143,7 @@ function Vido(state, api) {
      * @param {any} props
      * @returns {object} component instance methods
      */
-    function createComponent(component, props = {}) {
+    function createComponent(component, props = {}, content = null) {
         const instance = component.name + ':' + componentId++;
         let vidoInstance;
         vidoInstance = new vido();
@@ -3144,7 +3151,7 @@ function Vido(state, api) {
         vidoInstance.name = component.name;
         vidoInstance.Actions = new InstanceActionsCollector(instance);
         const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
-        const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props));
+        const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props, content), content);
         components.set(instance, internalMethods);
         components.get(instance).change(props);
         if (vidoInstance.debug) {
@@ -3157,15 +3164,12 @@ function Vido(state, api) {
     }
     vido.prototype.createComponent = createComponent;
     class Slot extends Directive {
-        constructor(components, props) {
+        constructor(components, props, content = null) {
             super();
             this.components = [];
-            if (typeof components === undefined) {
-                return undefined;
-            }
             if (Array.isArray(components)) {
                 for (const component of components) {
-                    this.components.push(createComponent(component, props));
+                    this.components.push(createComponent(component, props, content));
                 }
             }
         }

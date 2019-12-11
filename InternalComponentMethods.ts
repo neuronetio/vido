@@ -2,12 +2,14 @@ export default function getInternalComponentMethods(components, actionsByInstanc
   return class InternalComponentMethods {
     public instance: string;
     public vidoInstance: any;
-    public updateFunction: (changedProps: any) => void;
+    public renderFunction: (changedProps: any) => void;
+    public content: any;
 
-    constructor(instance, vidoInstance, updateFunction) {
+    constructor(instance, vidoInstance, renderFunction, content) {
       this.instance = instance;
       this.vidoInstance = vidoInstance;
-      this.updateFunction = updateFunction;
+      this.renderFunction = renderFunction;
+      this.content = content;
     }
 
     public destroy() {
@@ -24,6 +26,9 @@ export default function getInternalComponentMethods(components, actionsByInstanc
         console.trace();
         console.groupEnd();
       }
+      if (typeof this.content?.destroy === 'function') {
+        this.content.destroy();
+      }
       for (const d of this.vidoInstance.destroyable) {
         d();
       }
@@ -38,7 +43,7 @@ export default function getInternalComponentMethods(components, actionsByInstanc
         console.trace();
         console.groupEnd();
       }
-      return this.updateFunction(props);
+      return this.renderFunction(props);
     }
 
     public change(changedProps, options = { leave: false }) {

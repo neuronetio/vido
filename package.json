@@ -39,6 +39,6 @@
     "typescript": "^3.7.3"
   },
   "dependencies": {
-    "lit-html": "git+https://github.com/neuronetio/lit-html.git#optimised"
+    "lit-html-optimised": "^1.1.2"
   }
 }

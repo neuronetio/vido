@@ -1,8 +1,8 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-    typeof define === 'function' && define.amd ? define(['exports'], factory) :
-    (global = global || self, factory(global.Vido = {}));
-}(this, (function (exports) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('lit-html')) :
+    typeof define === 'function' && define.amd ? define(['exports', 'lit-html'], factory) :
+    (global = global || self, factory(global.Vido = {}, global.litHtml$1));
+}(this, (function (exports, litHtml$1) { 'use strict';
 
     /**
      * @license
@@ -2392,7 +2392,7 @@
     });
 
     const detached = new WeakMap();
-    class Detach extends Directive {
+    class Detach extends litHtml$1.Directive {
         constructor(ifFn) {
             super();
             this.ifFn = ifFn;
@@ -2418,7 +2418,7 @@
     }
 
     const toRemove = [], toUpdate = [];
-    class StyleMap extends Directive {
+    class StyleMap extends litHtml$1.Directive {
         constructor(styleInfo, detach = false) {
             super();
             this.previous = {};
@@ -2799,7 +2799,7 @@
     }
 
     function getActionsCollector(actionsByInstance) {
-        return class ActionsCollector extends Directive {
+        return class ActionsCollector extends litHtml$1.Directive {
             constructor(instance) {
                 super();
                 this.instance = instance;
@@ -2848,12 +2848,14 @@
 
     function getInternalComponentMethods(components, actionsByInstance, clone) {
         return class InternalComponentMethods {
-            constructor(instance, vidoInstance, updateFunction) {
+            constructor(instance, vidoInstance, renderFunction, content) {
                 this.instance = instance;
                 this.vidoInstance = vidoInstance;
-                this.updateFunction = updateFunction;
+                this.renderFunction = renderFunction;
+                this.content = content;
             }
             destroy() {
+                var _a;
                 if (this.vidoInstance.debug) {
                     console.groupCollapsed(`component destroy method fired ${this.instance}`);
                     console.log(clone({
@@ -2864,6 +2866,9 @@
                     }));
                     console.trace();
                     console.groupEnd();
+                }
+                if (typeof ((_a = this.content) === null || _a === void 0 ? void 0 : _a.destroy) === 'function') {
+                    this.content.destroy();
                 }
                 for (const d of this.vidoInstance.destroyable) {
                     d();
@@ -2878,7 +2883,7 @@
                     console.trace();
                     console.groupEnd();
                 }
-                return this.updateFunction(props);
+                return this.renderFunction(props);
             }
             change(changedProps, options = { leave: false }) {
                 const props = changedProps;
@@ -3142,7 +3147,7 @@
          * @param {any} props
          * @returns {object} component instance methods
          */
-        function createComponent(component, props = {}) {
+        function createComponent(component, props = {}, content = null) {
             const instance = component.name + ':' + componentId++;
             let vidoInstance;
             vidoInstance = new vido();
@@ -3150,7 +3155,7 @@
             vidoInstance.name = component.name;
             vidoInstance.Actions = new InstanceActionsCollector(instance);
             const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
-            const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props));
+            const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props, content), content);
             components.set(instance, internalMethods);
             components.get(instance).change(props);
             if (vidoInstance.debug) {
@@ -3163,15 +3168,12 @@
         }
         vido.prototype.createComponent = createComponent;
         class Slot extends Directive {
-            constructor(components, props) {
+            constructor(components, props, content = null) {
                 super();
                 this.components = [];
-                if (typeof components === undefined) {
-                    return undefined;
-                }
                 if (Array.isArray(components)) {
                     for (const component of components) {
-                        this.components.push(createComponent(component, props));
+                        this.components.push(createComponent(component, props, content));
                     }
                 }
             }
