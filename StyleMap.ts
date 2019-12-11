@@ -1,4 +1,4 @@
-import { Directive, Part } from 'lit-html';
+import { Directive, Part } from 'lit-html-optimised';
 export interface StyleInfo {
   [key: string]: string;
 }

@@ -1,4 +1,4 @@
-import { Directive, AttributePart } from 'lit-html';
+import { Directive, AttributePart } from 'lit-html-optimised';
 
 export default function getActionsCollector(actionsByInstance) {
   return class ActionsCollector extends Directive {

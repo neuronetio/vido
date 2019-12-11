@@ -1,5 +1,3 @@
-import { Directive as Directive$1 } from 'lit-html';
-
 /**
  * @license
  * Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
@@ -93,7 +91,7 @@ const isDirective = (o) => {
 /**
  * True if the custom elements polyfill is in use.
  */
-const isCEPolyfill = window.customElements !== undefined &&
+const isCEPolyfill = window.customElements != null &&
     window.customElements.polyfillWrapFlushCallback !==
         undefined;
 /**
@@ -1123,20 +1121,25 @@ class PropertyPart extends AttributePart {
 // argument to add/removeEventListener is interpreted as the boolean capture
 // value so we should only pass the `capture` property.
 let eventOptionsSupported = false;
-try {
-    const options = {
-        get capture() {
-            eventOptionsSupported = true;
-            return false;
-        }
-    };
-    // tslint:disable-next-line: no-any
-    window.addEventListener('test', options, options);
-    // tslint:disable-next-line: no-any
-    window.removeEventListener('test', options, options);
-}
-catch (_e) { // eslint-disable-line no-empty
-}
+// Wrap into an IIFE because MS Edge <= v41 does not support having try/catch
+// blocks right into the body of a module
+(() => {
+    try {
+        const options = {
+            get capture() {
+                eventOptionsSupported = true;
+                return false;
+            }
+        };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        window.addEventListener('test', options, options);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        window.removeEventListener('test', options, options);
+    }
+    catch (_e) {
+        // noop
+    }
+})();
 class EventPart {
     constructor(element, eventName, eventContext) {
         this.value = undefined;
@@ -1354,7 +1357,7 @@ const render = (result, container, options) => {
 // IMPORTANT: do not change the property name or the assignment expression.
 // This line will be used in regexes to search for lit-html usage.
 // TODO(justinfagnani): inject version number at build time
-(window['litHtmlVersions'] || (window['litHtmlVersions'] = [])).push('1.1.2');
+(window['litHtmlVersions'] || (window['litHtmlVersions'] = [])).push('1.1.3');
 /**
  * Interprets a template literal as an HTML template that can efficiently
  * render to and update a container.
@@ -2388,7 +2391,7 @@ const until = directive((...args) => (part) => {
 });
 
 const detached = new WeakMap();
-class Detach extends Directive$1 {
+class Detach extends Directive {
     constructor(ifFn) {
         super();
         this.ifFn = ifFn;
@@ -2414,7 +2417,7 @@ class Detach extends Directive$1 {
 }
 
 const toRemove = [], toUpdate = [];
-class StyleMap extends Directive$1 {
+class StyleMap extends Directive {
     constructor(styleInfo, detach = false) {
         super();
         this.previous = {};
@@ -2795,7 +2798,7 @@ function getPublicComponentMethods(components, actionsByInstance, clone) {
 }
 
 function getActionsCollector(actionsByInstance) {
-    return class ActionsCollector extends Directive$1 {
+    return class ActionsCollector extends Directive {
         constructor(instance) {
             super();
             this.instance = instance;

@@ -1,4 +1,4 @@
-import { AttributePart, Directive } from 'lit-html';
+import { AttributePart, Directive } from 'lit-html-optimised';
 
 const detached = new WeakMap();
 
