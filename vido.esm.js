@@ -3133,11 +3133,6 @@ function Vido(state, api) {
             }
             index++;
         }
-        return function destroy() {
-            for (const component of currentComponents) {
-                component.destroy();
-            }
-        };
     };
     const InternalComponentMethods = getInternalComponentMethods(components, actionsByInstance, clone);
     /**
