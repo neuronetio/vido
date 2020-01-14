@@ -88,9 +88,11 @@ const isDirective = (o) => {
 /**
  * True if the custom elements polyfill is in use.
  */
-const isCEPolyfill = window.customElements != null &&
-    window.customElements.polyfillWrapFlushCallback !==
-        undefined;
+const isCEPolyfill = typeof window !== 'undefined' ?
+    window.customElements != null &&
+        window.customElements
+            .polyfillWrapFlushCallback !== undefined :
+    false;
 /**
  * Reparents nodes, starting from `start` (inclusive) to `end` (exclusive),
  * into another container (could be the same container), before `before`. If
@@ -1354,7 +1356,11 @@ const render = (result, container, options) => {
 // IMPORTANT: do not change the property name or the assignment expression.
 // This line will be used in regexes to search for lit-html usage.
 // TODO(justinfagnani): inject version number at build time
-(window['litHtmlVersions'] || (window['litHtmlVersions'] = [])).push('1.1.4');
+const isBrowser = typeof window !== 'undefined';
+if (isBrowser) {
+    // If we run in the browser set version
+    (window['litHtmlVersions'] || (window['litHtmlVersions'] = [])).push('1.1.5');
+}
 /**
  * Interprets a template literal as an HTML template that can efficiently
  * render to and update a container.
@@ -1366,7 +1372,7 @@ const html = (strings, ...values) => new TemplateResult(strings, values, 'html',
  */
 const svg = (strings, ...values) => new SVGTemplateResult(strings, values, 'svg', defaultTemplateProcessor);
 
-var litHtml = /*#__PURE__*/Object.freeze({
+var lithtml = /*#__PURE__*/Object.freeze({
     __proto__: null,
     html: html,
     svg: svg,
@@ -2824,7 +2830,13 @@ function getActionsCollector(actionsByInstance) {
                         // @ts-ignore
                         if (typeof element.vido !== 'undefined')
                             delete element.vido;
-                        const componentAction = { create, update() { }, destroy() { } };
+                        const componentAction = {
+                            create,
+                            update() { },
+                            destroy() {
+                                console.log('dupa');
+                            }
+                        };
                         const action = { instance: this.instance, componentAction, element, props: this.props };
                         let byInstance = [];
                         if (actionsByInstance.has(this.instance)) {
@@ -3240,7 +3252,9 @@ function Vido(state, api) {
         }
         if (actionsByInstance.has(instance)) {
             for (const action of actionsByInstance.get(instance)) {
+                console.log(`will try to destroy ${instance}`, action);
                 if (typeof action.componentAction.destroy === 'function') {
+                    console.log(`destroying ${instance}`);
                     action.componentAction.destroy(action.element, action.props);
                 }
             }
@@ -3248,6 +3262,8 @@ function Vido(state, api) {
         actionsByInstance.delete(instance);
         components.get(instance).destroy();
         components.delete(instance);
+        console.log('components', components);
+        console.log('actionsByInstance', actionsByInstance);
         if (vidoInstance.debug) {
             console.groupCollapsed(`component destroyed ${instance}`);
             console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -3281,6 +3297,7 @@ function Vido(state, api) {
         const App = this.createComponent(config.component, config.props);
         app = App.instance;
         this.render();
+        console.log('App created', components);
         return App;
     };
     /**
@@ -3340,7 +3357,22 @@ function Vido(state, api) {
     };
     return new vido();
 }
+Vido.prototype.lithtml = lithtml;
+Vido.prototype.Action = Action;
+Vido.prototype.Directive = Directive;
+Vido.prototype.schedule = schedule;
+Vido.prototype.Detach = Detach;
+Vido.prototype.StyleMap = StyleMap;
+Vido.prototype.PointerAction = PointerAction;
+Vido.prototype.asyncAppend = asyncAppend;
+Vido.prototype.asyncReplace = asyncReplace;
+Vido.prototype.cache = cache;
+Vido.prototype.classMap = classMap;
+Vido.prototype.guard = guard;
+Vido.prototype.ifDefined = ifDefined;
+Vido.prototype.repeat = repeat;
+Vido.prototype.unsafeHTML = unsafeHTML;
+Vido.prototype.unti = until;
 
 export default Vido;
-export { Action, Detach, Directive, PointerAction, StyleMap, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, litHtml as lithtml, repeat, schedule, unsafeHTML, until };
 //# sourceMappingURL=vido.esm.js.map

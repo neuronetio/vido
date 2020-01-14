@@ -18,24 +18,6 @@ import { schedule, clone } from './helpers';
 import Action from './Action';
 
 import * as lithtml from 'lit-html-optimised';
-export {
-  lithtml,
-  Action,
-  Directive,
-  schedule,
-  Detach,
-  StyleMap,
-  PointerAction,
-  asyncAppend,
-  asyncReplace,
-  cache,
-  classMap,
-  guard,
-  ifDefined,
-  repeat,
-  unsafeHTML,
-  until
-};
 
 /* dev imports
 import { render, html, directive, svg, Part } from '../lit-html';
@@ -323,7 +305,9 @@ export default function Vido(state, api) {
     }
     if (actionsByInstance.has(instance)) {
       for (const action of actionsByInstance.get(instance)) {
+        console.log(`will try to destroy ${instance}`, action);
         if (typeof action.componentAction.destroy === 'function') {
+          console.log(`destroying ${instance}`);
           action.componentAction.destroy(action.element, action.props);
         }
       }
@@ -331,6 +315,8 @@ export default function Vido(state, api) {
     actionsByInstance.delete(instance);
     components.get(instance).destroy();
     components.delete(instance);
+    console.log('components', components);
+    console.log('actionsByInstance', actionsByInstance);
     if (vidoInstance.debug) {
       console.groupCollapsed(`component destroyed ${instance}`);
       console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -366,6 +352,7 @@ export default function Vido(state, api) {
     const App = this.createComponent(config.component, config.props);
     app = App.instance;
     this.render();
+    console.log('App created', components);
     return App;
   };
 
@@ -426,3 +413,20 @@ export default function Vido(state, api) {
 
   return new vido();
 }
+
+Vido.prototype.lithtml = lithtml;
+Vido.prototype.Action = Action;
+Vido.prototype.Directive = Directive;
+Vido.prototype.schedule = schedule;
+Vido.prototype.Detach = Detach;
+Vido.prototype.StyleMap = StyleMap;
+Vido.prototype.PointerAction = PointerAction;
+Vido.prototype.asyncAppend = asyncAppend;
+Vido.prototype.asyncReplace = asyncReplace;
+Vido.prototype.cache = cache;
+Vido.prototype.classMap = classMap;
+Vido.prototype.guard = guard;
+Vido.prototype.ifDefined = ifDefined;
+Vido.prototype.repeat = repeat;
+Vido.prototype.unsafeHTML = unsafeHTML;
+Vido.prototype.unti = until;

@@ -35,7 +35,13 @@ export default function getActionsCollector(actionsByInstance) {
           if (!exists) {
             // @ts-ignore
             if (typeof element.vido !== 'undefined') delete element.vido;
-            const componentAction = { create, update() {}, destroy() {} };
+            const componentAction = {
+              create,
+              update() {},
+              destroy() {
+                console.log('dupa');
+              }
+            };
             const action = { instance: this.instance, componentAction, element, props: this.props };
             let byInstance = [];
             if (actionsByInstance.has(this.instance)) {

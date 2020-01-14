@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html charset="utf-8" lang="en-US">
+  <head>
+    <title>basic test</title>
+    <base href="./" />
+  </head>
+  <body>
+    <div class="ooo">Basic test</div>
+    <div class="app"></div>
+    <script src="../vido.js"></script>
+    <script>
+      function Main(vido, props = {}) {
+        const { html } = vido;
+        return (templateProps) =>
+          html`
+            <div class="test">Test text</div>
+          `;
+      }
+      const vido = Vido({}, {});
+      const app = vido.createApp({ component: Main, props: vido, element: document.querySelector('.app') });
+      console.log(app);
+    </script>
+  </body>
+</html>
