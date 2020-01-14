@@ -63,5 +63,13 @@ export default function getPublicComponentMethods(components, actionsByInstance,
     public html(templateProps = {}) {
       return components.get(this.instance).update(templateProps, this.vidoInstance);
     }
+
+    public _getComponents() {
+      return components;
+    }
+
+    public _getActions() {
+      return actionsByInstance;
+    }
   };
 }

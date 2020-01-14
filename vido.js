@@ -2803,6 +2803,12 @@
             html(templateProps = {}) {
                 return components.get(this.instance).update(templateProps, this.vidoInstance);
             }
+            _getComponents() {
+                return components;
+            }
+            _getActions() {
+                return actionsByInstance;
+            }
         };
     }
 
@@ -3258,9 +3264,7 @@
             }
             if (actionsByInstance.has(instance)) {
                 for (const action of actionsByInstance.get(instance)) {
-                    console.log(`will try to destroy ${instance}`, action);
                     if (typeof action.componentAction.destroy === 'function') {
-                        console.log(`destroying ${instance}`);
                         action.componentAction.destroy(action.element, action.props);
                     }
                 }
@@ -3268,8 +3272,7 @@
             actionsByInstance.delete(instance);
             components.get(instance).destroy();
             components.delete(instance);
-            console.log('components', components);
-            console.log('actionsByInstance', actionsByInstance);
+            vidoInstance.update();
             if (vidoInstance.debug) {
                 console.groupCollapsed(`component destroyed ${instance}`);
                 console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -3303,7 +3306,6 @@
             const App = this.createComponent(config.component, config.props);
             app = App.instance;
             this.render();
-            console.log('App created', components);
             return App;
         };
         /**
@@ -3358,9 +3360,17 @@
          * Render view
          */
         vido.prototype.render = function renderView() {
-            render(components.get(app).update(), element);
-            this.executeActions();
+            const appComponent = components.get(app);
+            if (appComponent) {
+                render(appComponent.update(), element);
+                this.executeActions();
+            }
+            else {
+                element.remove();
+            }
         };
+        vido.prototype._components = components;
+        vido.prototype._actions = actionsByInstance;
         return new vido();
     }
     Vido.prototype.lithtml = lithtml;

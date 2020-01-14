@@ -1,24 +1,100 @@
 <!DOCTYPE html>
-<html charset="utf-8" lang="en-US">
+<html lang="en-US">
   <head>
     <title>basic test</title>
     <base href="./" />
+    <meta charset="utf-8" />
   </head>
   <body>
     <div class="ooo">Basic test</div>
     <div class="app"></div>
+    <div class="actions">
+      <button id="destroy-main" onclick="destroyMain()">destroy-main</button>
+    </div>
     <script src="../vido.js"></script>
     <script>
-      function Main(vido, props = {}) {
-        const { html } = vido;
+      window.itemsDestroyed = 0;
+      window.actionsCreated = 0;
+      window.actionsDestroyed = 0;
+      window.itemChildDestroyed = 0;
+
+      function itemAction(element, data) {
+        actionsCreated++;
+        return {
+          update() {},
+          destroy() {
+            actionsDestroyed++;
+          }
+        };
+      }
+
+      function ItemChild(vido, props = {}) {
+        const { html, onDestroy, Actions } = vido;
+        const actions = Actions.create([itemAction]);
+        onDestroy(() => {
+          itemChildDestroyed++;
+        });
+        return (templateProps) =>
+          html`
+            <div data-actions=${actions} class="item-child-${props.id}">child: ${props.id}</div>
+          `;
+      }
+
+      function Item(vido, props = {}) {
+        const { html, reuseComponents, onDestroy } = vido;
+
+        let childs = [];
+        reuseComponents(childs, [1, 2, 3, 4, 5], (child) => ({ id: props.id + '.' + child }), ItemChild);
+        onDestroy(() => {
+          childs.forEach((child) => child.destroy());
+        });
+        onDestroy(() => {
+          // noop
+        });
+        onDestroy(() => {
+          itemsDestroyed++;
+        });
+        onDestroy(() => {
+          // noop
+        });
+        return (templateProps) =>
+          html`
+            <div class="item-${props.id}">${props.id}: ${childs.map((child) => child.html())}</div>
+          `;
+      }
+
+      function Main(vido, props) {
+        const { html, onDestroy, onChange, reuseComponents } = vido;
+        let items = [];
+        onChange((changedProps) => {
+          props = changedProps;
+          reuseComponents(items, props.components, (component) => ({ id: component }), Item);
+        });
+
+        onDestroy(() => {
+          items.forEach((item) => item.destroy());
+        });
+
+        onDestroy(() => {
+          window.appDestroyed = true;
+        });
         return (templateProps) =>
           html`
             <div class="test">Test text</div>
+            <div class="items">${items.map((item) => item.html())}</div>
           `;
       }
-      const vido = Vido({}, {});
-      const app = vido.createApp({ component: Main, props: vido, element: document.querySelector('.app') });
-      console.log(app);
+
+      window.vido = Vido({}, {});
+      window.app = vido.createApp({
+        component: Main,
+        props: { components: [1, 2, 3, 4, 5] },
+        element: document.querySelector('.app')
+      });
+
+      function destroyMain() {
+        app.destroy();
+      }
     </script>
   </body>
 </html>
