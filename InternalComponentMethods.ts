@@ -34,6 +34,7 @@ export default function getInternalComponentMethods(components, actionsByInstanc
       }
       this.vidoInstance.onChangeFunctions = [];
       this.vidoInstance.destroyable = [];
+      this.vidoInstance.update();
     }
 
     public update(props = {}) {

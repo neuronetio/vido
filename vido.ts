@@ -311,9 +311,10 @@ export default function Vido(state, api) {
       }
     }
     actionsByInstance.delete(instance);
-    components.get(instance).destroy();
+    const component = components.get(instance);
+    component.update();
+    component.destroy();
     components.delete(instance);
-    vidoInstance.update();
     if (vidoInstance.debug) {
       console.groupCollapsed(`component destroyed ${instance}`);
       console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -407,7 +408,7 @@ export default function Vido(state, api) {
     if (appComponent) {
       render(appComponent.update(), element);
       this.executeActions();
-    } else {
+    } else if (element) {
       element.remove();
     }
   };

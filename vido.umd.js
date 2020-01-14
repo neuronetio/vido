@@ -2801,7 +2801,11 @@
              * @param {} templateProps
              */
             html(templateProps = {}) {
-                return components.get(this.instance).update(templateProps, this.vidoInstance);
+                const component = components.get(this.instance);
+                if (component) {
+                    return component.update(templateProps, this.vidoInstance);
+                }
+                return undefined;
             }
             _getComponents() {
                 return components;
@@ -2893,6 +2897,7 @@
                 }
                 this.vidoInstance.onChangeFunctions = [];
                 this.vidoInstance.destroyable = [];
+                this.vidoInstance.update();
             }
             update(props = {}) {
                 if (this.vidoInstance.debug) {
@@ -3268,9 +3273,10 @@
                 }
             }
             actionsByInstance.delete(instance);
-            components.get(instance).destroy();
+            const component = components.get(instance);
+            component.update();
+            component.destroy();
             components.delete(instance);
-            vidoInstance.update();
             if (vidoInstance.debug) {
                 console.groupCollapsed(`component destroyed ${instance}`);
                 console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -3363,7 +3369,7 @@
                 render(appComponent.update(), element);
                 this.executeActions();
             }
-            else {
+            else if (element) {
                 element.remove();
             }
         };

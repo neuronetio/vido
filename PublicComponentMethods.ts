@@ -61,7 +61,11 @@ export default function getPublicComponentMethods(components, actionsByInstance,
      * @param {} templateProps
      */
     public html(templateProps = {}) {
-      return components.get(this.instance).update(templateProps, this.vidoInstance);
+      const component = components.get(this.instance);
+      if (component) {
+        return component.update(templateProps, this.vidoInstance);
+      }
+      return undefined;
     }
 
     public _getComponents() {

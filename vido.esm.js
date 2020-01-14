@@ -2795,7 +2795,11 @@ function getPublicComponentMethods(components, actionsByInstance, clone) {
          * @param {} templateProps
          */
         html(templateProps = {}) {
-            return components.get(this.instance).update(templateProps, this.vidoInstance);
+            const component = components.get(this.instance);
+            if (component) {
+                return component.update(templateProps, this.vidoInstance);
+            }
+            return undefined;
         }
         _getComponents() {
             return components;
@@ -2887,6 +2891,7 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
             }
             this.vidoInstance.onChangeFunctions = [];
             this.vidoInstance.destroyable = [];
+            this.vidoInstance.update();
         }
         update(props = {}) {
             if (this.vidoInstance.debug) {
@@ -3262,9 +3267,10 @@ function Vido(state, api) {
             }
         }
         actionsByInstance.delete(instance);
-        components.get(instance).destroy();
+        const component = components.get(instance);
+        component.update();
+        component.destroy();
         components.delete(instance);
-        vidoInstance.update();
         if (vidoInstance.debug) {
             console.groupCollapsed(`component destroyed ${instance}`);
             console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -3357,7 +3363,7 @@ function Vido(state, api) {
             render(appComponent.update(), element);
             this.executeActions();
         }
-        else {
+        else if (element) {
             element.remove();
         }
     };
