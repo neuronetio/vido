@@ -2839,9 +2839,7 @@ function getActionsCollector(actionsByInstance) {
                         const componentAction = {
                             create,
                             update() { },
-                            destroy() {
-                                console.log('dupa');
-                            }
+                            destroy() { }
                         };
                         const action = { instance: this.instance, componentAction, element, props: this.props };
                         let byInstance = [];
