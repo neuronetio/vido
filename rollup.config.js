@@ -5,10 +5,10 @@ import { terser } from 'rollup-plugin-terser';
 
 export default [
   {
-    input: 'vido.ts',
+    input: 'vido.umd.ts',
     output: {
       sourcemap: true,
-      file: 'vido.js',
+      file: 'vido.umd.js',
       format: 'umd',
       name: 'Vido'
     },
@@ -22,10 +22,10 @@ export default [
     ]
   },
   {
-    input: 'vido.ts',
+    input: 'vido.umd.ts',
     output: {
       sourcemap: true,
-      file: 'vido.min.js',
+      file: 'vido.umd.min.js',
       format: 'umd',
       name: 'Vido'
     },

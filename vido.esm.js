@@ -3385,4 +3385,5 @@ Vido.prototype.unsafeHTML = unsafeHTML;
 Vido.prototype.unti = until;
 
 export default Vido;
+export { Action, Detach, Directive, PointerAction, StyleMap, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, lithtml, repeat, schedule, unsafeHTML, until };
 //# sourceMappingURL=vido.esm.js.map

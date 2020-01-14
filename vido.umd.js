@@ -3393,4 +3393,4 @@
     return Vido;
 
 })));
-//# sourceMappingURL=vido.js.map
+//# sourceMappingURL=vido.umd.js.map

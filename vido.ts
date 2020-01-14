@@ -435,3 +435,22 @@ Vido.prototype.ifDefined = ifDefined;
 Vido.prototype.repeat = repeat;
 Vido.prototype.unsafeHTML = unsafeHTML;
 Vido.prototype.unti = until;
+
+export {
+  lithtml,
+  Action,
+  Directive,
+  schedule,
+  Detach,
+  StyleMap,
+  PointerAction,
+  asyncAppend,
+  asyncReplace,
+  cache,
+  classMap,
+  guard,
+  ifDefined,
+  repeat,
+  unsafeHTML,
+  until
+};
