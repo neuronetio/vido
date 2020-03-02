@@ -3102,8 +3102,8 @@
         vido.prototype.onChange = function onChange(fn) {
             this.onChangeFunctions.push(fn);
         };
-        vido.prototype.update = function update() {
-            this.updateTemplate();
+        vido.prototype.update = function update(callback) {
+            return this.updateTemplate(callback);
         };
         /**
          * Reuse existing components when your data was changed
@@ -3288,16 +3288,20 @@
          * Update template - trigger render proccess
          * @param {object} vidoInstance
          */
-        vido.prototype.updateTemplate = function updateTemplate() {
-            const currentShouldUpdateCount = ++shouldUpdateCount;
-            const self = this;
-            function flush() {
-                if (currentShouldUpdateCount === shouldUpdateCount) {
-                    shouldUpdateCount = 0;
-                    self.render();
+        vido.prototype.updateTemplate = function updateTemplate(callback) {
+            return new Promise((resolve) => {
+                const currentShouldUpdateCount = ++shouldUpdateCount;
+                const self = this;
+                function flush() {
+                    if (currentShouldUpdateCount === shouldUpdateCount) {
+                        shouldUpdateCount = 0;
+                        self.render();
+                        callback();
+                        resolve();
+                    }
                 }
-            }
-            resolved.then(flush);
+                resolved.then(flush);
+            });
         };
         /**
          * Create app
