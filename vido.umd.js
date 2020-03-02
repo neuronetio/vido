@@ -3296,7 +3296,8 @@
                     if (currentShouldUpdateCount === shouldUpdateCount) {
                         shouldUpdateCount = 0;
                         self.render();
-                        callback();
+                        if (typeof callback === 'function')
+                            callback();
                         resolve();
                     }
                 }
