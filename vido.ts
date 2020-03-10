@@ -40,7 +40,7 @@ import { Directive } from '../lit-html/lib/directive';
  * @param {any} api - some api's or other globally available services
  * @returns {object} vido instance
  */
-export default function Vido(state, api) {
+export default function Vido<State, Api>(state: State, api: Api) {
   let componentId = 0;
   const components = new Map();
   let actionsByInstance = new Map();
@@ -74,8 +74,8 @@ export default function Vido(state, api) {
     this.destroyable = [];
     this.onChangeFunctions = [];
     this.debug = false;
-    this.state = state;
-    this.api = api;
+    this.state = state as State;
+    this.api = api as Api;
     this.lastProps = {};
     this.reuseComponents = this.reuseComponents.bind(this);
     this.onDestroy = this.onDestroy.bind(this);
