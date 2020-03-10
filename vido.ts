@@ -145,7 +145,7 @@ export default function Vido<State, Api>(state: State, api: Api) {
         let diff = dataLen - currentLen;
         while (diff) {
           const item = dataArray[dataLen - diff];
-          const newComponent = vido.createComponent(component, getProps(item));
+          const newComponent = this.createComponent(component, getProps(item));
           currentComponents.push(newComponent);
           modified.push(newComponent.instance);
           diff--;
@@ -178,7 +178,7 @@ export default function Vido<State, Api>(state: State, api: Api) {
       }
     }
 
-    static createComponent(component, props = {}, content = null) {
+    createComponent(component, props = {}, content = null) {
       const instance = component.name + ':' + componentId++;
       let vidoInstance;
       vidoInstance = new vido();
@@ -292,7 +292,7 @@ export default function Vido<State, Api>(state: State, api: Api) {
 
     createApp(config) {
       element = config.element;
-      const App = vido.createComponent(config.component, config.props);
+      const App = this.createComponent(config.component, config.props);
       app = App.instance;
       this.render();
       return App;
