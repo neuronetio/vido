@@ -1359,7 +1359,7 @@ const render = (result, container, options) => {
 const isBrowser = typeof window !== 'undefined';
 if (isBrowser) {
     // If we run in the browser set version
-    (window['litHtmlVersions'] || (window['litHtmlVersions'] = [])).push('1.1.5');
+    (window['litHtmlVersions'] || (window['litHtmlVersions'] = [])).push('1.1.7');
 }
 /**
  * Interprets a template literal as an HTML template that can efficiently
