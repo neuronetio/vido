@@ -1,10 +1,6 @@
 import { Directive, Part } from 'lit-html-optimised';
 import { Properties as CSSProp } from 'csstype';
 
-export interface StyleInfo {
-  [key: string]: string;
-}
-
 const toRemove = [],
   toUpdate = [];
 
@@ -13,14 +9,14 @@ export default class StyleMap extends Directive {
   private previous: {};
   private detach: boolean;
 
-  constructor(styleInfo: StyleInfo, detach: boolean = false) {
+  constructor(styleInfo: CSSProp, detach: boolean = false) {
     super();
     this.previous = {};
     this.style = styleInfo;
     this.detach = detach;
   }
 
-  public setStyle(styleInfo: StyleInfo) {
+  public setStyle(styleInfo: CSSProp) {
     this.style = styleInfo;
   }
 
