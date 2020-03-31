@@ -71,7 +71,7 @@ export interface vido<State, Api> {
   repeat: typeof repeat;
   unsafeHTML: typeof unsafeHTML;
   until: typeof until;
-  schedule: (callback) => void;
+  schedule: typeof schedule;
   StyleMap: typeof StyleMap;
   Detach: typeof Detach;
   PointerAction: typeof PointerAction;
