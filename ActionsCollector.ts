@@ -2,9 +2,9 @@ import { Directive, AttributePart } from 'lit-html-optimised';
 
 export default function getActionsCollector(actionsByInstance) {
   return class ActionsCollector extends Directive {
-    private instance: string;
-    private actions: unknown[];
-    private props: unknown;
+    instance: string;
+    actions: unknown[];
+    props: unknown;
 
     constructor(instance) {
       super();

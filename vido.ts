@@ -33,14 +33,60 @@ import { until } from '../lit-html/directives/until';
 import { Directive } from '../lit-html/lib/directive';
 */
 
+export type UpdateTemplate = (props: unknown) => lithtml.TemplateResult;
+
+export type Component = (vido: vido<unknown, unknown>, props: unknown) => UpdateTemplate;
+
+export interface ComponentInstance {
+  instance: string;
+  update: () => Promise<unknown>;
+  destroy: () => void;
+  change: (props: unknown, options?: any) => void;
+  html: (props?: unknown) => lithtml.TemplateResult;
+}
+
+export interface vido<State, Api> {
+  state: State;
+  api: Api;
+  html: (strings: TemplateStringsArray, ...values: unknown[]) => lithtml.TemplateResult;
+  svg: (strings: TemplateStringsArray, ...values: unknown[]) => lithtml.SVGTemplateResult;
+  onDestroy: (callback) => void;
+  onChange: (callback) => void;
+  update: (callback?: any) => Promise<unknown>;
+  createComponent: (component: Component, props?: unknown, content?: unknown) => ComponentInstance;
+  reuseComponents: (
+    currentComponents: ComponentInstance[],
+    dataArray: unknown[],
+    getProps,
+    component: Component,
+    leaveTail?: boolean
+  ) => void;
+  directive: typeof directive;
+  asyncAppend: typeof asyncAppend;
+  asyncReplace: typeof asyncReplace;
+  cache: typeof cache;
+  classMap: typeof classMap;
+  guard: typeof guard;
+  ifDefined: typeof ifDefined;
+  repeat: typeof repeat;
+  unsafeHTML: typeof unsafeHTML;
+  until: typeof until;
+  schedule: (callback) => void;
+  StyleMap: typeof StyleMap;
+  Detach: typeof Detach;
+  PointerAction: typeof PointerAction;
+  Action: typeof Action;
+  Actions?: any;
+}
+
 /**
  * Vido library
  *
  * @param {any} state - state management for the view (can be anything)
  * @param {any} api - some api's or other globally available services
- * @returns {object} vido instance
+ * @returns {VidoInstance} vido instance
  */
-export default function Vido<State, Api>(state: State, api: Api) {
+export default function Vido<State, Api>(state: State, api: Api): vido<State, Api> {
   let componentId = 0;
   const components = new Map();
   let actionsByInstance = new Map();
@@ -68,7 +114,7 @@ export default function Vido<State, Api>(state: State, api: Api) {
   const PublicComponentMethods = getPublicComponentMethods(components, actionsByInstance, clone);
   const InternalComponentMethods = getInternalComponentMethods(components, actionsByInstance, clone);
 
-  class vido {
+  class VidoInstance {
     destroyable = [];
     onChangeFunctions = [];
     debug = false;
@@ -132,7 +178,13 @@ export default function Vido<State, Api>(state: State, api: Api) {
      * @param {boolean} leaveTail - leave last elements and do not destroy corresponding components
      * @returns {array} of components (with updated/destroyed/created ones)
      */
-    reuseComponents(currentComponents, dataArray, getProps, component, leaveTail = true) {
+    reuseComponents(
+      currentComponents: ComponentInstance[],
+      dataArray: unknown[],
+      getProps,
+      component: Component,
+      leaveTail = true
+    ) {
       const modified = [];
       const currentLen = currentComponents.length;
       const dataLen = dataArray.length;
@@ -181,7 +233,7 @@ export default function Vido<State, Api>(state: State, api: Api) {
     createComponent(component, props = {}, content = null) {
       const instance = component.name + ':' + componentId++;
       let vidoInstance;
-      vidoInstance = new vido();
+      vidoInstance = new VidoInstance();
       vidoInstance.instance = instance;
       vidoInstance.name = component.name;
       vidoInstance.Actions = new InstanceActionsCollector(instance);
@@ -309,7 +361,7 @@ export default function Vido<State, Api>(state: State, api: Api) {
     }
   }
 
-  return new vido();
+  return new VidoInstance();
 }
 
 Vido.prototype.lithtml = lithtml;

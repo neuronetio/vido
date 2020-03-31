@@ -3,7 +3,7 @@ export default function getPublicComponentMethods(components, actionsByInstance,
     public instance: string;
     public name: string;
     public vidoInstance: any;
-    private props: any;
+    public props: any;
 
     constructor(instance, vidoInstance, props = {}) {
       this.instance = instance;

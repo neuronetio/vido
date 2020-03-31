@@ -3011,25 +3011,12 @@ function clone(source) {
     return mergeDeep({}, source);
 }
 
-/* dev imports
-import { render, html, directive, svg, Part } from '../lit-html';
-import { asyncAppend } from '../lit-html/directives/async-append';
-import { asyncReplace } from '../lit-html/directives/async-replace';
-import { cache } from '../lit-html/directives/cache';
-import { classMap } from '../lit-html/directives/class-map';
-import { guard } from '../lit-html/directives/guard';
-import { ifDefined } from '../lit-html/directives/if-defined';
-import { repeat } from '../lit-html/directives/repeat';
-import { unsafeHTML } from '../lit-html/directives/unsafe-html';
-import { until } from '../lit-html/directives/until';
-import { Directive } from '../lit-html/lib/directive';
-*/
 /**
  * Vido library
  *
  * @param {any} state - state management for the view (can be anything)
  * @param {any} api - some api's or other globally available services
- * @returns {object} vido instance
+ * @returns {VidoInstance} vido instance
  */
 function Vido(state, api) {
     let componentId = 0;
@@ -3052,7 +3039,7 @@ function Vido(state, api) {
     }
     const PublicComponentMethods = getPublicComponentMethods(components, actionsByInstance, clone);
     const InternalComponentMethods = getInternalComponentMethods(components, actionsByInstance, clone);
-    class vido {
+    class VidoInstance {
         constructor() {
             this.destroyable = [];
             this.onChangeFunctions = [];
@@ -3159,7 +3146,7 @@ function Vido(state, api) {
         createComponent(component, props = {}, content = null) {
             const instance = component.name + ':' + componentId++;
             let vidoInstance;
-            vidoInstance = new vido();
+            vidoInstance = new VidoInstance();
             vidoInstance.instance = instance;
             vidoInstance.name = component.name;
             vidoInstance.Actions = new InstanceActionsCollector(instance);
@@ -3280,7 +3267,7 @@ function Vido(state, api) {
             }
         }
     }
-    return new vido();
+    return new VidoInstance();
 }
 Vido.prototype.lithtml = lithtml;
 Vido.prototype.Action = Action;
