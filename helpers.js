@@ -147,3 +147,8 @@ function clone(source) {
     return mergeDeep({}, source);
 }
 exports.clone = clone;
+exports["default"] = {
+    mergeDeep: mergeDeep,
+    clone: clone,
+    schedule: schedule
+};

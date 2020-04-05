@@ -20,3 +20,9 @@ export declare function mergeDeep(target: any, ...sources: any[]): any;
  * @returns {object} cloned source
  */
 export declare function clone(source: any): any;
+declare const _default: {
+    mergeDeep: typeof mergeDeep;
+    clone: typeof clone;
+    schedule: typeof schedule;
+};
+export default _default;

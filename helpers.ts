@@ -86,3 +86,9 @@ export function clone(source) {
   }
   return mergeDeep({}, source);
 }
+
+export default {
+  mergeDeep,
+  clone,
+  schedule,
+};
