@@ -45,6 +45,12 @@ export interface ComponentInstance {
   html: (props?: unknown) => lithtml.TemplateResult;
 }
 
+export interface CreateAppConfig {
+  element: HTMLElement;
+  component: Component;
+  props: unknown;
+}
+
 export interface vido<State, Api> {
   state: State;
   api: Api;
@@ -54,6 +60,7 @@ export interface vido<State, Api> {
   onChange: (callback) => void;
   update: (callback?: any) => Promise<unknown>;
   createComponent: (component: Component, props?: unknown, content?: unknown) => ComponentInstance;
+  createApp: (config: CreateAppConfig) => ComponentInstance;
   reuseComponents: (
     currentComponents: ComponentInstance[],
     dataArray: unknown[],
@@ -230,7 +237,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       }
     }
 
-    createComponent(component, props = {}, content = null) {
+    createComponent(component, props = {}, content = null): ComponentInstance {
       const instance = component.name + ':' + componentId++;
       let vidoInstance;
       vidoInstance = new VidoInstance();
@@ -342,7 +349,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       });
     }
 
-    createApp(config) {
+    createApp(config: CreateAppConfig): ComponentInstance {
       element = config.element;
       const App = this.createComponent(config.component, config.props);
       app = App.instance;
@@ -350,7 +357,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       return App;
     }
 
-    render() {
+    render(): void {
       const appComponent = components.get(app);
       if (appComponent) {
         render(appComponent.update(), element);
@@ -397,5 +404,5 @@ export {
   ifDefined,
   repeat,
   unsafeHTML,
-  until
+  until,
 };

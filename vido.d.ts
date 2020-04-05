@@ -23,6 +23,11 @@ export interface ComponentInstance {
     change: (props: unknown, options?: any) => void;
     html: (props?: unknown) => lithtml.TemplateResult;
 }
+export interface CreateAppConfig {
+    element: HTMLElement;
+    component: Component;
+    props: unknown;
+}
 export interface vido<State, Api> {
     state: State;
     api: Api;
@@ -32,6 +37,7 @@ export interface vido<State, Api> {
     onChange: (callback: any) => void;
     update: (callback?: any) => Promise<unknown>;
     createComponent: (component: Component, props?: unknown, content?: unknown) => ComponentInstance;
+    createApp: (config: CreateAppConfig) => ComponentInstance;
     reuseComponents: (currentComponents: ComponentInstance[], dataArray: unknown[], getProps: any, component: Component, leaveTail?: boolean) => void;
     directive: typeof directive;
     asyncAppend: typeof asyncAppend;
@@ -58,4 +64,4 @@ export interface vido<State, Api> {
  * @returns {VidoInstance} vido instance
  */
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
-export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until };
+export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until, };
