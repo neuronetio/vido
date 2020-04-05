@@ -3011,13 +3011,6 @@ function clone(source) {
     return mergeDeep({}, source);
 }
 
-/**
- * Vido library
- *
- * @param {any} state - state management for the view (can be anything)
- * @param {any} api - some api's or other globally available services
- * @returns {VidoInstance} vido instance
- */
 function Vido(state, api) {
     let componentId = 0;
     const components = new Map();

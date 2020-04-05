@@ -22,6 +22,7 @@ export interface ComponentInstance {
     destroy: () => void;
     change: (props: unknown, options?: any) => void;
     html: (props?: unknown) => lithtml.TemplateResult;
+    vidoInstance: vido<unknown, unknown>;
 }
 export interface CreateAppConfig {
     element: HTMLElement;
@@ -56,12 +57,5 @@ export interface vido<State, Api> {
     Action: typeof Action;
     Actions?: any;
 }
-/**
- * Vido library
- *
- * @param {any} state - state management for the view (can be anything)
- * @param {any} api - some api's or other globally available services
- * @returns {VidoInstance} vido instance
- */
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
 export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until, };

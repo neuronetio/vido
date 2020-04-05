@@ -46,13 +46,6 @@ var Action_1 = require("./Action");
 exports.Action = Action_1["default"];
 var lithtml = require("lit-html-optimised");
 exports.lithtml = lithtml;
-/**
- * Vido library
- *
- * @param {any} state - state management for the view (can be anything)
- * @param {any} api - some api's or other globally available services
- * @returns {VidoInstance} vido instance
- */
 function Vido(state, api) {
     var componentId = 0;
     var components = new Map();

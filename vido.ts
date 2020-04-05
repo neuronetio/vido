@@ -43,6 +43,7 @@ export interface ComponentInstance {
   destroy: () => void;
   change: (props: unknown, options?: any) => void;
   html: (props?: unknown) => lithtml.TemplateResult;
+  vidoInstance: vido<unknown, unknown>;
 }
 
 export interface CreateAppConfig {
@@ -86,13 +87,6 @@ export interface vido<State, Api> {
   Actions?: any;
 }
 
-/**
- * Vido library
- *
- * @param {any} state - state management for the view (can be anything)
- * @param {any} api - some api's or other globally available services
- * @returns {VidoInstance} vido instance
- */
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api> {
   let componentId = 0;
   const components = new Map();
