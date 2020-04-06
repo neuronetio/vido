@@ -1,6 +1,6 @@
 {
   "name": "@neuronet.io/vido",
-  "version": "2.6.9",
+  "version": "2.6.10",
   "description": "Compilation-less and eval free frontend framework for fast scalable apps.",
   "main": "vido.umd.min.js",
   "module": "vido.esm.min.js",
