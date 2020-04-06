@@ -33,9 +33,9 @@ export default class Detach extends Directive {
     } else {
       const data = detached.get(part);
       if (data) {
-        if (data.nextSibling) {
+        if (data.nextSibling && data.nextSibling.parentNode) {
           data.nextSibling.parentNode.insertBefore(data.element, data.nextSibling);
-        } else if (data.previousSibling) {
+        } else if (data.previousSibling && data.previousSibling.parentNode) {
           data.previousSibling.parentNode.appendChild(data.element);
         } else if (data.parent) {
           data.parent.appendChild(data.element);
