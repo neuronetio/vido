@@ -21,12 +21,14 @@ export default class Detach extends Directive {
     const detach = this.ifFn();
     const element: Element = part.committer.element;
     if (detach) {
-      detached.set(part, {
-        element,
-        nextSibling: element.nextSibling,
-        previousSibling: element.previousSibling,
-        parent: element.parentNode,
-      });
+      if (!detached.has(part)) {
+        detached.set(part, {
+          element,
+          nextSibling: element.nextSibling,
+          previousSibling: element.previousSibling,
+          parent: element.parentNode,
+        });
+      }
       element.remove();
     } else {
       const data = detached.get(part);
