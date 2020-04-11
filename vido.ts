@@ -272,6 +272,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       }
       actionsByInstance.delete(instance);
       const component = components.get(instance);
+      if (!component) return;
       component.update();
       component.destroy();
       components.delete(instance);

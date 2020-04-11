@@ -3191,6 +3191,8 @@
                 }
                 actionsByInstance.delete(instance);
                 const component = components.get(instance);
+                if (!component)
+                    return;
                 component.update();
                 component.destroy();
                 components.delete(instance);
