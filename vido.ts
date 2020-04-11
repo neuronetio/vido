@@ -224,7 +224,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       let index = 0;
       for (const component of currentComponents) {
         const item = dataArray[index];
-        if (!modified.includes(component.instance)) {
+        if (!modified.includes(component.instance) && component) {
           component.change(getProps(item), { leave: leave && index >= leaveStartingAt });
         }
         index++;

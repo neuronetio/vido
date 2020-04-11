@@ -48,7 +48,9 @@ function getPublicComponentMethods(components, actionsByInstance, clone) {
                 console.trace();
                 console.groupEnd();
             }
-            components.get(this.instance).change(newProps, options);
+            var component = components.get(this.instance);
+            if (component)
+                component.change(newProps, options);
         };
         /**
          * Get component lit-html template

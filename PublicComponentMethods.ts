@@ -53,7 +53,8 @@ export default function getPublicComponentMethods(components, actionsByInstance,
         console.trace();
         console.groupEnd();
       }
-      components.get(this.instance).change(newProps, options);
+      const component = components.get(this.instance);
+      if (component) component.change(newProps, options);
     }
 
     /**

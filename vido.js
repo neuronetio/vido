@@ -170,7 +170,7 @@ function Vido(state, api) {
                 for (var currentComponents_1 = __values(currentComponents), currentComponents_1_1 = currentComponents_1.next(); !currentComponents_1_1.done; currentComponents_1_1 = currentComponents_1.next()) {
                     var component_1 = currentComponents_1_1.value;
                     var item = dataArray[index];
-                    if (!modified.includes(component_1.instance)) {
+                    if (!modified.includes(component_1.instance) && component_1) {
                         component_1.change(getProps(item), { leave: leave && index >= leaveStartingAt });
                     }
                     index++;

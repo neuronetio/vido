@@ -2806,7 +2806,9 @@
                     console.trace();
                     console.groupEnd();
                 }
-                components.get(this.instance).change(newProps, options);
+                const component = components.get(this.instance);
+                if (component)
+                    component.change(newProps, options);
             }
             /**
              * Get component lit-html template
@@ -3148,7 +3150,7 @@
                 let index = 0;
                 for (const component of currentComponents) {
                     const item = dataArray[index];
-                    if (!modified.includes(component.instance)) {
+                    if (!modified.includes(component.instance) && component) {
                         component.change(getProps(item), { leave: leave && index >= leaveStartingAt });
                     }
                     index++;
