@@ -3037,6 +3037,7 @@
         let actionsByInstance = new Map();
         let app, element;
         let shouldUpdateCount = 0;
+        const afterUpdateCallbacks = [];
         const resolved = Promise.resolve();
         const additionalMethods = {};
         const ActionsCollector = getActionsCollector(actionsByInstance);
@@ -3250,7 +3251,7 @@
             }
             updateTemplate(callback = undefined) {
                 if (callback)
-                    this.callbacks.push(callback);
+                    afterUpdateCallbacks.push(callback);
                 return new Promise((resolve) => {
                     const currentShouldUpdateCount = ++shouldUpdateCount;
                     const self = this;
@@ -3258,7 +3259,7 @@
                         if (currentShouldUpdateCount === shouldUpdateCount) {
                             shouldUpdateCount = 0;
                             self.render();
-                            for (const cb of this.callbacks) {
+                            for (const cb of afterUpdateCallbacks) {
                                 cb();
                             }
                             this.callbacks.length = 0;

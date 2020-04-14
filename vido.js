@@ -52,6 +52,7 @@ function Vido(state, api) {
     var actionsByInstance = new Map();
     var app, element;
     var shouldUpdateCount = 0;
+    var afterUpdateCallbacks = [];
     var resolved = Promise.resolve();
     var additionalMethods = {};
     var ActionsCollector = ActionsCollector_1["default"](actionsByInstance);
@@ -324,7 +325,7 @@ function Vido(state, api) {
             var _this = this;
             if (callback === void 0) { callback = undefined; }
             if (callback)
-                this.callbacks.push(callback);
+                afterUpdateCallbacks.push(callback);
             return new Promise(function (resolve) {
                 var currentShouldUpdateCount = ++shouldUpdateCount;
                 var self = _this;
@@ -334,15 +335,15 @@ function Vido(state, api) {
                         shouldUpdateCount = 0;
                         self.render();
                         try {
-                            for (var _b = __values(this.callbacks), _c = _b.next(); !_c.done; _c = _b.next()) {
-                                var cb = _c.value;
+                            for (var afterUpdateCallbacks_1 = __values(afterUpdateCallbacks), afterUpdateCallbacks_1_1 = afterUpdateCallbacks_1.next(); !afterUpdateCallbacks_1_1.done; afterUpdateCallbacks_1_1 = afterUpdateCallbacks_1.next()) {
+                                var cb = afterUpdateCallbacks_1_1.value;
                                 cb();
                             }
                         }
                         catch (e_6_1) { e_6 = { error: e_6_1 }; }
                         finally {
                             try {
-                                if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+                                if (afterUpdateCallbacks_1_1 && !afterUpdateCallbacks_1_1.done && (_a = afterUpdateCallbacks_1["return"])) _a.call(afterUpdateCallbacks_1);
                             }
                             finally { if (e_6) throw e_6.error; }
                         }
