@@ -29,40 +29,11 @@ function isObject(item) {
   return item && typeof item === 'object' && !Array.isArray(item);
 }
 
-function getArray(source): any[] {
-  const result = new Array(source.length);
-  let index = 0;
-  for (let item of source) {
-    if (isObject(item)) {
-      if (typeof item['clone'] === 'function') {
-        result[index] = item.clone();
-      } else {
-        result[index] = mergeDeep({}, item);
-      }
-    } else {
-      result[index] = item;
-    }
-    index++;
-  }
-  return result;
-}
-
-function setObject(source: object, target: unknown, key) {
-  if (typeof target[key] === 'undefined') {
-    target[key] = {};
-  }
-  if (typeof source['clone'] === 'function') {
-    target[key] = source[key].clone();
-  } else {
-    target[key] = mergeDeep(target[key], source);
-  }
-}
-
 /**
  * Merge deep - helper function which will merge objects recursively - creating brand new one - like clone
  *
  * @param {object} target
- * @params {object} sources
+ * @params {[object]} sources
  * @returns {object}
  */
 export function mergeDeep(target, ...sources) {
@@ -70,9 +41,29 @@ export function mergeDeep(target, ...sources) {
   if (isObject(target) && isObject(source)) {
     for (const key in source) {
       if (isObject(source[key])) {
-        setObject(source[key], target, key);
+        if (typeof source[key].clone === 'function') {
+          target[key] = source[key].clone();
+        } else {
+          if (typeof target[key] === 'undefined') {
+            target[key] = {};
+          }
+          target[key] = mergeDeep(target[key], source[key]);
+        }
       } else if (Array.isArray(source[key])) {
-        target[key] = getArray(source[key]);
+        target[key] = new Array(source[key].length);
+        let index = 0;
+        for (let item of source[key]) {
+          if (isObject(item)) {
+            if (typeof item.clone === 'function') {
+              target[key][index] = item.clone();
+            } else {
+              target[key][index] = mergeDeep({}, item);
+            }
+          } else {
+            target[key][index] = item;
+          }
+          index++;
+        }
       } else {
         target[key] = source[key];
       }
