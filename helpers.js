@@ -72,6 +72,47 @@ exports.schedule = schedule;
 function isObject(item) {
     return item && typeof item === 'object' && !Array.isArray(item);
 }
+function getArray(source) {
+    var e_1, _a;
+    var result = new Array(source.length);
+    var index = 0;
+    try {
+        for (var source_1 = __values(source), source_1_1 = source_1.next(); !source_1_1.done; source_1_1 = source_1.next()) {
+            var item = source_1_1.value;
+            if (isObject(item)) {
+                if (typeof item['clone'] === 'function') {
+                    result[index] = item.clone();
+                }
+                else {
+                    result[index] = mergeDeep({}, item);
+                }
+            }
+            else {
+                result[index] = item;
+            }
+            index++;
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (source_1_1 && !source_1_1.done && (_a = source_1["return"])) _a.call(source_1);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    return result;
+}
+function setObject(source, target, key) {
+    if (typeof target[key] === 'undefined') {
+        target[key] = {};
+    }
+    if (typeof source['clone'] === 'function') {
+        target[key] = source[key].clone();
+    }
+    else {
+        target[key] = mergeDeep(target[key], source);
+    }
+}
 /**
  * Merge deep - helper function which will merge objects recursively - creating brand new one - like clone
  *
@@ -80,7 +121,6 @@ function isObject(item) {
  * @returns {object}
  */
 function mergeDeep(target) {
-    var e_1, _a;
     var sources = [];
     for (var _i = 1; _i < arguments.length; _i++) {
         sources[_i - 1] = arguments[_i];
@@ -89,30 +129,10 @@ function mergeDeep(target) {
     if (isObject(target) && isObject(source)) {
         for (var key in source) {
             if (isObject(source[key])) {
-                if (typeof target[key] === 'undefined') {
-                    target[key] = {};
-                }
-                target[key] = mergeDeep(target[key], source[key]);
+                setObject(source[key], target, key);
             }
             else if (Array.isArray(source[key])) {
-                target[key] = [];
-                try {
-                    for (var _b = (e_1 = void 0, __values(source[key])), _c = _b.next(); !_c.done; _c = _b.next()) {
-                        var item = _c.value;
-                        if (isObject(item)) {
-                            target[key].push(mergeDeep({}, item));
-                            continue;
-                        }
-                        target[key].push(item);
-                    }
-                }
-                catch (e_1_1) { e_1 = { error: e_1_1 }; }
-                finally {
-                    try {
-                        if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
-                    }
-                    finally { if (e_1) throw e_1.error; }
-                }
+                target[key] = getArray(source[key]);
             }
             else {
                 target[key] = source[key];
