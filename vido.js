@@ -322,15 +322,31 @@ function Vido(state, api) {
         };
         VidoInstance.prototype.updateTemplate = function (callback) {
             var _this = this;
+            if (callback === void 0) { callback = undefined; }
+            if (callback)
+                this.callbacks.push(callback);
             return new Promise(function (resolve) {
                 var currentShouldUpdateCount = ++shouldUpdateCount;
                 var self = _this;
                 function flush() {
+                    var e_6, _a;
                     if (currentShouldUpdateCount === shouldUpdateCount) {
                         shouldUpdateCount = 0;
                         self.render();
-                        if (typeof callback === 'function')
-                            callback();
+                        try {
+                            for (var _b = __values(this.callbacks), _c = _b.next(); !_c.done; _c = _b.next()) {
+                                var cb = _c.value;
+                                cb();
+                            }
+                        }
+                        catch (e_6_1) { e_6 = { error: e_6_1 }; }
+                        finally {
+                            try {
+                                if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+                            }
+                            finally { if (e_6) throw e_6.error; }
+                        }
+                        this.callbacks.length = 0;
                         resolve();
                     }
                 }

@@ -11,7 +11,7 @@ export default function getPublicComponentMethods(components: any, actionsByInst
         /**
          * Update template - trigger rendering process
          */
-        update(): any;
+        update(callback?: () => void): any;
         /**
          * Change component input properties
          * @param {any} newProps

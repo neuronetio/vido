@@ -328,7 +328,10 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       }
     }
 
-    updateTemplate(callback) {
+    callbacks: (() => void)[];
+
+    updateTemplate(callback: () => void = undefined) {
+      if (callback) this.callbacks.push(callback);
       return new Promise((resolve) => {
         const currentShouldUpdateCount = ++shouldUpdateCount;
         const self = this;
@@ -336,7 +339,10 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
           if (currentShouldUpdateCount === shouldUpdateCount) {
             shouldUpdateCount = 0;
             self.render();
-            if (typeof callback === 'function') callback();
+            for (const cb of this.callbacks) {
+              cb();
+            }
+            this.callbacks.length = 0;
             resolve();
           }
         }

@@ -32,14 +32,14 @@ export default function getPublicComponentMethods(components, actionsByInstance,
     /**
      * Update template - trigger rendering process
      */
-    public update() {
+    public update(callback: () => void = undefined) {
       if (this.vidoInstance.debug) {
         console.groupCollapsed(`updating component ${this.instance}`);
         console.log(clone({ components: components.keys(), actionsByInstance }));
         console.trace();
         console.groupEnd();
       }
-      return this.vidoInstance.updateTemplate(this.vidoInstance);
+      return this.vidoInstance.updateTemplate(callback);
     }
 
     /**

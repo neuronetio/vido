@@ -28,14 +28,15 @@ function getPublicComponentMethods(components, actionsByInstance, clone) {
         /**
          * Update template - trigger rendering process
          */
-        PublicComponentMethods.prototype.update = function () {
+        PublicComponentMethods.prototype.update = function (callback) {
+            if (callback === void 0) { callback = undefined; }
             if (this.vidoInstance.debug) {
                 console.groupCollapsed("updating component " + this.instance);
                 console.log(clone({ components: components.keys(), actionsByInstance: actionsByInstance }));
                 console.trace();
                 console.groupEnd();
             }
-            return this.vidoInstance.updateTemplate(this.vidoInstance);
+            return this.vidoInstance.updateTemplate(callback);
         };
         /**
          * Change component input properties

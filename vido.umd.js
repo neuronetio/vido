@@ -2786,14 +2786,14 @@
             /**
              * Update template - trigger rendering process
              */
-            update() {
+            update(callback = undefined) {
                 if (this.vidoInstance.debug) {
                     console.groupCollapsed(`updating component ${this.instance}`);
                     console.log(clone({ components: components.keys(), actionsByInstance }));
                     console.trace();
                     console.groupEnd();
                 }
-                return this.vidoInstance.updateTemplate(this.vidoInstance);
+                return this.vidoInstance.updateTemplate(callback);
             }
             /**
              * Change component input properties
@@ -3248,7 +3248,9 @@
                     }
                 }
             }
-            updateTemplate(callback) {
+            updateTemplate(callback = undefined) {
+                if (callback)
+                    this.callbacks.push(callback);
                 return new Promise((resolve) => {
                     const currentShouldUpdateCount = ++shouldUpdateCount;
                     const self = this;
@@ -3256,8 +3258,10 @@
                         if (currentShouldUpdateCount === shouldUpdateCount) {
                             shouldUpdateCount = 0;
                             self.render();
-                            if (typeof callback === 'function')
-                                callback();
+                            for (const cb of this.callbacks) {
+                                cb();
+                            }
+                            this.callbacks.length = 0;
                             resolve();
                         }
                     }
