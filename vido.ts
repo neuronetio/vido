@@ -341,7 +341,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
             for (const cb of afterUpdateCallbacks) {
               cb();
             }
-            this.callbacks.length = 0;
+            afterUpdateCallbacks.length = 0;
             resolve();
           }
         }

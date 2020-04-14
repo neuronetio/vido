@@ -347,7 +347,7 @@ function Vido(state, api) {
                             }
                             finally { if (e_6) throw e_6.error; }
                         }
-                        this.callbacks.length = 0;
+                        afterUpdateCallbacks.length = 0;
                         resolve();
                     }
                 }

@@ -3262,7 +3262,7 @@
                             for (const cb of afterUpdateCallbacks) {
                                 cb();
                             }
-                            this.callbacks.length = 0;
+                            afterUpdateCallbacks.length = 0;
                             resolve();
                         }
                     }
