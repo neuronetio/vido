@@ -3139,7 +3139,7 @@
                         const item = dataArray[dataLen - diff];
                         const newComponent = this.createComponent(component, getProps(item));
                         currentComponents.push(newComponent);
-                        modified.push(newComponent.instance);
+                        modified.push(newComponent);
                         diff--;
                     }
                 }
@@ -3152,7 +3152,7 @@
                     while (diff) {
                         const index = currentLen - diff;
                         if (!leaveTail) {
-                            modified.push(currentComponents[index].instance);
+                            modified.push(currentComponents[index]);
                             currentComponents[index].destroy();
                         }
                         diff--;
@@ -3164,7 +3164,7 @@
                 let index = 0;
                 for (const component of currentComponents) {
                     const item = dataArray[index];
-                    if (!modified.includes(component.instance) && component) {
+                    if (component && !modified.includes(component)) {
                         component.change(getProps(item), { leave: leave && index >= leaveStartingAt });
                     }
                     index++;

@@ -24,7 +24,7 @@
           update() {},
           destroy() {
             actionsDestroyed++;
-          }
+          },
         };
       }
 
@@ -35,9 +35,7 @@
           itemChildDestroyed++;
         });
         return (templateProps) =>
-          html`
-            <div data-actions=${actions} class="item-child-${props.id}">child: ${props.id}</div>
-          `;
+          html` <div data-actions=${actions} class="item-child-${props.id}">child: ${props.id}</div> `;
       }
 
       function Item(vido, props = {}) {
@@ -58,9 +56,7 @@
           // noop
         });
         return (templateProps) =>
-          html`
-            <div class="item-${props.id}">${props.id}: ${childs.map((child) => child.html())}</div>
-          `;
+          html` <div class="item-${props.id}">${props.id}: ${childs.map((child) => child.html())}</div> `;
       }
 
       function Main(vido, props) {
@@ -89,7 +85,7 @@
       window.app = vido.createApp({
         component: Main,
         props: { components: [1, 2, 3, 4, 5] },
-        element: document.querySelector('.app')
+        element: document.querySelector('.app'),
       });
 
       function destroyMain() {

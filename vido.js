@@ -144,7 +144,7 @@ function Vido(state, api) {
                     var item = dataArray[dataLen - diff];
                     var newComponent = this.createComponent(component, getProps(item));
                     currentComponents.push(newComponent);
-                    modified.push(newComponent.instance);
+                    modified.push(newComponent);
                     diff--;
                 }
             }
@@ -157,7 +157,7 @@ function Vido(state, api) {
                 while (diff) {
                     var index_1 = currentLen - diff;
                     if (!leaveTail) {
-                        modified.push(currentComponents[index_1].instance);
+                        modified.push(currentComponents[index_1]);
                         currentComponents[index_1].destroy();
                     }
                     diff--;
@@ -171,7 +171,7 @@ function Vido(state, api) {
                 for (var currentComponents_1 = __values(currentComponents), currentComponents_1_1 = currentComponents_1.next(); !currentComponents_1_1.done; currentComponents_1_1 = currentComponents_1.next()) {
                     var component_1 = currentComponents_1_1.value;
                     var item = dataArray[index];
-                    if (!modified.includes(component_1.instance) && component_1) {
+                    if (component_1 && !modified.includes(component_1)) {
                         component_1.change(getProps(item), { leave: leave && index >= leaveStartingAt });
                     }
                     index++;

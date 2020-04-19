@@ -1,4 +1,4 @@
-import { render, html, directive, svg, Directive, NodePart } from 'lit-html-optimised';
+import { render, html, directive, svg, Directive } from 'lit-html-optimised';
 import { asyncAppend } from 'lit-html-optimised/directives/async-append';
 import { asyncReplace } from 'lit-html-optimised/directives/async-replace';
 import { cache } from 'lit-html-optimised/directives/cache';
@@ -201,7 +201,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
           const item = dataArray[dataLen - diff];
           const newComponent = this.createComponent(component, getProps(item));
           currentComponents.push(newComponent);
-          modified.push(newComponent.instance);
+          modified.push(newComponent);
           diff--;
         }
       } else if (currentLen > dataLen) {
@@ -213,7 +213,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
         while (diff) {
           const index = currentLen - diff;
           if (!leaveTail) {
-            modified.push(currentComponents[index].instance);
+            modified.push(currentComponents[index]);
             currentComponents[index].destroy();
           }
           diff--;
@@ -225,7 +225,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       let index = 0;
       for (const component of currentComponents) {
         const item = dataArray[index];
-        if (!modified.includes(component.instance) && component) {
+        if (component && !modified.includes(component)) {
           component.change(getProps(item), { leave: leave && index >= leaveStartingAt });
         }
         index++;
