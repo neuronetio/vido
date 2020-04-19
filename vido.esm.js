@@ -3118,7 +3118,7 @@ function Vido(state, api) {
          * @param {boolean} leaveTail - leave last elements and do not destroy corresponding components
          * @returns {array} of components (with updated/destroyed/created ones)
          */
-        reuseComponents(currentComponents, dataArray, getProps, component, leaveTail = true) {
+        reuseComponents(currentComponents, dataArray, getProps, component, leaveTail = true, debug = false) {
             const modified = [];
             const currentLen = currentComponents.length;
             const dataLen = dataArray.length;
@@ -3156,10 +3156,20 @@ function Vido(state, api) {
                 }
             }
             let index = 0;
+            if (debug)
+                console.log('modified components', modified);
+            if (debug)
+                console.log('current components', currentComponents);
+            if (debug)
+                console.log('data array', dataArray);
             for (const component of currentComponents) {
-                const item = dataArray[index];
+                const data = dataArray[index];
+                if (debug)
+                    console.log(`reuse components data at '${index}'`, data);
                 if (component && !modified.includes(component)) {
-                    component.change(getProps(item), { leave: leave && index >= leaveStartingAt });
+                    if (debug)
+                        console.log('getProps fn result', getProps(data));
+                    component.change(getProps(data), { leave: leave && index >= leaveStartingAt });
                 }
                 index++;
             }

@@ -127,9 +127,10 @@ function Vido(state, api) {
          * @param {boolean} leaveTail - leave last elements and do not destroy corresponding components
          * @returns {array} of components (with updated/destroyed/created ones)
          */
-        VidoInstance.prototype.reuseComponents = function (currentComponents, dataArray, getProps, component, leaveTail) {
+        VidoInstance.prototype.reuseComponents = function (currentComponents, dataArray, getProps, component, leaveTail, debug) {
             var e_1, _a;
             if (leaveTail === void 0) { leaveTail = true; }
+            if (debug === void 0) { debug = false; }
             var modified = [];
             var currentLen = currentComponents.length;
             var dataLen = dataArray.length;
@@ -167,12 +168,22 @@ function Vido(state, api) {
                 }
             }
             var index = 0;
+            if (debug)
+                console.log('modified components', modified);
+            if (debug)
+                console.log('current components', currentComponents);
+            if (debug)
+                console.log('data array', dataArray);
             try {
                 for (var currentComponents_1 = __values(currentComponents), currentComponents_1_1 = currentComponents_1.next(); !currentComponents_1_1.done; currentComponents_1_1 = currentComponents_1.next()) {
                     var component_1 = currentComponents_1_1.value;
-                    var item = dataArray[index];
+                    var data = dataArray[index];
+                    if (debug)
+                        console.log("reuse components data at '" + index + "'", data);
                     if (component_1 && !modified.includes(component_1)) {
-                        component_1.change(getProps(item), { leave: leave && index >= leaveStartingAt });
+                        if (debug)
+                            console.log('getProps fn result', getProps(data));
+                        component_1.change(getProps(data), { leave: leave && index >= leaveStartingAt });
                     }
                     index++;
                 }
