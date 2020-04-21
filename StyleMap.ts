@@ -1,13 +1,12 @@
 import { Directive, Part } from 'lit-html-optimised';
 import { PropertiesHyphenFallback as CSSProp } from 'csstype';
 
-const toRemove = [],
-  toUpdate = [];
-
 export default class StyleMap extends Directive {
   public style: CSSProp;
   private previous: {};
   private detach: boolean;
+  private toRemove = [];
+  private toUpdate = [];
 
   constructor(styleInfo: CSSProp, detach: boolean = false) {
     super();
@@ -25,27 +24,29 @@ export default class StyleMap extends Directive {
   }
 
   public body(part: Part) {
-    toRemove.length = 0;
-    toUpdate.length = 0;
+    this.toRemove.length = 0;
+    this.toUpdate.length = 0;
     // @ts-ignore
     const element = part.committer.element;
     const style = element.style;
     let previous = this.previous;
     for (const name in previous) {
+      if (!this.style.hasOwnProperty(name)) continue;
       if (this.style[name] === undefined) {
-        toRemove.push(name);
+        this.toRemove.push(name);
       }
     }
     for (const name in this.style) {
+      if (!this.style.hasOwnProperty(name)) continue;
       const value = this.style[name];
       const prev = previous[name];
       if (prev !== undefined && prev === value) {
         continue;
       }
-      toUpdate.push(name);
+      this.toUpdate.push(name);
     }
 
-    if (toRemove.length || toUpdate.length) {
+    if (this.toRemove.length || this.toUpdate.length) {
       let parent, nextSibling;
       if (this.detach) {
         parent = element.parentNode;
@@ -54,10 +55,10 @@ export default class StyleMap extends Directive {
           element.remove();
         }
       }
-      for (const name of toRemove) {
+      for (const name of this.toRemove) {
         style.removeProperty(name);
       }
-      for (const name of toUpdate) {
+      for (const name of this.toUpdate) {
         const value = this.style[name];
         if (!name.includes('-')) {
           style[name] = value;

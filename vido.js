@@ -125,6 +125,7 @@ function Vido(state, api) {
          * @param {function} getProps - you can pass params to component from array item ( example: item=>({id:item.id}) )
          * @param {function} component - what kind of components do you want to create?
          * @param {boolean} leaveTail - leave last elements and do not destroy corresponding components
+         * @param {boolean} debug - show debug info
          * @returns {array} of components (with updated/destroyed/created ones)
          */
         VidoInstance.prototype.reuseComponents = function (currentComponents, dataArray, getProps, component, leaveTail, debug) {

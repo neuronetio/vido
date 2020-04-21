@@ -36,12 +36,13 @@ var __values = (this && this.__values) || function(o) {
 };
 exports.__esModule = true;
 var lit_html_optimised_1 = require("lit-html-optimised");
-var toRemove = [], toUpdate = [];
 var StyleMap = /** @class */ (function (_super) {
     __extends(StyleMap, _super);
     function StyleMap(styleInfo, detach) {
         if (detach === void 0) { detach = false; }
         var _this = _super.call(this) || this;
+        _this.toRemove = [];
+        _this.toUpdate = [];
         _this.previous = {};
         _this.style = styleInfo;
         _this.detach = detach;
@@ -55,26 +56,30 @@ var StyleMap = /** @class */ (function (_super) {
     };
     StyleMap.prototype.body = function (part) {
         var e_1, _a, e_2, _b;
-        toRemove.length = 0;
-        toUpdate.length = 0;
+        this.toRemove.length = 0;
+        this.toUpdate.length = 0;
         // @ts-ignore
         var element = part.committer.element;
         var style = element.style;
         var previous = this.previous;
         for (var name_1 in previous) {
+            if (!this.style.hasOwnProperty(name_1))
+                continue;
             if (this.style[name_1] === undefined) {
-                toRemove.push(name_1);
+                this.toRemove.push(name_1);
             }
         }
         for (var name_2 in this.style) {
+            if (!this.style.hasOwnProperty(name_2))
+                continue;
             var value = this.style[name_2];
             var prev = previous[name_2];
             if (prev !== undefined && prev === value) {
                 continue;
             }
-            toUpdate.push(name_2);
+            this.toUpdate.push(name_2);
         }
-        if (toRemove.length || toUpdate.length) {
+        if (this.toRemove.length || this.toUpdate.length) {
             var parent_1, nextSibling = void 0;
             if (this.detach) {
                 parent_1 = element.parentNode;
@@ -84,21 +89,21 @@ var StyleMap = /** @class */ (function (_super) {
                 }
             }
             try {
-                for (var toRemove_1 = __values(toRemove), toRemove_1_1 = toRemove_1.next(); !toRemove_1_1.done; toRemove_1_1 = toRemove_1.next()) {
-                    var name_3 = toRemove_1_1.value;
+                for (var _c = __values(this.toRemove), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var name_3 = _d.value;
                     style.removeProperty(name_3);
                 }
             }
             catch (e_1_1) { e_1 = { error: e_1_1 }; }
             finally {
                 try {
-                    if (toRemove_1_1 && !toRemove_1_1.done && (_a = toRemove_1["return"])) _a.call(toRemove_1);
+                    if (_d && !_d.done && (_a = _c["return"])) _a.call(_c);
                 }
                 finally { if (e_1) throw e_1.error; }
             }
             try {
-                for (var toUpdate_1 = __values(toUpdate), toUpdate_1_1 = toUpdate_1.next(); !toUpdate_1_1.done; toUpdate_1_1 = toUpdate_1.next()) {
-                    var name_4 = toUpdate_1_1.value;
+                for (var _e = __values(this.toUpdate), _f = _e.next(); !_f.done; _f = _e.next()) {
+                    var name_4 = _f.value;
                     var value = this.style[name_4];
                     if (!name_4.includes('-')) {
                         style[name_4] = value;
@@ -111,7 +116,7 @@ var StyleMap = /** @class */ (function (_super) {
             catch (e_2_1) { e_2 = { error: e_2_1 }; }
             finally {
                 try {
-                    if (toUpdate_1_1 && !toUpdate_1_1.done && (_b = toUpdate_1["return"])) _b.call(toUpdate_1);
+                    if (_f && !_f.done && (_b = _e["return"])) _b.call(_e);
                 }
                 finally { if (e_2) throw e_2.error; }
             }
