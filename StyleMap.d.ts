@@ -6,8 +6,10 @@ export default class StyleMap extends Directive {
     private detach;
     private toRemove;
     private toUpdate;
+    private debug;
     constructor(styleInfo: CSSProp, detach?: boolean);
     setStyle(styleInfo: CSSProp): void;
+    setDebug(debug?: boolean): void;
     setDetach(detach: any): void;
     body(part: Part): void;
 }

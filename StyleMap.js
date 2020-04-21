@@ -23,6 +23,26 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 var __values = (this && this.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
@@ -43,6 +63,7 @@ var StyleMap = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this.toRemove = [];
         _this.toUpdate = [];
+        _this.debug = false;
         _this.previous = {};
         _this.style = styleInfo;
         _this.detach = detach;
@@ -50,6 +71,10 @@ var StyleMap = /** @class */ (function (_super) {
     }
     StyleMap.prototype.setStyle = function (styleInfo) {
         this.style = styleInfo;
+    };
+    StyleMap.prototype.setDebug = function (debug) {
+        if (debug === void 0) { debug = true; }
+        this.debug = debug;
     };
     StyleMap.prototype.setDetach = function (detach) {
         this.detach = detach;
@@ -60,24 +85,37 @@ var StyleMap = /** @class */ (function (_super) {
         this.toUpdate.length = 0;
         // @ts-ignore
         var element = part.committer.element;
-        var style = element.style;
+        var elementStyle = element.style;
         var previous = this.previous;
-        for (var name_1 in previous) {
-            if (!this.style.hasOwnProperty(name_1))
+        for (var name_1 in elementStyle) {
+            if (!elementStyle.hasOwnProperty(name_1))
                 continue;
             if (this.style[name_1] === undefined) {
-                this.toRemove.push(name_1);
+                if (!this.toRemove.includes(name_1))
+                    this.toRemove.push(name_1);
             }
         }
-        for (var name_2 in this.style) {
+        for (var name_2 in previous) {
             if (!this.style.hasOwnProperty(name_2))
                 continue;
-            var value = this.style[name_2];
-            var prev = previous[name_2];
+            if (this.style[name_2] === undefined) {
+                if (!this.toRemove.includes(name_2))
+                    this.toRemove.push(name_2);
+            }
+        }
+        for (var name_3 in this.style) {
+            if (!this.style.hasOwnProperty(name_3))
+                continue;
+            var value = this.style[name_3];
+            var prev = previous[name_3];
             if (prev !== undefined && prev === value) {
                 continue;
             }
-            this.toUpdate.push(name_2);
+            this.toUpdate.push(name_3);
+        }
+        if (this.debug) {
+            console.log('[StyleMap] to remove', __spread(this.toRemove));
+            console.log('[StyleMap] to update', __spread(this.toUpdate));
         }
         if (this.toRemove.length || this.toUpdate.length) {
             var parent_1, nextSibling = void 0;
@@ -90,8 +128,10 @@ var StyleMap = /** @class */ (function (_super) {
             }
             try {
                 for (var _c = __values(this.toRemove), _d = _c.next(); !_d.done; _d = _c.next()) {
-                    var name_3 = _d.value;
-                    style.removeProperty(name_3);
+                    var name_4 = _d.value;
+                    elementStyle.removeProperty(name_4);
+                    if (elementStyle[name_4])
+                        delete elementStyle[name_4];
                 }
             }
             catch (e_1_1) { e_1 = { error: e_1_1 }; }
@@ -103,13 +143,13 @@ var StyleMap = /** @class */ (function (_super) {
             }
             try {
                 for (var _e = __values(this.toUpdate), _f = _e.next(); !_f.done; _f = _e.next()) {
-                    var name_4 = _f.value;
-                    var value = this.style[name_4];
-                    if (!name_4.includes('-')) {
-                        style[name_4] = value;
+                    var name_5 = _f.value;
+                    var value = this.style[name_5];
+                    if (!name_5.includes('-')) {
+                        elementStyle[name_5] = value;
                     }
                     else {
-                        style.setProperty(name_4, value);
+                        elementStyle.setProperty(name_5, value);
                     }
                 }
             }

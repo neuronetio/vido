@@ -2442,12 +2442,16 @@
             super();
             this.toRemove = [];
             this.toUpdate = [];
+            this.debug = false;
             this.previous = {};
             this.style = styleInfo;
             this.detach = detach;
         }
         setStyle(styleInfo) {
             this.style = styleInfo;
+        }
+        setDebug(debug = true) {
+            this.debug = debug;
         }
         setDetach(detach) {
             this.detach = detach;
@@ -2457,13 +2461,22 @@
             this.toUpdate.length = 0;
             // @ts-ignore
             const element = part.committer.element;
-            const style = element.style;
+            const elementStyle = element.style;
             let previous = this.previous;
+            for (const name in elementStyle) {
+                if (!elementStyle.hasOwnProperty(name))
+                    continue;
+                if (this.style[name] === undefined) {
+                    if (!this.toRemove.includes(name))
+                        this.toRemove.push(name);
+                }
+            }
             for (const name in previous) {
                 if (!this.style.hasOwnProperty(name))
                     continue;
                 if (this.style[name] === undefined) {
-                    this.toRemove.push(name);
+                    if (!this.toRemove.includes(name))
+                        this.toRemove.push(name);
                 }
             }
             for (const name in this.style) {
@@ -2476,6 +2489,10 @@
                 }
                 this.toUpdate.push(name);
             }
+            if (this.debug) {
+                console.log('[StyleMap] to remove', [...this.toRemove]);
+                console.log('[StyleMap] to update', [...this.toUpdate]);
+            }
             if (this.toRemove.length || this.toUpdate.length) {
                 let parent, nextSibling;
                 if (this.detach) {
@@ -2486,15 +2503,17 @@
                     }
                 }
                 for (const name of this.toRemove) {
-                    style.removeProperty(name);
+                    elementStyle.removeProperty(name);
+                    if (elementStyle[name])
+                        delete elementStyle[name];
                 }
                 for (const name of this.toUpdate) {
                     const value = this.style[name];
                     if (!name.includes('-')) {
-                        style[name] = value;
+                        elementStyle[name] = value;
                     }
                     else {
-                        style.setProperty(name, value);
+                        elementStyle.setProperty(name, value);
                     }
                 }
                 if (this.detach && parent) {

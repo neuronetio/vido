@@ -7,6 +7,7 @@ export default class StyleMap extends Directive {
   private detach: boolean;
   private toRemove = [];
   private toUpdate = [];
+  private debug = false;
 
   constructor(styleInfo: CSSProp, detach: boolean = false) {
     super();
@@ -19,6 +20,10 @@ export default class StyleMap extends Directive {
     this.style = styleInfo;
   }
 
+  public setDebug(debug = true) {
+    this.debug = debug;
+  }
+
   public setDetach(detach) {
     this.detach = detach;
   }
@@ -27,13 +32,21 @@ export default class StyleMap extends Directive {
     this.toRemove.length = 0;
     this.toUpdate.length = 0;
     // @ts-ignore
-    const element = part.committer.element;
-    const style = element.style;
+    const element = part.committer.element as HTMLElement;
+    const elementStyle = element.style;
     let previous = this.previous;
+
+    for (const name in elementStyle) {
+      if (!elementStyle.hasOwnProperty(name)) continue;
+      if (this.style[name] === undefined) {
+        if (!this.toRemove.includes(name)) this.toRemove.push(name);
+      }
+    }
+
     for (const name in previous) {
       if (!this.style.hasOwnProperty(name)) continue;
       if (this.style[name] === undefined) {
-        this.toRemove.push(name);
+        if (!this.toRemove.includes(name)) this.toRemove.push(name);
       }
     }
     for (const name in this.style) {
@@ -46,6 +59,11 @@ export default class StyleMap extends Directive {
       this.toUpdate.push(name);
     }
 
+    if (this.debug) {
+      console.log('[StyleMap] to remove', [...this.toRemove]);
+      console.log('[StyleMap] to update', [...this.toUpdate]);
+    }
+
     if (this.toRemove.length || this.toUpdate.length) {
       let parent, nextSibling;
       if (this.detach) {
@@ -56,14 +74,15 @@ export default class StyleMap extends Directive {
         }
       }
       for (const name of this.toRemove) {
-        style.removeProperty(name);
+        elementStyle.removeProperty(name);
+        if (elementStyle[name]) delete elementStyle[name];
       }
       for (const name of this.toUpdate) {
         const value = this.style[name];
         if (!name.includes('-')) {
-          style[name] = value;
+          elementStyle[name] = value;
         } else {
-          style.setProperty(name, value);
+          elementStyle.setProperty(name, value);
         }
       }
       if (this.detach && parent) {
