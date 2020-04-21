@@ -23,6 +23,17 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -42,17 +53,6 @@ var __read = (this && this.__read) || function (o, n) {
 var __spread = (this && this.__spread) || function () {
     for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
     return ar;
-};
-var __values = (this && this.__values) || function(o) {
-    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-    if (m) return m.call(o);
-    if (o && typeof o.length === "number") return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 exports.__esModule = true;
 var lit_html_optimised_1 = require("lit-html-optimised");
@@ -80,19 +80,34 @@ var StyleMap = /** @class */ (function (_super) {
         this.detach = detach;
     };
     StyleMap.prototype.body = function (part) {
-        var e_1, _a, e_2, _b;
+        var e_1, _a, e_2, _b, e_3, _c;
         this.toRemove.length = 0;
         this.toUpdate.length = 0;
         // @ts-ignore
         var element = part.committer.element;
         var elementStyle = element.style;
         var previous = this.previous;
-        for (var name_1 in elementStyle) {
-            if (!elementStyle.hasOwnProperty(name_1))
-                continue;
-            if (this.style[name_1] === undefined) {
-                if (!this.toRemove.includes(name_1))
-                    this.toRemove.push(name_1);
+        if (element.attributes.getNamedItem('style')) {
+            var currentElementStyles = element.attributes
+                .getNamedItem('style')
+                .value.split(';')
+                .map(function (item) { return item.substr(0, item.indexOf(':')).trim(); })
+                .filter(function (item) { return !!item; });
+            try {
+                for (var currentElementStyles_1 = __values(currentElementStyles), currentElementStyles_1_1 = currentElementStyles_1.next(); !currentElementStyles_1_1.done; currentElementStyles_1_1 = currentElementStyles_1.next()) {
+                    var name_1 = currentElementStyles_1_1.value;
+                    if (this.style[name_1] === undefined) {
+                        if (!this.toRemove.includes(name_1))
+                            this.toRemove.push(name_1);
+                    }
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (currentElementStyles_1_1 && !currentElementStyles_1_1.done && (_a = currentElementStyles_1["return"])) _a.call(currentElementStyles_1);
+                }
+                finally { if (e_1) throw e_1.error; }
             }
         }
         for (var name_2 in previous) {
@@ -127,23 +142,23 @@ var StyleMap = /** @class */ (function (_super) {
                 }
             }
             try {
-                for (var _c = __values(this.toRemove), _d = _c.next(); !_d.done; _d = _c.next()) {
-                    var name_4 = _d.value;
+                for (var _d = __values(this.toRemove), _e = _d.next(); !_e.done; _e = _d.next()) {
+                    var name_4 = _e.value;
                     elementStyle.removeProperty(name_4);
                     if (elementStyle[name_4])
                         delete elementStyle[name_4];
                 }
             }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
             finally {
                 try {
-                    if (_d && !_d.done && (_a = _c["return"])) _a.call(_c);
+                    if (_e && !_e.done && (_b = _d["return"])) _b.call(_d);
                 }
-                finally { if (e_1) throw e_1.error; }
+                finally { if (e_2) throw e_2.error; }
             }
             try {
-                for (var _e = __values(this.toUpdate), _f = _e.next(); !_f.done; _f = _e.next()) {
-                    var name_5 = _f.value;
+                for (var _f = __values(this.toUpdate), _g = _f.next(); !_g.done; _g = _f.next()) {
+                    var name_5 = _g.value;
                     var value = this.style[name_5];
                     if (!name_5.includes('-')) {
                         elementStyle[name_5] = value;
@@ -153,12 +168,12 @@ var StyleMap = /** @class */ (function (_super) {
                     }
                 }
             }
-            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            catch (e_3_1) { e_3 = { error: e_3_1 }; }
             finally {
                 try {
-                    if (_f && !_f.done && (_b = _e["return"])) _b.call(_e);
+                    if (_g && !_g.done && (_c = _f["return"])) _c.call(_f);
                 }
-                finally { if (e_2) throw e_2.error; }
+                finally { if (e_3) throw e_3.error; }
             }
             if (this.detach && parent_1) {
                 parent_1.insertBefore(element, nextSibling);

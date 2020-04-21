@@ -2463,12 +2463,17 @@
             const element = part.committer.element;
             const elementStyle = element.style;
             let previous = this.previous;
-            for (const name in elementStyle) {
-                if (!elementStyle.hasOwnProperty(name))
-                    continue;
-                if (this.style[name] === undefined) {
-                    if (!this.toRemove.includes(name))
-                        this.toRemove.push(name);
+            if (element.attributes.getNamedItem('style')) {
+                const currentElementStyles = element.attributes
+                    .getNamedItem('style')
+                    .value.split(';')
+                    .map((item) => item.substr(0, item.indexOf(':')).trim())
+                    .filter((item) => !!item);
+                for (const name of currentElementStyles) {
+                    if (this.style[name] === undefined) {
+                        if (!this.toRemove.includes(name))
+                            this.toRemove.push(name);
+                    }
                 }
             }
             for (const name in previous) {
