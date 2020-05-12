@@ -44,12 +44,20 @@
         return (templateProps) => html`<span>item child2</span>`;
       }
 
+      function ItemSlot(vido, props = {}) {
+        const { html } = vido;
+        return (templateProps) => html`<span id="slot-${props.id}">item slot</span>`;
+      }
+
       function Item(vido, props = {}) {
-        const { html, reuseComponents, onDestroy, createComponent } = vido;
+        const { html, reuseComponents, onDestroy, createComponent, Slots } = vido;
 
         if (typeof window.ItemInstance === 'undefined') {
           window.ItemInstance = vido.instance;
         }
+
+        const slots = new Slots(vido, props);
+        slots.setComponents({ inside: [ItemSlot] });
 
         let itemChild2 = createComponent(ItemChild2);
         onDestroy(itemChild2.destroy);
@@ -71,7 +79,8 @@
         return (templateProps) =>
           html`
             <div class="item-${props.id}">
-              ${props.id} (${itemChild2.html()}): ${childs.map((child) => child.html())}
+              ${props.id} [slot: ${slots.html('inside', templateProps)}](${itemChild2.html()}):
+              ${childs.map((child) => child.html())}
             </div>
           `;
       }

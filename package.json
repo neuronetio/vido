@@ -5,7 +5,7 @@
   "main": "vido.umd.min.js",
   "module": "vido.esm.min.js",
   "scripts": {
-    "build": "tsc -d vido.ts --downlevelIteration && rollup -c",
+    "build": "tsc -p ./tsconfig.json && rollup -c",
     "autobuild": "rollup -c -w",
     "test": "nightwatch --env chrome && nightwatch --env firefox"
   },

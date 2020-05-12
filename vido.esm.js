@@ -3071,6 +3071,80 @@ function clone(source) {
     return mergeDeep({}, source);
 }
 
+class Slots {
+    constructor(vido, props) {
+        this.slotInstances = {};
+        this.destroyed = false;
+        this.vido = vido;
+        this.props = props;
+        this.destroy = this.destroy.bind(this);
+        this.change = this.change.bind(this);
+        this.html = this.html.bind(this);
+        this.getInstances = this.getInstances.bind(this);
+        this.setComponents = this.setComponents.bind(this);
+        this.vido.onDestroy(() => {
+            this.destroy();
+        });
+    }
+    setComponents(slots) {
+        if (!slots || this.destroyed)
+            return;
+        for (const slotPlacement in slots) {
+            const slotsComponents = slots[slotPlacement];
+            if (typeof this.slotInstances[slotPlacement] === 'undefined') {
+                this.slotInstances[slotPlacement] = [];
+            }
+            for (const instance of this.slotInstances[slotPlacement]) {
+                instance.destroy();
+            }
+            this.slotInstances[slotPlacement].length = 0;
+            for (const component of slotsComponents) {
+                this.slotInstances[slotPlacement].push(this.vido.createComponent(component, this.props));
+            }
+        }
+        this.vido.update();
+    }
+    destroy() {
+        if (this.destroyed)
+            return;
+        for (const slotPlacement in this.slotInstances) {
+            for (const instance of this.slotInstances[slotPlacement]) {
+                instance.destroy();
+            }
+            this.slotInstances[slotPlacement].length = 0;
+        }
+        this.destroyed = true;
+    }
+    change(changedProps, options = undefined) {
+        if (this.destroyed)
+            return;
+        for (const slotPlacement in this.slotInstances) {
+            const instances = this.slotInstances[slotPlacement];
+            for (const slot of instances) {
+                slot.change(changedProps, options);
+            }
+        }
+    }
+    getInstances(placement) {
+        if (this.destroyed)
+            return;
+        if (placement === undefined)
+            return this.slotInstances;
+        return this.slotInstances[placement];
+    }
+    html(placement, templateProps) {
+        if (this.destroyed)
+            return;
+        return this.slotInstances[placement].map((instance) => instance.html(templateProps));
+    }
+    getProps() {
+        return this.props;
+    }
+    isDestroyed() {
+        return this.destroyed;
+    }
+}
+
 function Vido(state, api) {
     let componentId = 0;
     const components = new Map();
@@ -3119,6 +3193,7 @@ function Vido(state, api) {
             this.Detach = Detach;
             this.PointerAction = PointerAction;
             this.Action = Action;
+            this.Slots = Slots;
             this._components = components;
             this._actions = actionsByInstance;
             this.reuseComponents = this.reuseComponents.bind(this);
@@ -3127,10 +3202,10 @@ function Vido(state, api) {
             this.update = this.update.bind(this);
             this.destroyComponent = this.destroyComponent.bind(this);
             for (const name in additionalMethods) {
-                this[name] = additionalMethods[name];
+                this[name] = additionalMethods[name].bind(this);
             }
         }
-        addMethod(name, body) {
+        static addMethod(name, body) {
             additionalMethods[name] = body;
         }
         onDestroy(fn) {
@@ -3358,8 +3433,9 @@ Vido.prototype.guard = guard;
 Vido.prototype.ifDefined = ifDefined;
 Vido.prototype.repeat = repeat;
 Vido.prototype.unsafeHTML = unsafeHTML;
-Vido.prototype.unti = until;
+Vido.prototype.until = until;
+Vido.prototype.Slots = Slots;
 
 export default Vido;
-export { Action, Detach, Directive, PointerAction, StyleMap, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, lithtml, repeat, schedule, unsafeHTML, until };
+export { Action, Detach, Directive, PointerAction, Slots, StyleMap, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, lithtml, repeat, schedule, unsafeHTML, until };
 //# sourceMappingURL=vido.esm.js.map

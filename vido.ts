@@ -16,6 +16,7 @@ import getActionsCollector from './ActionsCollector';
 import getInternalComponentMethods from './InternalComponentMethods';
 import { schedule, clone } from './helpers';
 import Action from './Action';
+import { Slots } from './Slots';
 
 import * as lithtml from 'lit-html-optimised';
 
@@ -85,6 +86,7 @@ export interface vido<State, Api> {
   Detach: typeof Detach;
   PointerAction: typeof PointerAction;
   Action: typeof Action;
+  Slots: typeof Slots;
   Actions?: any;
 }
 
@@ -142,6 +144,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
     Detach = Detach;
     PointerAction = PointerAction;
     Action = Action;
+    Slots = Slots;
     _components = components;
     _actions = actionsByInstance;
 
@@ -152,23 +155,23 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       this.update = this.update.bind(this);
       this.destroyComponent = this.destroyComponent.bind(this);
       for (const name in additionalMethods) {
-        this[name] = additionalMethods[name];
+        this[name] = additionalMethods[name].bind(this);
       }
     }
 
-    addMethod(name: string, body: (...args: unknown[]) => unknown) {
+    public static addMethod(name: string, body: (...args: unknown[]) => unknown) {
       additionalMethods[name] = body;
     }
 
-    onDestroy(fn) {
+    public onDestroy(fn) {
       this.destroyable.push(fn);
     }
 
-    onChange(fn) {
+    public onChange(fn) {
       this.onChangeFunctions.push(fn);
     }
 
-    update(callback) {
+    public update(callback) {
       return this.updateTemplate(callback);
     }
 
@@ -183,7 +186,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
      * @param {boolean} debug - show debug info
      * @returns {array} of components (with updated/destroyed/created ones)
      */
-    reuseComponents(
+    public reuseComponents(
       currentComponents: ComponentInstance[],
       dataArray: unknown[],
       getProps,
@@ -241,7 +244,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       }
     }
 
-    createComponent(component, props = {}, content = null): ComponentInstance {
+    public createComponent(component, props = {}, content = null): ComponentInstance {
       const instance = component.name + ':' + componentId++;
       let vidoInstance;
       vidoInstance = new VidoInstance();
@@ -266,7 +269,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       return publicMethods;
     }
 
-    destroyComponent(instance, vidoInstance) {
+    public destroyComponent(instance, vidoInstance) {
       if (vidoInstance.debug) {
         console.groupCollapsed(`destroying component ${instance}...`);
         console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -297,7 +300,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       }
     }
 
-    executeActions() {
+    private executeActions() {
       for (const actions of actionsByInstance.values()) {
         for (const action of actions) {
           if (action.element.vido === undefined) {
@@ -341,7 +344,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       }
     }
 
-    updateTemplate(callback: () => void = undefined) {
+    private updateTemplate(callback: () => void = undefined) {
       if (callback) afterUpdateCallbacks.push(callback);
       return new Promise((resolve) => {
         const currentShouldUpdateCount = ++shouldUpdateCount;
@@ -361,7 +364,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       });
     }
 
-    createApp(config: CreateAppConfig): ComponentInstance {
+    public createApp(config: CreateAppConfig): ComponentInstance {
       element = config.element;
       const App = this.createComponent(config.component, config.props);
       app = App.instance;
@@ -369,7 +372,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       return App;
     }
 
-    render(): void {
+    public render(): void {
       const appComponent = components.get(app);
       if (appComponent) {
         render(appComponent.update(), element);
@@ -398,7 +401,8 @@ Vido.prototype.guard = guard;
 Vido.prototype.ifDefined = ifDefined;
 Vido.prototype.repeat = repeat;
 Vido.prototype.unsafeHTML = unsafeHTML;
-Vido.prototype.unti = until;
+Vido.prototype.until = until;
+Vido.prototype.Slots = Slots;
 
 export {
   lithtml,
@@ -417,4 +421,5 @@ export {
   repeat,
   unsafeHTML,
   until,
+  Slots,
 };

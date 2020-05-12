@@ -1,85 +1,57 @@
-"use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-exports.__esModule = true;
-var Action_1 = require("./Action");
-var defaultOptions = {
+import Action from './Action';
+const defaultOptions = {
     element: document.createTextNode(''),
     axis: 'xy',
     threshold: 10,
-    onDown: function (data) { },
-    onMove: function (data) { },
-    onUp: function (data) { },
-    onWheel: function (data) { }
+    onDown(data) { },
+    onMove(data) { },
+    onUp(data) { },
+    onWheel(data) { }
 };
-var pointerEventsExists = typeof PointerEvent !== 'undefined';
-var id = 0;
-var PointerAction = /** @class */ (function (_super) {
-    __extends(PointerAction, _super);
-    function PointerAction(element, data) {
-        var _this = _super.call(this) || this;
-        _this.moving = '';
-        _this.initialX = 0;
-        _this.initialY = 0;
-        _this.lastY = 0;
-        _this.lastX = 0;
-        _this.onPointerDown = _this.onPointerDown.bind(_this);
-        _this.onPointerMove = _this.onPointerMove.bind(_this);
-        _this.onPointerUp = _this.onPointerUp.bind(_this);
-        _this.onWheel = _this.onWheel.bind(_this);
-        _this.element = element;
-        _this.id = ++id;
-        _this.options = __assign(__assign({}, defaultOptions), data.pointerOptions);
+const pointerEventsExists = typeof PointerEvent !== 'undefined';
+let id = 0;
+export default class PointerAction extends Action {
+    constructor(element, data) {
+        super();
+        this.moving = '';
+        this.initialX = 0;
+        this.initialY = 0;
+        this.lastY = 0;
+        this.lastX = 0;
+        this.onPointerDown = this.onPointerDown.bind(this);
+        this.onPointerMove = this.onPointerMove.bind(this);
+        this.onPointerUp = this.onPointerUp.bind(this);
+        this.onWheel = this.onWheel.bind(this);
+        this.element = element;
+        this.id = ++id;
+        this.options = Object.assign(Object.assign({}, defaultOptions), data.pointerOptions);
         if (pointerEventsExists) {
-            element.addEventListener('pointerdown', _this.onPointerDown);
-            document.addEventListener('pointermove', _this.onPointerMove);
-            document.addEventListener('pointerup', _this.onPointerUp);
+            element.addEventListener('pointerdown', this.onPointerDown);
+            document.addEventListener('pointermove', this.onPointerMove);
+            document.addEventListener('pointerup', this.onPointerUp);
         }
         else {
-            element.addEventListener('touchstart', _this.onPointerDown);
-            document.addEventListener('touchmove', _this.onPointerMove, { passive: false });
-            document.addEventListener('touchend', _this.onPointerUp);
-            document.addEventListener('touchcancel', _this.onPointerUp);
-            element.addEventListener('mousedown', _this.onPointerDown);
-            document.addEventListener('mousemove', _this.onPointerMove, { passive: false });
-            document.addEventListener('mouseup', _this.onPointerUp);
+            element.addEventListener('touchstart', this.onPointerDown);
+            document.addEventListener('touchmove', this.onPointerMove, { passive: false });
+            document.addEventListener('touchend', this.onPointerUp);
+            document.addEventListener('touchcancel', this.onPointerUp);
+            element.addEventListener('mousedown', this.onPointerDown);
+            document.addEventListener('mousemove', this.onPointerMove, { passive: false });
+            document.addEventListener('mouseup', this.onPointerUp);
         }
-        return _this;
     }
-    PointerAction.prototype.normalizeMouseWheelEvent = function (event) {
+    normalizeMouseWheelEvent(event) {
         // @ts-ignore
-        var x = event.deltaX || 0;
+        let x = event.deltaX || 0;
         // @ts-ignore
-        var y = event.deltaY || 0;
+        let y = event.deltaY || 0;
         // @ts-ignore
-        var z = event.deltaZ || 0;
+        let z = event.deltaZ || 0;
         // @ts-ignore
-        var mode = event.deltaMode;
+        const mode = event.deltaMode;
         // @ts-ignore
-        var lineHeight = parseInt(getComputedStyle(event.target).getPropertyValue('line-height'));
-        var scale = 1;
+        const lineHeight = parseInt(getComputedStyle(event.target).getPropertyValue('line-height'));
+        let scale = 1;
         switch (mode) {
             case 1:
                 scale = lineHeight;
@@ -92,17 +64,17 @@ var PointerAction = /** @class */ (function (_super) {
         x *= scale;
         y *= scale;
         z *= scale;
-        return { x: x, y: y, z: z, event: event };
-    };
-    PointerAction.prototype.onWheel = function (event) {
-        var normalized = this.normalizeMouseWheelEvent(event);
+        return { x, y, z, event };
+    }
+    onWheel(event) {
+        const normalized = this.normalizeMouseWheelEvent(event);
         this.options.onWheel(normalized);
-    };
-    PointerAction.prototype.normalizePointerEvent = function (event) {
-        var result = { x: 0, y: 0, pageX: 0, pageY: 0, clientX: 0, clientY: 0, screenX: 0, screenY: 0, event: event };
+    }
+    normalizePointerEvent(event) {
+        let result = { x: 0, y: 0, pageX: 0, pageY: 0, clientX: 0, clientY: 0, screenX: 0, screenY: 0, event };
         switch (event.type) {
             case 'wheel':
-                var wheel = this.normalizeMouseWheelEvent(event);
+                const wheel = this.normalizeMouseWheelEvent(event);
                 result.x = wheel.x;
                 result.y = wheel.y;
                 result.pageX = result.x;
@@ -137,36 +109,36 @@ var PointerAction = /** @class */ (function (_super) {
                 break;
         }
         return result;
-    };
-    PointerAction.prototype.onPointerDown = function (event) {
+    }
+    onPointerDown(event) {
         if (event.type === 'mousedown' && event.button !== 0)
             return;
         this.moving = 'xy';
-        var normalized = this.normalizePointerEvent(event);
+        const normalized = this.normalizePointerEvent(event);
         this.lastX = normalized.x;
         this.lastY = normalized.y;
         this.initialX = normalized.x;
         this.initialY = normalized.y;
         this.options.onDown(normalized);
-    };
-    PointerAction.prototype.handleX = function (normalized) {
-        var movementX = normalized.x - this.lastX;
+    }
+    handleX(normalized) {
+        let movementX = normalized.x - this.lastX;
         this.lastY = normalized.y;
         this.lastX = normalized.x;
         return movementX;
-    };
-    PointerAction.prototype.handleY = function (normalized) {
-        var movementY = normalized.y - this.lastY;
+    }
+    handleY(normalized) {
+        let movementY = normalized.y - this.lastY;
         this.lastY = normalized.y;
         this.lastX = normalized.x;
         return movementY;
-    };
-    PointerAction.prototype.onPointerMove = function (event) {
+    }
+    onPointerMove(event) {
         if (this.moving === '' || (event.type === 'mousemove' && event.button !== 0))
             return;
-        var normalized = this.normalizePointerEvent(event);
+        const normalized = this.normalizePointerEvent(event);
         if (this.options.axis === 'x|y') {
-            var movementX = 0, movementY = 0;
+            let movementX = 0, movementY = 0;
             if (this.moving === 'x' ||
                 (this.moving === 'xy' && Math.abs(normalized.x - this.initialX) > this.options.threshold)) {
                 this.moving = 'x';
@@ -178,19 +150,19 @@ var PointerAction = /** @class */ (function (_super) {
                 movementY = this.handleY(normalized);
             }
             this.options.onMove({
-                movementX: movementX,
-                movementY: movementY,
+                movementX,
+                movementY,
                 x: normalized.x,
                 y: normalized.y,
                 initialX: this.initialX,
                 initialY: this.initialY,
                 lastX: this.lastX,
                 lastY: this.lastY,
-                event: event
+                event
             });
         }
         else if (this.options.axis === 'xy') {
-            var movementX = 0, movementY = 0;
+            let movementX = 0, movementY = 0;
             if (Math.abs(normalized.x - this.initialX) > this.options.threshold) {
                 movementX = this.handleX(normalized);
             }
@@ -198,15 +170,15 @@ var PointerAction = /** @class */ (function (_super) {
                 movementY = this.handleY(normalized);
             }
             this.options.onMove({
-                movementX: movementX,
-                movementY: movementY,
+                movementX,
+                movementY,
                 x: normalized.x,
                 y: normalized.y,
                 initialX: this.initialX,
                 initialY: this.initialY,
                 lastX: this.lastX,
                 lastY: this.lastY,
-                event: event
+                event
             });
         }
         else if (this.options.axis === 'x') {
@@ -220,12 +192,12 @@ var PointerAction = /** @class */ (function (_super) {
                     initialY: this.initialY,
                     lastX: this.lastX,
                     lastY: this.lastY,
-                    event: event
+                    event
                 });
             }
         }
         else if (this.options.axis === 'y') {
-            var movementY = 0;
+            let movementY = 0;
             if (this.moving === 'y' ||
                 (this.moving === 'xy' && Math.abs(normalized.y - this.initialY) > this.options.threshold)) {
                 this.moving = 'y';
@@ -233,20 +205,20 @@ var PointerAction = /** @class */ (function (_super) {
             }
             this.options.onMove({
                 movementX: 0,
-                movementY: movementY,
+                movementY,
                 x: normalized.x,
                 y: normalized.y,
                 initialX: this.initialX,
                 initialY: this.initialY,
                 lastX: this.lastX,
                 lastY: this.lastY,
-                event: event
+                event
             });
         }
-    };
-    PointerAction.prototype.onPointerUp = function (event) {
+    }
+    onPointerUp(event) {
         this.moving = '';
-        var normalized = this.normalizePointerEvent(event);
+        const normalized = this.normalizePointerEvent(event);
         this.options.onUp({
             movementX: 0,
             movementY: 0,
@@ -256,12 +228,12 @@ var PointerAction = /** @class */ (function (_super) {
             initialY: this.initialY,
             lastX: this.lastX,
             lastY: this.lastY,
-            event: event
+            event
         });
         this.lastY = 0;
         this.lastX = 0;
-    };
-    PointerAction.prototype.destroy = function (element) {
+    }
+    destroy(element) {
         if (pointerEventsExists) {
             element.removeEventListener('pointerdown', this.onPointerDown);
             document.removeEventListener('pointermove', this.onPointerMove);
@@ -276,7 +248,5 @@ var PointerAction = /** @class */ (function (_super) {
             document.removeEventListener('touchend', this.onPointerUp);
             document.removeEventListener('touchcancel', this.onPointerUp);
         }
-    };
-    return PointerAction;
-}(Action_1["default"]));
-exports["default"] = PointerAction;
+    }
+}

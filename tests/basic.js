@@ -14,10 +14,11 @@ module.exports = {
   Create(client) {
     client
       .url('file:///' + path.join(__dirname, './basic.html'))
-      .waitForElementVisible('.test', 1000)
+      .waitForElementVisible('.test', 500)
+      .waitForElementVisible('#slot-2', 500)
       .assert.containsText('.test', 'Test text')
       .execute(getComponents, [], ({ value }) => {
-        expect(value.length).toEqual(6 + 5 * 6);
+        expect(value.length).toEqual(6 + 5 * 7);
       })
       .execute(
         function () {
@@ -40,13 +41,13 @@ module.exports = {
         },
         [],
         function ({ value }) {
-          expect(value.length).toEqual(6 + 4 * 6);
+          expect(value.length).toEqual(6 + 4 * 7);
         }
       )
       .click('#remove-one')
       .waitForElementNotPresent('.item-5')
       .execute(getComponents, [], function ({ value }) {
-        expect(value.length).toEqual(5 + 3 * 6);
+        expect(value.length).toEqual(5 + 3 * 7);
       });
   },
 

@@ -1,100 +1,72 @@
-"use strict";
-var __values = (this && this.__values) || function(o) {
-    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-    if (m) return m.call(o);
-    if (o && typeof o.length === "number") return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-};
-exports.__esModule = true;
-var lit_html_optimised_1 = require("lit-html-optimised");
-exports.Directive = lit_html_optimised_1.Directive;
-var async_append_1 = require("lit-html-optimised/directives/async-append");
-exports.asyncAppend = async_append_1.asyncAppend;
-var async_replace_1 = require("lit-html-optimised/directives/async-replace");
-exports.asyncReplace = async_replace_1.asyncReplace;
-var cache_1 = require("lit-html-optimised/directives/cache");
-exports.cache = cache_1.cache;
-var class_map_1 = require("lit-html-optimised/directives/class-map");
-exports.classMap = class_map_1.classMap;
-var guard_1 = require("lit-html-optimised/directives/guard");
-exports.guard = guard_1.guard;
-var if_defined_1 = require("lit-html-optimised/directives/if-defined");
-exports.ifDefined = if_defined_1.ifDefined;
-var repeat_1 = require("lit-html-optimised/directives/repeat");
-exports.repeat = repeat_1.repeat;
-var unsafe_html_1 = require("lit-html-optimised/directives/unsafe-html");
-exports.unsafeHTML = unsafe_html_1.unsafeHTML;
-var until_1 = require("lit-html-optimised/directives/until");
-exports.until = until_1.until;
-var Detach_1 = require("./Detach");
-exports.Detach = Detach_1["default"];
-var StyleMap_1 = require("./StyleMap");
-exports.StyleMap = StyleMap_1["default"];
-var PointerAction_1 = require("./PointerAction");
-exports.PointerAction = PointerAction_1["default"];
-var PublicComponentMethods_1 = require("./PublicComponentMethods");
-var ActionsCollector_1 = require("./ActionsCollector");
-var InternalComponentMethods_1 = require("./InternalComponentMethods");
-var helpers_1 = require("./helpers");
-exports.schedule = helpers_1.schedule;
-var Action_1 = require("./Action");
-exports.Action = Action_1["default"];
-var lithtml = require("lit-html-optimised");
-exports.lithtml = lithtml;
-function Vido(state, api) {
-    var componentId = 0;
-    var components = new Map();
-    var actionsByInstance = new Map();
-    var app, element;
-    var shouldUpdateCount = 0;
-    var afterUpdateCallbacks = [];
-    var resolved = Promise.resolve();
-    var additionalMethods = {};
-    var ActionsCollector = ActionsCollector_1["default"](actionsByInstance);
-    var InstanceActionsCollector = /** @class */ (function () {
-        function InstanceActionsCollector(instance) {
+import { render, html, directive, svg, Directive } from 'lit-html-optimised';
+import { asyncAppend } from 'lit-html-optimised/directives/async-append';
+import { asyncReplace } from 'lit-html-optimised/directives/async-replace';
+import { cache } from 'lit-html-optimised/directives/cache';
+import { classMap } from 'lit-html-optimised/directives/class-map';
+import { guard } from 'lit-html-optimised/directives/guard';
+import { ifDefined } from 'lit-html-optimised/directives/if-defined';
+import { repeat } from 'lit-html-optimised/directives/repeat';
+import { unsafeHTML } from 'lit-html-optimised/directives/unsafe-html';
+import { until } from 'lit-html-optimised/directives/until';
+import Detach from './Detach';
+import StyleMap from './StyleMap';
+import PointerAction from './PointerAction';
+import getPublicComponentMethods from './PublicComponentMethods';
+import getActionsCollector from './ActionsCollector';
+import getInternalComponentMethods from './InternalComponentMethods';
+import { schedule, clone } from './helpers';
+import Action from './Action';
+import { Slots } from './Slots';
+import * as lithtml from 'lit-html-optimised';
+export default function Vido(state, api) {
+    let componentId = 0;
+    const components = new Map();
+    let actionsByInstance = new Map();
+    let app, element;
+    let shouldUpdateCount = 0;
+    const afterUpdateCallbacks = [];
+    const resolved = Promise.resolve();
+    const additionalMethods = {};
+    const ActionsCollector = getActionsCollector(actionsByInstance);
+    class InstanceActionsCollector {
+        constructor(instance) {
             this.instance = instance;
         }
-        InstanceActionsCollector.prototype.create = function (actions, props) {
-            var actionsInstance = new ActionsCollector(this.instance);
+        create(actions, props) {
+            const actionsInstance = new ActionsCollector(this.instance);
             actionsInstance.set(actions, props);
             return actionsInstance;
-        };
-        return InstanceActionsCollector;
-    }());
-    var PublicComponentMethods = PublicComponentMethods_1["default"](components, actionsByInstance, helpers_1.clone);
-    var InternalComponentMethods = InternalComponentMethods_1["default"](components, actionsByInstance, helpers_1.clone);
-    var VidoInstance = /** @class */ (function () {
-        function VidoInstance() {
+        }
+    }
+    const PublicComponentMethods = getPublicComponentMethods(components, actionsByInstance, clone);
+    const InternalComponentMethods = getInternalComponentMethods(components, actionsByInstance, clone);
+    class VidoInstance {
+        constructor() {
             this.destroyable = [];
             this.onChangeFunctions = [];
             this.debug = false;
             this.state = state;
             this.api = api;
             this.lastProps = {};
-            this.html = lit_html_optimised_1.html;
-            this.svg = lit_html_optimised_1.svg;
-            this.directive = lit_html_optimised_1.directive;
-            this.asyncAppend = async_append_1.asyncAppend;
-            this.asyncReplace = async_replace_1.asyncReplace;
-            this.cache = cache_1.cache;
-            this.classMap = class_map_1.classMap;
-            this.guard = guard_1.guard;
-            this.ifDefined = if_defined_1.ifDefined;
-            this.repeat = repeat_1.repeat;
-            this.unsafeHTML = unsafe_html_1.unsafeHTML;
-            this.until = until_1.until;
-            this.schedule = helpers_1.schedule;
-            this.actionsByInstance = function (componentActions, props) { };
-            this.StyleMap = StyleMap_1["default"];
-            this.Detach = Detach_1["default"];
-            this.PointerAction = PointerAction_1["default"];
-            this.Action = Action_1["default"];
+            this.html = html;
+            this.svg = svg;
+            this.directive = directive;
+            this.asyncAppend = asyncAppend;
+            this.asyncReplace = asyncReplace;
+            this.cache = cache;
+            this.classMap = classMap;
+            this.guard = guard;
+            this.ifDefined = ifDefined;
+            this.repeat = repeat;
+            this.unsafeHTML = unsafeHTML;
+            this.until = until;
+            this.schedule = schedule;
+            this.actionsByInstance = (componentActions, props) => { };
+            this.StyleMap = StyleMap;
+            this.Detach = Detach;
+            this.PointerAction = PointerAction;
+            this.Action = Action;
+            this.Slots = Slots;
             this._components = components;
             this._actions = actionsByInstance;
             this.reuseComponents = this.reuseComponents.bind(this);
@@ -102,22 +74,22 @@ function Vido(state, api) {
             this.onChange = this.onChange.bind(this);
             this.update = this.update.bind(this);
             this.destroyComponent = this.destroyComponent.bind(this);
-            for (var name_1 in additionalMethods) {
-                this[name_1] = additionalMethods[name_1];
+            for (const name in additionalMethods) {
+                this[name] = additionalMethods[name].bind(this);
             }
         }
-        VidoInstance.prototype.addMethod = function (name, body) {
+        static addMethod(name, body) {
             additionalMethods[name] = body;
-        };
-        VidoInstance.prototype.onDestroy = function (fn) {
+        }
+        onDestroy(fn) {
             this.destroyable.push(fn);
-        };
-        VidoInstance.prototype.onChange = function (fn) {
+        }
+        onChange(fn) {
             this.onChangeFunctions.push(fn);
-        };
-        VidoInstance.prototype.update = function (callback) {
+        }
+        update(callback) {
             return this.updateTemplate(callback);
-        };
+        }
         /**
          * Reuse existing components when your data was changed
          *
@@ -129,39 +101,36 @@ function Vido(state, api) {
          * @param {boolean} debug - show debug info
          * @returns {array} of components (with updated/destroyed/created ones)
          */
-        VidoInstance.prototype.reuseComponents = function (currentComponents, dataArray, getProps, component, leaveTail, debug) {
-            var e_1, _a;
-            if (leaveTail === void 0) { leaveTail = true; }
-            if (debug === void 0) { debug = false; }
-            var modified = [];
-            var currentLen = currentComponents.length;
-            var dataLen = dataArray.length;
-            var leave = false;
+        reuseComponents(currentComponents, dataArray, getProps, component, leaveTail = true, debug = false) {
+            const modified = [];
+            const currentLen = currentComponents.length;
+            const dataLen = dataArray.length;
+            let leave = false;
             if (leaveTail && (dataArray === undefined || dataArray.length === 0)) {
                 leave = true;
             }
-            var leaveStartingAt = 0;
+            let leaveStartingAt = 0;
             if (currentLen < dataLen) {
-                var diff = dataLen - currentLen;
+                let diff = dataLen - currentLen;
                 while (diff) {
-                    var item = dataArray[dataLen - diff];
-                    var newComponent = this.createComponent(component, getProps(item));
+                    const item = dataArray[dataLen - diff];
+                    const newComponent = this.createComponent(component, getProps(item));
                     currentComponents.push(newComponent);
                     modified.push(newComponent);
                     diff--;
                 }
             }
             else if (currentLen > dataLen) {
-                var diff = currentLen - dataLen;
+                let diff = currentLen - dataLen;
                 if (leaveTail) {
                     leave = true;
                     leaveStartingAt = currentLen - diff;
                 }
                 while (diff) {
-                    var index_1 = currentLen - diff;
+                    const index = currentLen - diff;
                     if (!leaveTail) {
-                        modified.push(currentComponents[index_1]);
-                        currentComponents[index_1].destroy();
+                        modified.push(currentComponents[index]);
+                        currentComponents[index].destroy();
                     }
                     diff--;
                 }
@@ -169,198 +138,131 @@ function Vido(state, api) {
                     currentComponents.length = dataLen;
                 }
             }
-            var index = 0;
+            let index = 0;
             if (debug)
                 console.log('modified components', modified);
             if (debug)
                 console.log('current components', currentComponents);
             if (debug)
                 console.log('data array', dataArray);
-            try {
-                for (var currentComponents_1 = __values(currentComponents), currentComponents_1_1 = currentComponents_1.next(); !currentComponents_1_1.done; currentComponents_1_1 = currentComponents_1.next()) {
-                    var component_1 = currentComponents_1_1.value;
-                    var data = dataArray[index];
+            for (const component of currentComponents) {
+                const data = dataArray[index];
+                if (debug)
+                    console.log(`reuse components data at '${index}'`, data);
+                if (component && !modified.includes(component)) {
                     if (debug)
-                        console.log("reuse components data at '" + index + "'", data);
-                    if (component_1 && !modified.includes(component_1)) {
-                        if (debug)
-                            console.log('getProps fn result', getProps(data));
-                        component_1.change(getProps(data), { leave: leave && index >= leaveStartingAt });
-                    }
-                    index++;
+                        console.log('getProps fn result', getProps(data));
+                    component.change(getProps(data), { leave: leave && index >= leaveStartingAt });
                 }
+                index++;
             }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-            finally {
-                try {
-                    if (currentComponents_1_1 && !currentComponents_1_1.done && (_a = currentComponents_1["return"])) _a.call(currentComponents_1);
-                }
-                finally { if (e_1) throw e_1.error; }
-            }
-        };
-        VidoInstance.prototype.createComponent = function (component, props, content) {
-            if (props === void 0) { props = {}; }
-            if (content === void 0) { content = null; }
-            var instance = component.name + ':' + componentId++;
-            var vidoInstance;
+        }
+        createComponent(component, props = {}, content = null) {
+            const instance = component.name + ':' + componentId++;
+            let vidoInstance;
             vidoInstance = new VidoInstance();
             vidoInstance.instance = instance;
             vidoInstance.name = component.name;
             vidoInstance.Actions = new InstanceActionsCollector(instance);
-            var publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
-            var internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props, content), content);
+            const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
+            const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props, content), content);
             components.set(instance, internalMethods);
             components.get(instance).change(props);
             if (vidoInstance.debug) {
-                console.groupCollapsed("component created " + instance);
-                console.log(helpers_1.clone({ props: props, components: components.keys(), actionsByInstance: actionsByInstance }));
+                console.groupCollapsed(`component created ${instance}`);
+                console.log(clone({ props, components: components.keys(), actionsByInstance }));
                 console.trace();
                 console.groupEnd();
             }
             return publicMethods;
-        };
-        VidoInstance.prototype.destroyComponent = function (instance, vidoInstance) {
-            var e_2, _a;
+        }
+        destroyComponent(instance, vidoInstance) {
             if (vidoInstance.debug) {
-                console.groupCollapsed("destroying component " + instance + "...");
-                console.log(helpers_1.clone({ components: components.keys(), actionsByInstance: actionsByInstance }));
+                console.groupCollapsed(`destroying component ${instance}...`);
+                console.log(clone({ components: components.keys(), actionsByInstance }));
                 console.trace();
                 console.groupEnd();
             }
             if (actionsByInstance.has(instance)) {
-                try {
-                    for (var _b = __values(actionsByInstance.get(instance)), _c = _b.next(); !_c.done; _c = _b.next()) {
-                        var action = _c.value;
-                        if (typeof action.componentAction.destroy === 'function') {
-                            action.componentAction.destroy(action.element, action.props);
-                        }
+                for (const action of actionsByInstance.get(instance)) {
+                    if (typeof action.componentAction.destroy === 'function') {
+                        action.componentAction.destroy(action.element, action.props);
                     }
-                }
-                catch (e_2_1) { e_2 = { error: e_2_1 }; }
-                finally {
-                    try {
-                        if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
-                    }
-                    finally { if (e_2) throw e_2.error; }
                 }
             }
-            actionsByInstance["delete"](instance);
-            var component = components.get(instance);
+            actionsByInstance.delete(instance);
+            const component = components.get(instance);
             if (!component) {
-                console.warn("No component to destroy! [" + instance + "]");
+                console.warn(`No component to destroy! [${instance}]`);
                 return;
             }
             component.update();
             component.destroy();
-            components["delete"](instance);
+            components.delete(instance);
             if (vidoInstance.debug) {
-                console.groupCollapsed("component destroyed " + instance);
-                console.log(helpers_1.clone({ components: components.keys(), actionsByInstance: actionsByInstance }));
+                console.groupCollapsed(`component destroyed ${instance}`);
+                console.log(clone({ components: components.keys(), actionsByInstance }));
                 console.trace();
                 console.groupEnd();
             }
-        };
-        VidoInstance.prototype.executeActions = function () {
-            var e_3, _a, e_4, _b, e_5, _c;
-            var _d, _e, _f;
-            try {
-                for (var _g = __values(actionsByInstance.values()), _h = _g.next(); !_h.done; _h = _g.next()) {
-                    var actions = _h.value;
-                    try {
-                        for (var actions_1 = (e_4 = void 0, __values(actions)), actions_1_1 = actions_1.next(); !actions_1_1.done; actions_1_1 = actions_1.next()) {
-                            var action = actions_1_1.value;
-                            if (action.element.vido === undefined) {
-                                var componentAction = action.componentAction;
-                                var create = componentAction.create;
-                                if (typeof create !== 'undefined') {
-                                    var result = void 0;
-                                    if (((_d = create.prototype) === null || _d === void 0 ? void 0 : _d.isAction) !== true &&
-                                        create.isAction === undefined &&
-                                        ((_e = create.prototype) === null || _e === void 0 ? void 0 : _e.update) === undefined &&
-                                        ((_f = create.prototype) === null || _f === void 0 ? void 0 : _f.destroy) === undefined) {
-                                        result = create(action.element, action.props);
-                                    }
-                                    else {
-                                        result = new create(action.element, action.props);
-                                    }
-                                    if (result !== undefined) {
-                                        if (typeof result === 'function') {
-                                            componentAction.destroy = result;
-                                        }
-                                        else {
-                                            if (typeof result.update === 'function') {
-                                                componentAction.update = result.update.bind(result);
-                                            }
-                                            if (typeof result.destroy === 'function') {
-                                                componentAction.destroy = result.destroy.bind(result);
-                                            }
-                                        }
-                                    }
-                                }
+        }
+        executeActions() {
+            var _a, _b, _c;
+            for (const actions of actionsByInstance.values()) {
+                for (const action of actions) {
+                    if (action.element.vido === undefined) {
+                        const componentAction = action.componentAction;
+                        const create = componentAction.create;
+                        if (typeof create !== 'undefined') {
+                            let result;
+                            if (((_a = create.prototype) === null || _a === void 0 ? void 0 : _a.isAction) !== true &&
+                                create.isAction === undefined &&
+                                ((_b = create.prototype) === null || _b === void 0 ? void 0 : _b.update) === undefined &&
+                                ((_c = create.prototype) === null || _c === void 0 ? void 0 : _c.destroy) === undefined) {
+                                result = create(action.element, action.props);
                             }
                             else {
-                                action.element.vido = action.props;
-                                if (typeof action.componentAction.update === 'function') {
-                                    action.componentAction.update(action.element, action.props);
+                                result = new create(action.element, action.props);
+                            }
+                            if (result !== undefined) {
+                                if (typeof result === 'function') {
+                                    componentAction.destroy = result;
+                                }
+                                else {
+                                    if (typeof result.update === 'function') {
+                                        componentAction.update = result.update.bind(result);
+                                    }
+                                    if (typeof result.destroy === 'function') {
+                                        componentAction.destroy = result.destroy.bind(result);
+                                    }
                                 }
                             }
                         }
                     }
-                    catch (e_4_1) { e_4 = { error: e_4_1 }; }
-                    finally {
-                        try {
-                            if (actions_1_1 && !actions_1_1.done && (_b = actions_1["return"])) _b.call(actions_1);
+                    else {
+                        action.element.vido = action.props;
+                        if (typeof action.componentAction.update === 'function') {
+                            action.componentAction.update(action.element, action.props);
                         }
-                        finally { if (e_4) throw e_4.error; }
-                    }
-                    try {
-                        for (var actions_2 = (e_5 = void 0, __values(actions)), actions_2_1 = actions_2.next(); !actions_2_1.done; actions_2_1 = actions_2.next()) {
-                            var action = actions_2_1.value;
-                            action.element.vido = action.props;
-                        }
-                    }
-                    catch (e_5_1) { e_5 = { error: e_5_1 }; }
-                    finally {
-                        try {
-                            if (actions_2_1 && !actions_2_1.done && (_c = actions_2["return"])) _c.call(actions_2);
-                        }
-                        finally { if (e_5) throw e_5.error; }
                     }
                 }
-            }
-            catch (e_3_1) { e_3 = { error: e_3_1 }; }
-            finally {
-                try {
-                    if (_h && !_h.done && (_a = _g["return"])) _a.call(_g);
+                for (const action of actions) {
+                    action.element.vido = action.props;
                 }
-                finally { if (e_3) throw e_3.error; }
             }
-        };
-        VidoInstance.prototype.updateTemplate = function (callback) {
-            var _this = this;
-            if (callback === void 0) { callback = undefined; }
+        }
+        updateTemplate(callback = undefined) {
             if (callback)
                 afterUpdateCallbacks.push(callback);
-            return new Promise(function (resolve) {
-                var currentShouldUpdateCount = ++shouldUpdateCount;
-                var self = _this;
+            return new Promise((resolve) => {
+                const currentShouldUpdateCount = ++shouldUpdateCount;
+                const self = this;
                 function flush() {
-                    var e_6, _a;
                     if (currentShouldUpdateCount === shouldUpdateCount) {
                         shouldUpdateCount = 0;
                         self.render();
-                        try {
-                            for (var afterUpdateCallbacks_1 = __values(afterUpdateCallbacks), afterUpdateCallbacks_1_1 = afterUpdateCallbacks_1.next(); !afterUpdateCallbacks_1_1.done; afterUpdateCallbacks_1_1 = afterUpdateCallbacks_1.next()) {
-                                var cb = afterUpdateCallbacks_1_1.value;
-                                cb();
-                            }
-                        }
-                        catch (e_6_1) { e_6 = { error: e_6_1 }; }
-                        finally {
-                            try {
-                                if (afterUpdateCallbacks_1_1 && !afterUpdateCallbacks_1_1.done && (_a = afterUpdateCallbacks_1["return"])) _a.call(afterUpdateCallbacks_1);
-                            }
-                            finally { if (e_6) throw e_6.error; }
+                        for (const cb of afterUpdateCallbacks) {
+                            cb();
                         }
                         afterUpdateCallbacks.length = 0;
                         resolve();
@@ -368,42 +270,42 @@ function Vido(state, api) {
                 }
                 resolved.then(flush);
             });
-        };
-        VidoInstance.prototype.createApp = function (config) {
+        }
+        createApp(config) {
             element = config.element;
-            var App = this.createComponent(config.component, config.props);
+            const App = this.createComponent(config.component, config.props);
             app = App.instance;
             this.render();
             return App;
-        };
-        VidoInstance.prototype.render = function () {
-            var appComponent = components.get(app);
+        }
+        render() {
+            const appComponent = components.get(app);
             if (appComponent) {
-                lit_html_optimised_1.render(appComponent.update(), element);
+                render(appComponent.update(), element);
                 this.executeActions();
             }
             else if (element) {
                 element.remove();
             }
-        };
-        return VidoInstance;
-    }());
+        }
+    }
     return new VidoInstance();
 }
-exports["default"] = Vido;
 Vido.prototype.lithtml = lithtml;
-Vido.prototype.Action = Action_1["default"];
-Vido.prototype.Directive = lit_html_optimised_1.Directive;
-Vido.prototype.schedule = helpers_1.schedule;
-Vido.prototype.Detach = Detach_1["default"];
-Vido.prototype.StyleMap = StyleMap_1["default"];
-Vido.prototype.PointerAction = PointerAction_1["default"];
-Vido.prototype.asyncAppend = async_append_1.asyncAppend;
-Vido.prototype.asyncReplace = async_replace_1.asyncReplace;
-Vido.prototype.cache = cache_1.cache;
-Vido.prototype.classMap = class_map_1.classMap;
-Vido.prototype.guard = guard_1.guard;
-Vido.prototype.ifDefined = if_defined_1.ifDefined;
-Vido.prototype.repeat = repeat_1.repeat;
-Vido.prototype.unsafeHTML = unsafe_html_1.unsafeHTML;
-Vido.prototype.unti = until_1.until;
+Vido.prototype.Action = Action;
+Vido.prototype.Directive = Directive;
+Vido.prototype.schedule = schedule;
+Vido.prototype.Detach = Detach;
+Vido.prototype.StyleMap = StyleMap;
+Vido.prototype.PointerAction = PointerAction;
+Vido.prototype.asyncAppend = asyncAppend;
+Vido.prototype.asyncReplace = asyncReplace;
+Vido.prototype.cache = cache;
+Vido.prototype.classMap = classMap;
+Vido.prototype.guard = guard;
+Vido.prototype.ifDefined = ifDefined;
+Vido.prototype.repeat = repeat;
+Vido.prototype.unsafeHTML = unsafeHTML;
+Vido.prototype.until = until;
+Vido.prototype.Slots = Slots;
+export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until, Slots, };
