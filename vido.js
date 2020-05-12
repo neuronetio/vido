@@ -245,8 +245,10 @@ function Vido(state, api) {
             }
             actionsByInstance["delete"](instance);
             var component = components.get(instance);
-            if (!component)
+            if (!component) {
+                console.warn("No component to destroy! [" + instance + "]");
                 return;
+            }
             component.update();
             component.destroy();
             components["delete"](instance);

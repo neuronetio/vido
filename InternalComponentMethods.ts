@@ -20,7 +20,7 @@ export default function getInternalComponentMethods(components, actionsByInstanc
             props: this.vidoInstance.props,
             components: components.keys(),
             destroyable: this.vidoInstance.destroyable,
-            actionsByInstance
+            actionsByInstance,
           })
         );
         console.trace();
@@ -32,8 +32,9 @@ export default function getInternalComponentMethods(components, actionsByInstanc
       for (const d of this.vidoInstance.destroyable) {
         d();
       }
-      this.vidoInstance.onChangeFunctions = [];
-      this.vidoInstance.destroyable = [];
+      this.vidoInstance.onChangeFunctions.length = 0;
+      this.vidoInstance.destroyable.length = 0;
+      this.vidoInstance.destroyed = true;
       this.vidoInstance.update();
     }
 
@@ -57,7 +58,7 @@ export default function getInternalComponentMethods(components, actionsByInstanc
             components: components.keys(),
             onChangeFunctions: this.vidoInstance.onChangeFunctions,
             changedProps,
-            actionsByInstance
+            actionsByInstance,
           })
         );
         console.trace();

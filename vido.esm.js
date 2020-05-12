@@ -2921,7 +2921,7 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
                     props: this.vidoInstance.props,
                     components: components.keys(),
                     destroyable: this.vidoInstance.destroyable,
-                    actionsByInstance
+                    actionsByInstance,
                 }));
                 console.trace();
                 console.groupEnd();
@@ -2932,8 +2932,9 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
             for (const d of this.vidoInstance.destroyable) {
                 d();
             }
-            this.vidoInstance.onChangeFunctions = [];
-            this.vidoInstance.destroyable = [];
+            this.vidoInstance.onChangeFunctions.length = 0;
+            this.vidoInstance.destroyable.length = 0;
+            this.vidoInstance.destroyed = true;
             this.vidoInstance.update();
         }
         update(props = {}) {
@@ -2954,7 +2955,7 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
                     components: components.keys(),
                     onChangeFunctions: this.vidoInstance.onChangeFunctions,
                     changedProps,
-                    actionsByInstance
+                    actionsByInstance,
                 }));
                 console.trace();
                 console.groupEnd();
@@ -3239,8 +3240,10 @@ function Vido(state, api) {
             }
             actionsByInstance.delete(instance);
             const component = components.get(instance);
-            if (!component)
+            if (!component) {
+                console.warn(`No component to destroy! [${instance}]`);
                 return;
+            }
             component.update();
             component.destroy();
             components.delete(instance);

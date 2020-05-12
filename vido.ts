@@ -281,7 +281,10 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       }
       actionsByInstance.delete(instance);
       const component = components.get(instance);
-      if (!component) return;
+      if (!component) {
+        console.warn(`No component to destroy! [${instance}]`);
+        return;
+      }
       component.update();
       component.destroy();
       components.delete(instance);

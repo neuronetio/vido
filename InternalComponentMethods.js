@@ -49,8 +49,9 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
                 }
                 finally { if (e_1) throw e_1.error; }
             }
-            this.vidoInstance.onChangeFunctions = [];
-            this.vidoInstance.destroyable = [];
+            this.vidoInstance.onChangeFunctions.length = 0;
+            this.vidoInstance.destroyable.length = 0;
+            this.vidoInstance.destroyed = true;
             this.vidoInstance.update();
         };
         InternalComponentMethods.prototype.update = function (props) {
