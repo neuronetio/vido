@@ -3,7 +3,6 @@ const path = require('path');
 
 function getComponents() {
   const c = [];
-  // @ts-ignore
   const components = window.vido._components;
   for (const [name, component] of components) {
     c.push(component);
@@ -15,10 +14,39 @@ module.exports = {
   Create(client) {
     client
       .url('file:///' + path.join(__dirname, './basic.html'))
-      .waitForElementVisible('body', 1000)
+      .waitForElementVisible('.test', 1000)
       .assert.containsText('.test', 'Test text')
       .execute(getComponents, [], ({ value }) => {
-        expect(value.length).toEqual(6 + 5 * 5);
+        expect(value.length).toEqual(6 + 5 * 6);
+      })
+      .execute(
+        function () {
+          return window.ItemInstance;
+        },
+        [],
+        function ({ value }) {
+          expect(value).toBeTruthy();
+        }
+      )
+      .execute(
+        function () {
+          window.destroyItemInstance();
+          const c = [];
+          const components = window.vido._components;
+          for (const [name, component] of components) {
+            c.push(component);
+          }
+          return c;
+        },
+        [],
+        function ({ value }) {
+          expect(value.length).toEqual(6 + 4 * 6);
+        }
+      )
+      .click('#remove-one')
+      .waitForElementNotPresent('.item-5')
+      .execute(getComponents, [], function ({ value }) {
+        expect(value.length).toEqual(5 + 3 * 6);
       });
   },
 
@@ -30,48 +58,41 @@ module.exports = {
         expect(value.length).toEqual(0);
       })
       .execute(
-        function() {
+        function () {
           // @ts-ignore
           return window.appDestroyed;
         },
         [],
-        function({ value }) {
+        function ({ value }) {
           expect(value).toEqual(true);
         }
       )
       .execute(
-        function() {
+        function () {
           // @ts-ignore
           return window.itemsDestroyed;
         },
         [],
-        function({ value }) {
+        function ({ value }) {
           expect(value).toEqual(5);
         }
       )
       .execute(
-        function() {
+        function () {
           // @ts-ignore
           return window.actionsDestroyed;
         },
         [],
-        function({ value }) {
+        function ({ value }) {
           expect(value).toEqual(25);
         }
       )
-      .execute(
-        function() {
-          // @ts-ignore
-          return window.itemChildDestroyed;
-        },
-        [],
-        function({ value }) {
-          expect(value).toEqual(25);
-        }
-      );
+      .execute(getComponents, [], ({ value }) => {
+        expect(value.length).toEqual(0);
+      });
   },
 
   after(client) {
     client.end();
-  }
+  },
 };

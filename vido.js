@@ -101,6 +101,7 @@ function Vido(state, api) {
             this.onDestroy = this.onDestroy.bind(this);
             this.onChange = this.onChange.bind(this);
             this.update = this.update.bind(this);
+            this.destroyComponent = this.destroyComponent.bind(this);
             for (var name_1 in additionalMethods) {
                 this[name_1] = additionalMethods[name_1];
             }

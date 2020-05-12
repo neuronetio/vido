@@ -150,6 +150,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       this.onDestroy = this.onDestroy.bind(this);
       this.onChange = this.onChange.bind(this);
       this.update = this.update.bind(this);
+      this.destroyComponent = this.destroyComponent.bind(this);
       for (const name in additionalMethods) {
         this[name] = additionalMethods[name];
       }

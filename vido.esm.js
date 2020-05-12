@@ -2912,6 +2912,9 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
             this.vidoInstance = vidoInstance;
             this.renderFunction = renderFunction;
             this.content = content;
+            this.destroy = this.destroy.bind(this);
+            this.update = this.update.bind(this);
+            this.change = this.change.bind(this);
         }
         destroy() {
             var _a;
@@ -3122,6 +3125,7 @@ function Vido(state, api) {
             this.onDestroy = this.onDestroy.bind(this);
             this.onChange = this.onChange.bind(this);
             this.update = this.update.bind(this);
+            this.destroyComponent = this.destroyComponent.bind(this);
             for (const name in additionalMethods) {
                 this[name] = additionalMethods[name];
             }

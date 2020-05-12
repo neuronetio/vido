@@ -5,11 +5,14 @@ export default function getInternalComponentMethods(components, actionsByInstanc
     public renderFunction: (changedProps: any) => void;
     public content: any;
 
-    constructor(instance, vidoInstance, renderFunction, content) {
+    constructor(instance: string, vidoInstance, renderFunction, content) {
       this.instance = instance;
       this.vidoInstance = vidoInstance;
       this.renderFunction = renderFunction;
       this.content = content;
+      this.destroy = this.destroy.bind(this);
+      this.update = this.update.bind(this);
+      this.change = this.change.bind(this);
     }
 
     public destroy() {

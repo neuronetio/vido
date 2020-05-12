@@ -18,6 +18,9 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
             this.vidoInstance = vidoInstance;
             this.renderFunction = renderFunction;
             this.content = content;
+            this.destroy = this.destroy.bind(this);
+            this.update = this.update.bind(this);
+            this.change = this.change.bind(this);
         }
         InternalComponentMethods.prototype.destroy = function () {
             var e_1, _a;

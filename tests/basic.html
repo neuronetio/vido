@@ -10,6 +10,7 @@
     <div class="app"></div>
     <div class="actions">
       <button id="destroy-main" onclick="destroyMain()">destroy-main</button>
+      <button onclick="destroyItemInstance()">destroy-item-instance</button>
     </div>
     <script src="../vido.umd.js"></script>
     <script>
@@ -38,11 +39,23 @@
           html` <div data-actions=${actions} class="item-child-${props.id}">child: ${props.id}</div> `;
       }
 
+      function ItemChild2(vido, props = {}) {
+        const { html } = vido;
+        return (templateProps) => html`<span>item child2</span>`;
+      }
+
       function Item(vido, props = {}) {
-        const { html, reuseComponents, onDestroy } = vido;
+        const { html, reuseComponents, onDestroy, createComponent } = vido;
+
+        if (typeof window.ItemInstance === 'undefined') {
+          window.ItemInstance = vido.instance;
+        }
+
+        let itemChild2 = createComponent(ItemChild2);
+        onDestroy(itemChild2.destroy);
 
         let childs = [];
-        reuseComponents(childs, [1, 2, 3, 4, 5], (child) => ({ id: props.id + '.' + child }), ItemChild);
+        reuseComponents(childs, [1, 2, 3, 4, 5], (child) => ({ id: props.id + '.' + child }), ItemChild, false);
         onDestroy(() => {
           childs.forEach((child) => child.destroy());
         });
@@ -56,7 +69,11 @@
           // noop
         });
         return (templateProps) =>
-          html` <div class="item-${props.id}">${props.id}: ${childs.map((child) => child.html())}</div> `;
+          html`
+            <div class="item-${props.id}">
+              ${props.id} (${itemChild2.html()}): ${childs.map((child) => child.html())}
+            </div>
+          `;
       }
 
       function Main(vido, props) {
@@ -64,7 +81,7 @@
         let items = [];
         onChange((changedProps) => {
           props = changedProps;
-          reuseComponents(items, props.components, (component) => ({ id: component }), Item);
+          reuseComponents(items, props.components, (component) => ({ id: component }), Item, false);
         });
 
         onDestroy(() => {
@@ -74,9 +91,16 @@
         onDestroy(() => {
           window.appDestroyed = true;
         });
+
+        function remove() {
+          props.components.length = 4;
+          reuseComponents(items, props.components, (component) => ({ id: component }), Item, false);
+        }
+
         return (templateProps) =>
           html`
             <div class="test">Test text</div>
+            <div><button id="remove-one" @click=${remove}>remove one</button></div>
             <div class="items">${items.map((item) => item.html())}</div>
           `;
       }
@@ -90,6 +114,11 @@
 
       function destroyMain() {
         app.destroy();
+      }
+
+      function destroyItemInstance() {
+        var i = window.vido._components.get(window.ItemInstance);
+        i.destroy();
       }
     </script>
   </body>
