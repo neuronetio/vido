@@ -2994,7 +2994,7 @@ function schedule(fn) {
  * @returns {boolean}
  */
 function isObject(item) {
-    return item && typeof item === 'object' && !Array.isArray(item);
+    return item && typeof item === 'object' && item.constructor && item.constructor.name === 'Object';
 }
 /**
  * Merge deep - helper function which will merge objects recursively - creating brand new one - like clone

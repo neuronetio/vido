@@ -26,7 +26,7 @@ export function schedule(fn: (argument) => void | any) {
  * @returns {boolean}
  */
 function isObject(item) {
-  return item && typeof item === 'object' && !Array.isArray(item);
+  return item && typeof item === 'object' && item.constructor && item.constructor.name === 'Object';
 }
 
 /**
