@@ -2,10 +2,10 @@
   "name": "@neuronet.io/vido",
   "version": "3.0.0",
   "description": "Compilation-less and eval free frontend framework for fast scalable apps.",
-  "main": "vido.umd.min.js",
-  "module": "vido.esm.min.js",
+  "main": "dist/vido.umd.min.js",
+  "module": "dist/vido.esm.min.js",
   "scripts": {
-    "build": "tsc -p ./tsconfig.json && rollup -c",
+    "build": "tsc && rollup -c",
     "autobuild": "rollup -c -w",
     "test": "nightwatch --env chrome && nightwatch --env firefox"
   },
