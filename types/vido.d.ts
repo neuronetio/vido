@@ -61,3 +61,4 @@ export interface vido<State, Api> {
 }
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
 export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until, Slots, };
+//# sourceMappingURL=vido.d.ts.map

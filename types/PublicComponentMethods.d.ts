@@ -26,3 +26,4 @@ export default function getPublicComponentMethods(components: any, actionsByInst
         _getActions(): any;
     };
 };
+//# sourceMappingURL=PublicComponentMethods.d.ts.map

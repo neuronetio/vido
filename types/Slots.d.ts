@@ -1,4 +1,4 @@
-import { vido, ComponentInstance, lithtml, Component } from './vido';
+import { vido, ComponentInstance, lithtml, Component } from './vido.d';
 export declare type SlotInstances = {
     [key: string]: ComponentInstance[];
 };
@@ -19,3 +19,4 @@ export declare class Slots {
     getProps(): unknown;
     isDestroyed(): boolean;
 }
+//# sourceMappingURL=Slots.d.ts.map

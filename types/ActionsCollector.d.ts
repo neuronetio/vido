@@ -10,3 +10,4 @@ export default function getActionsCollector(actionsByInstance: any): {
         isClass: boolean;
     };
 };
+//# sourceMappingURL=ActionsCollector.d.ts.map

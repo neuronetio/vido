@@ -5,73 +5,73 @@ import { terser } from 'rollup-plugin-terser';
 
 export default [
   {
-    input: 'vido.umd.ts',
+    input: 'src/vido.umd.ts',
     output: {
       sourcemap: true,
-      file: 'vido.umd.js',
+      file: 'dist/vido.umd.js',
       format: 'umd',
-      name: 'Vido'
+      name: 'Vido',
     },
     plugins: [
       typescript({ target: 'es6' }),
       resolve({
-        browser: true
-        //module: true
-      }),
-      commonjs({ extensions: ['.js', '.ts'] })
-    ]
-  },
-  {
-    input: 'vido.umd.ts',
-    output: {
-      sourcemap: true,
-      file: 'vido.umd.min.js',
-      format: 'umd',
-      name: 'Vido'
-    },
-    plugins: [
-      typescript({ target: 'es6' }),
-      resolve({
-        browser: true
+        browser: true,
         //module: true
       }),
       commonjs({ extensions: ['.js', '.ts'] }),
-      terser()
-    ]
+    ],
   },
   {
-    input: 'vido.ts',
+    input: 'src/vido.umd.ts',
     output: {
       sourcemap: true,
-      file: 'vido.esm.js',
-      format: 'esm',
-      name: 'Vido'
+      file: 'dist/vido.umd.min.js',
+      format: 'umd',
+      name: 'Vido',
     },
     plugins: [
       typescript({ target: 'es6' }),
       resolve({
-        browser: true
-        //module: true
-      }),
-      commonjs({ extensions: ['.js', '.ts'] })
-    ]
-  },
-  {
-    input: 'vido.ts',
-    output: {
-      sourcemap: true,
-      file: 'vido.esm.min.js',
-      format: 'esm',
-      name: 'Vido'
-    },
-    plugins: [
-      typescript({ target: 'es6' }),
-      resolve({
-        browser: true
+        browser: true,
         //module: true
       }),
       commonjs({ extensions: ['.js', '.ts'] }),
-      terser()
-    ]
-  }
+      terser(),
+    ],
+  },
+  {
+    input: 'src/vido.ts',
+    output: {
+      sourcemap: true,
+      file: 'dist/vido.esm.js',
+      format: 'esm',
+      name: 'Vido',
+    },
+    plugins: [
+      typescript({ target: 'es6' }),
+      resolve({
+        browser: true,
+        //module: true
+      }),
+      commonjs({ extensions: ['.js', '.ts'] }),
+    ],
+  },
+  {
+    input: 'src/vido.ts',
+    output: {
+      sourcemap: true,
+      file: 'dist/vido.esm.min.js',
+      format: 'esm',
+      name: 'Vido',
+    },
+    plugins: [
+      typescript({ target: 'es6' }),
+      resolve({
+        browser: true,
+        //module: true
+      }),
+      commonjs({ extensions: ['.js', '.ts'] }),
+      terser(),
+    ],
+  },
 ];

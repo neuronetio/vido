@@ -28,3 +28,4 @@ export default class PointerAction extends Action {
     private onPointerUp;
     destroy(element: any): void;
 }
+//# sourceMappingURL=PointerAction.d.ts.map

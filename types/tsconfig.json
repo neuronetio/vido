@@ -4,6 +4,7 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "esModuleInterop": true,
+    "declaration": true,
     "strict": false,
     "module": "ESNext",
     "downlevelIteration": true,
@@ -12,6 +13,8 @@
     "target": "ES2015",
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "outDir": "dist"
+    "declarationMap": true,
+    "declarationDir": "types",
+    "emitDeclarationOnly": true
   }
 }
