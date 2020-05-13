@@ -10,4 +10,3 @@ export default class Detach extends Directive {
     constructor(ifFn: () => boolean);
     body(part: AttributePart): void;
 }
-//# sourceMappingURL=Detach.d.ts.map

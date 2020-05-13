@@ -13,4 +13,3 @@ export default class StyleMap extends Directive {
     setDetach(detach: any): void;
     body(part: Part): void;
 }
-//# sourceMappingURL=StyleMap.d.ts.map

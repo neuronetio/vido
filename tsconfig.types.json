@@ -1,0 +1,20 @@
+{
+  "exclude": ["**/*.js", "dist/**", "types/**", "node_modules/**"],
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "declaration": true,
+    "strict": false,
+    "module": "ESNext",
+    "downlevelIteration": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "target": "ES2015",
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "declarationMap": false,
+    "emitDeclarationOnly": true,
+    "declarationDir": "types"
+  }
+}

@@ -13,7 +13,8 @@
     "target": "ES2015",
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true
+    "declarationMap": false,
+    "emitDeclarationOnly": true,
+    "outFile": "types/global.d.ts"
   }
 }
