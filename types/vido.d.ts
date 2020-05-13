@@ -16,14 +16,14 @@ import Action from './Action';
 import { Slots } from './Slots';
 import * as lithtml from 'lit-html-optimised';
 export declare type UpdateTemplate = (props: unknown) => lithtml.TemplateResult;
-export declare type Component = (vido: vido<unknown, unknown>, props: unknown) => UpdateTemplate;
+export declare type Component = (vido: AnyVido, props: unknown) => UpdateTemplate;
 export interface ComponentInstance {
     instance: string;
     update: () => Promise<unknown>;
     destroy: () => void;
     change: (props: unknown, options?: any) => void;
     html: (props?: unknown) => lithtml.TemplateResult;
-    vidoInstance: vido<unknown, unknown>;
+    vidoInstance: AnyVido;
 }
 export interface CreateAppConfig {
     element: HTMLElement;

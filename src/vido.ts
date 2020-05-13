@@ -36,7 +36,7 @@ import { Directive } from '../lit-html/lib/directive';
 
 export type UpdateTemplate = (props: unknown) => lithtml.TemplateResult;
 
-export type Component = (vido: vido<unknown, unknown>, props: unknown) => UpdateTemplate;
+export type Component = (vido: AnyVido, props: unknown) => UpdateTemplate;
 
 export interface ComponentInstance {
   instance: string;
@@ -44,7 +44,7 @@ export interface ComponentInstance {
   destroy: () => void;
   change: (props: unknown, options?: any) => void;
   html: (props?: unknown) => lithtml.TemplateResult;
-  vidoInstance: vido<unknown, unknown>;
+  vidoInstance: AnyVido;
 }
 
 export interface CreateAppConfig {
