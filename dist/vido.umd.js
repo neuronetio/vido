@@ -3340,7 +3340,6 @@
                 }
             }
             executeActions() {
-                var _a, _b, _c;
                 for (const actions of actionsByInstance.values()) {
                     for (const action of actions) {
                         if (action.element.vido === undefined) {
@@ -3348,10 +3347,11 @@
                             const create = componentAction.create;
                             if (typeof create !== 'undefined') {
                                 let result;
-                                if (((_a = create.prototype) === null || _a === void 0 ? void 0 : _a.isAction) !== true &&
+                                if (create.prototype &&
+                                    create.prototype.isAction !== true &&
                                     create.isAction === undefined &&
-                                    ((_b = create.prototype) === null || _b === void 0 ? void 0 : _b.update) === undefined &&
-                                    ((_c = create.prototype) === null || _c === void 0 ? void 0 : _c.destroy) === undefined) {
+                                    create.prototype.update === undefined &&
+                                    create.prototype.destroy === undefined) {
                                     result = create(action.element, action.props);
                                 }
                                 else {

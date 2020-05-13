@@ -311,10 +311,11 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
             if (typeof create !== 'undefined') {
               let result;
               if (
-                create.prototype?.isAction !== true &&
+                create.prototype &&
+                create.prototype.isAction !== true &&
                 create.isAction === undefined &&
-                create.prototype?.update === undefined &&
-                create.prototype?.destroy === undefined
+                create.prototype.update === undefined &&
+                create.prototype.destroy === undefined
               ) {
                 result = create(action.element, action.props);
               } else {
