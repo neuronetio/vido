@@ -2923,7 +2923,6 @@
                 this.change = this.change.bind(this);
             }
             destroy() {
-                var _a;
                 if (this.vidoInstance.debug) {
                     console.groupCollapsed(`component destroy method fired ${this.instance}`);
                     console.log(clone({
@@ -2935,7 +2934,7 @@
                     console.trace();
                     console.groupEnd();
                 }
-                if (typeof ((_a = this.content) === null || _a === void 0 ? void 0 : _a.destroy) === 'function') {
+                if (this.content && typeof this.content.destroy === 'function') {
                     this.content.destroy();
                 }
                 for (const d of this.vidoInstance.destroyable) {

@@ -29,7 +29,7 @@ export default function getInternalComponentMethods(components, actionsByInstanc
         console.trace();
         console.groupEnd();
       }
-      if (typeof this.content?.destroy === 'function') {
+      if (this.content && typeof this.content.destroy === 'function') {
         this.content.destroy();
       }
       for (const d of this.vidoInstance.destroyable) {
