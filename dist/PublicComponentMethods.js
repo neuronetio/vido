@@ -1,6 +1,7 @@
 export default function getPublicComponentMethods(components, actionsByInstance, clone) {
     return class PublicComponentMethods {
         constructor(instance, vidoInstance, props = {}) {
+            this.destroyed = false;
             this.instance = instance;
             this.name = vidoInstance.name;
             this.vidoInstance = vidoInstance;
@@ -14,13 +15,16 @@ export default function getPublicComponentMethods(components, actionsByInstance,
          * Destroy component
          */
         destroy() {
+            if (this.destroyed)
+                return;
             if (this.vidoInstance.debug) {
                 console.groupCollapsed(`destroying component ${this.instance}`);
                 console.log(clone({ components: components.keys(), actionsByInstance }));
                 console.trace();
                 console.groupEnd();
             }
-            return this.vidoInstance.destroyComponent(this.instance, this.vidoInstance);
+            this.vidoInstance.destroyComponent(this.instance, this.vidoInstance);
+            this.destroyed = true;
         }
         /**
          * Update template - trigger rendering process
@@ -55,7 +59,7 @@ export default function getPublicComponentMethods(components, actionsByInstance,
          */
         html(templateProps = {}) {
             const component = components.get(this.instance);
-            if (component) {
+            if (component && !component.destroyed) {
                 return component.update(templateProps, this.vidoInstance);
             }
             return undefined;

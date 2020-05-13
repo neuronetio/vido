@@ -43,6 +43,7 @@ export default function Vido(state, api) {
     class VidoInstance {
         constructor() {
             this.destroyable = [];
+            this.destroyed = false;
             this.onChangeFunctions = [];
             this.debug = false;
             this.state = state;
@@ -162,6 +163,7 @@ export default function Vido(state, api) {
             let vidoInstance;
             vidoInstance = new VidoInstance();
             vidoInstance.instance = instance;
+            vidoInstance.destroyed = false;
             vidoInstance.name = component.name;
             vidoInstance.Actions = new InstanceActionsCollector(instance);
             const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
@@ -196,7 +198,6 @@ export default function Vido(state, api) {
                 console.warn(`No component to destroy! [${instance}]`);
                 return;
             }
-            component.update();
             component.destroy();
             components.delete(instance);
             if (vidoInstance.debug) {
@@ -210,19 +211,21 @@ export default function Vido(state, api) {
             for (const actions of actionsByInstance.values()) {
                 for (const action of actions) {
                     if (action.element.vido === undefined) {
+                        const component = components.get(action.instance);
+                        action.isActive = function isActive() {
+                            return component && component.destroyed === false;
+                        };
                         const componentAction = action.componentAction;
                         const create = componentAction.create;
                         if (typeof create !== 'undefined') {
                             let result;
-                            if (create.prototype &&
-                                create.prototype.isAction !== true &&
-                                create.isAction === undefined &&
-                                create.prototype.update === undefined &&
-                                create.prototype.destroy === undefined) {
-                                result = create(action.element, action.props);
+                            if ((create.prototype &&
+                                (create.prototype.isAction || create.prototype.update || create.prototype.destroy)) ||
+                                create.isAction) {
+                                result = new create(action.element, action.props);
                             }
                             else {
-                                result = new create(action.element, action.props);
+                                result = create(action.element, action.props);
                             }
                             if (result !== undefined) {
                                 if (typeof result === 'function') {
@@ -241,7 +244,7 @@ export default function Vido(state, api) {
                     }
                     else {
                         action.element.vido = action.props;
-                        if (typeof action.componentAction.update === 'function') {
+                        if (typeof action.componentAction.update === 'function' && action.isActive()) {
                             action.componentAction.update(action.element, action.props);
                         }
                     }

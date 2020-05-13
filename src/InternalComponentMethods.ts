@@ -4,6 +4,7 @@ export default function getInternalComponentMethods(components, actionsByInstanc
     public vidoInstance: any;
     public renderFunction: (changedProps: any) => void;
     public content: any;
+    public destroyed = false;
 
     constructor(instance: string, vidoInstance, renderFunction, content) {
       this.instance = instance;
@@ -16,6 +17,7 @@ export default function getInternalComponentMethods(components, actionsByInstanc
     }
 
     public destroy() {
+      if (this.destroyed) return;
       if (this.vidoInstance.debug) {
         console.groupCollapsed(`component destroy method fired ${this.instance}`);
         console.log(
@@ -38,6 +40,7 @@ export default function getInternalComponentMethods(components, actionsByInstanc
       this.vidoInstance.onChangeFunctions.length = 0;
       this.vidoInstance.destroyable.length = 0;
       this.vidoInstance.destroyed = true;
+      this.destroyed = true;
       this.vidoInstance.update();
     }
 

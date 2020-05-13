@@ -4,10 +4,11 @@ export default function getPublicComponentMethods(components: any, actionsByInst
         name: string;
         vidoInstance: any;
         props: any;
+        destroyed: boolean;
         /**
          * Destroy component
          */
-        destroy(): any;
+        destroy(): void;
         /**
          * Update template - trigger rendering process
          */

@@ -4,6 +4,7 @@ export default function getInternalComponentMethods(components: any, actionsByIn
         vidoInstance: any;
         renderFunction: (changedProps: any) => void;
         content: any;
+        destroyed: boolean;
         destroy(): void;
         update(props?: {}): void;
         change(changedProps: any, options?: {

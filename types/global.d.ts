@@ -39,6 +39,7 @@ declare module "InternalComponentMethods" {
             vidoInstance: any;
             renderFunction: (changedProps: any) => void;
             content: any;
+            destroyed: boolean;
             destroy(): void;
             update(props?: {}): void;
             change(changedProps: any, options?: {
@@ -86,10 +87,11 @@ declare module "PublicComponentMethods" {
             name: string;
             vidoInstance: any;
             props: any;
+            destroyed: boolean;
             /**
              * Destroy component
              */
-            destroy(): any;
+            destroy(): void;
             /**
              * Update template - trigger rendering process
              */

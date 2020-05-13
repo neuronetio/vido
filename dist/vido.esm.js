@@ -2785,6 +2785,7 @@ class PointerAction extends Action {
 function getPublicComponentMethods(components, actionsByInstance, clone) {
     return class PublicComponentMethods {
         constructor(instance, vidoInstance, props = {}) {
+            this.destroyed = false;
             this.instance = instance;
             this.name = vidoInstance.name;
             this.vidoInstance = vidoInstance;
@@ -2798,13 +2799,16 @@ function getPublicComponentMethods(components, actionsByInstance, clone) {
          * Destroy component
          */
         destroy() {
+            if (this.destroyed)
+                return;
             if (this.vidoInstance.debug) {
                 console.groupCollapsed(`destroying component ${this.instance}`);
                 console.log(clone({ components: components.keys(), actionsByInstance }));
                 console.trace();
                 console.groupEnd();
             }
-            return this.vidoInstance.destroyComponent(this.instance, this.vidoInstance);
+            this.vidoInstance.destroyComponent(this.instance, this.vidoInstance);
+            this.destroyed = true;
         }
         /**
          * Update template - trigger rendering process
@@ -2839,7 +2843,7 @@ function getPublicComponentMethods(components, actionsByInstance, clone) {
          */
         html(templateProps = {}) {
             const component = components.get(this.instance);
-            if (component) {
+            if (component && !component.destroyed) {
                 return component.update(templateProps, this.vidoInstance);
             }
             return undefined;
@@ -2908,6 +2912,7 @@ function getActionsCollector(actionsByInstance) {
 function getInternalComponentMethods(components, actionsByInstance, clone) {
     return class InternalComponentMethods {
         constructor(instance, vidoInstance, renderFunction, content) {
+            this.destroyed = false;
             this.instance = instance;
             this.vidoInstance = vidoInstance;
             this.renderFunction = renderFunction;
@@ -2917,6 +2922,8 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
             this.change = this.change.bind(this);
         }
         destroy() {
+            if (this.destroyed)
+                return;
             if (this.vidoInstance.debug) {
                 console.groupCollapsed(`component destroy method fired ${this.instance}`);
                 console.log(clone({
@@ -2937,6 +2944,7 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
             this.vidoInstance.onChangeFunctions.length = 0;
             this.vidoInstance.destroyable.length = 0;
             this.vidoInstance.destroyed = true;
+            this.destroyed = true;
             this.vidoInstance.update();
         }
         update(props = {}) {
@@ -3169,6 +3177,7 @@ function Vido(state, api) {
     class VidoInstance {
         constructor() {
             this.destroyable = [];
+            this.destroyed = false;
             this.onChangeFunctions = [];
             this.debug = false;
             this.state = state;
@@ -3288,6 +3297,7 @@ function Vido(state, api) {
             let vidoInstance;
             vidoInstance = new VidoInstance();
             vidoInstance.instance = instance;
+            vidoInstance.destroyed = false;
             vidoInstance.name = component.name;
             vidoInstance.Actions = new InstanceActionsCollector(instance);
             const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
@@ -3322,7 +3332,6 @@ function Vido(state, api) {
                 console.warn(`No component to destroy! [${instance}]`);
                 return;
             }
-            component.update();
             component.destroy();
             components.delete(instance);
             if (vidoInstance.debug) {
@@ -3336,19 +3345,21 @@ function Vido(state, api) {
             for (const actions of actionsByInstance.values()) {
                 for (const action of actions) {
                     if (action.element.vido === undefined) {
+                        const component = components.get(action.instance);
+                        action.isActive = function isActive() {
+                            return component && component.destroyed === false;
+                        };
                         const componentAction = action.componentAction;
                         const create = componentAction.create;
                         if (typeof create !== 'undefined') {
                             let result;
-                            if (create.prototype &&
-                                create.prototype.isAction !== true &&
-                                create.isAction === undefined &&
-                                create.prototype.update === undefined &&
-                                create.prototype.destroy === undefined) {
-                                result = create(action.element, action.props);
+                            if ((create.prototype &&
+                                (create.prototype.isAction || create.prototype.update || create.prototype.destroy)) ||
+                                create.isAction) {
+                                result = new create(action.element, action.props);
                             }
                             else {
-                                result = new create(action.element, action.props);
+                                result = create(action.element, action.props);
                             }
                             if (result !== undefined) {
                                 if (typeof result === 'function') {
@@ -3367,7 +3378,7 @@ function Vido(state, api) {
                     }
                     else {
                         action.element.vido = action.props;
-                        if (typeof action.componentAction.update === 'function') {
+                        if (typeof action.componentAction.update === 'function' && action.isActive()) {
                             action.componentAction.update(action.element, action.props);
                         }
                     }

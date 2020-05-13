@@ -49,8 +49,39 @@
         return (templateProps) => html`<span id="slot-${props.id}">item slot</span>`;
       }
 
+      class ItemActionClass {
+        constructor(element, data) {
+          const span = element.querySelector('.action');
+          span.innerText = `action ${data.id}`;
+        }
+        update(element, data) {
+          const span = element.querySelector('.action');
+          span.innerText = `action ${data.id}`;
+        }
+        destroy(element, data) {
+          const span = element.querySelector('.action');
+          span.innerText = ``;
+        }
+      }
+
+      function ItemAction(element, data) {
+        const span = element.querySelector('.actionFn');
+        span.innerText = `actionFn ${data.id}`;
+
+        return {
+          update(element, data) {
+            const span = element.querySelector('.actionFn');
+            span.innerText = `actionFn ${data.id}`;
+          },
+          destroy(element, data) {
+            const span = element.querySelector('.actionFn');
+            span.innerText = ``;
+          },
+        };
+      }
+
       function Item(vido, props = {}) {
-        const { html, reuseComponents, onDestroy, createComponent, Slots } = vido;
+        const { html, reuseComponents, onDestroy, createComponent, Slots, Actions } = vido;
 
         if (typeof window.ItemInstance === 'undefined') {
           window.ItemInstance = vido.instance;
@@ -76,11 +107,15 @@
         onDestroy(() => {
           // noop
         });
+
+        const actions = Actions.create([ItemActionClass, ItemAction], { ...props });
+
         return (templateProps) =>
           html`
-            <div class="item-${props.id}">
-              ${props.id} [slot: ${slots.html('inside', templateProps)}](${itemChild2.html()}):
-              ${childs.map((child) => child.html())}
+            <div class="item-${props.id}" data-actions=${actions}>
+              ${props.id} {action:<span class="action action-${props.id}"></span> &
+              <span class="actionFn actionFn-${props.id}"></span>} [slot:
+              ${slots.html('inside', templateProps)}](${itemChild2.html()}): ${childs.map((child) => child.html())}
             </div>
           `;
       }
@@ -128,6 +163,7 @@
       function destroyItemInstance() {
         var i = window.vido._components.get(window.ItemInstance);
         i.destroy();
+        window.app.update();
       }
     </script>
   </body>

@@ -17,6 +17,8 @@ module.exports = {
       .waitForElementVisible('.test', 500)
       .waitForElementVisible('#slot-2', 500)
       .assert.containsText('.test', 'Test text')
+      .assert.containsText('.action-2', 'action 2')
+      .assert.containsText('.actionFn-3', 'actionFn 3')
       .execute(getComponents, [], ({ value }) => {
         expect(value.length).toEqual(6 + 5 * 7);
       })
