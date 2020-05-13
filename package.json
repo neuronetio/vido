@@ -5,7 +5,8 @@
   "main": "dist/vido.umd.min.js",
   "module": "dist/vido.esm.min.js",
   "scripts": {
-    "build": "tsc && rollup -c",
+    "build": "tsc -p ./types.json && tsc -p ./tsconfig.json && rollup -c",
+    "types": "tsc -p ./types.json",
     "autobuild": "rollup -c -w",
     "test": "nightwatch --env chrome && nightwatch --env firefox"
   },

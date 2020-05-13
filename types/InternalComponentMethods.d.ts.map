@@ -1,1 +1,1 @@
-{"version":3,"file":"InternalComponentMethods.d.ts","sourceRoot":"","sources":["../InternalComponentMethods.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,OAAO,UAAU,2BAA2B,CAAC,UAAU,KAAA,EAAE,iBAAiB,KAAA,EAAE,KAAK,KAAA;;;;;;;;;;;;EA0EvF"}
+{"version":3,"file":"InternalComponentMethods.d.ts","sourceRoot":"","sources":["../src/InternalComponentMethods.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,OAAO,UAAU,2BAA2B,CAAC,UAAU,KAAA,EAAE,iBAAiB,KAAA,EAAE,KAAK,KAAA;;;;;;;;;;;;EA0EvF"}

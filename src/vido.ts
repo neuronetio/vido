@@ -90,6 +90,8 @@ export interface vido<State, Api> {
   Actions?: any;
 }
 
+export type AnyVido = vido<any, any>;
+
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api> {
   let componentId = 0;
   const components = new Map();

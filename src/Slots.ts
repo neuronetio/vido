@@ -1,4 +1,4 @@
-import { vido, ComponentInstance, lithtml, Component } from './vido';
+import { ComponentInstance, lithtml, Component, AnyVido } from './vido';
 
 export type SlotInstances = {
   [key: string]: ComponentInstance[];
@@ -10,11 +10,11 @@ export interface SlotStorage {
 
 export class Slots {
   private slotInstances: SlotInstances = {};
-  private vido: vido<unknown, unknown>;
+  private vido: AnyVido;
   private destroyed = false;
   private props: unknown;
 
-  constructor(vido: vido<unknown, unknown>, props: unknown) {
+  constructor(vido: AnyVido, props: unknown) {
     this.vido = vido;
     this.props = props;
     this.destroy = this.destroy.bind(this);

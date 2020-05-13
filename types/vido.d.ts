@@ -59,6 +59,7 @@ export interface vido<State, Api> {
     Slots: typeof Slots;
     Actions?: any;
 }
+export declare type AnyVido = vido<any, any>;
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
 export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until, Slots, };
 //# sourceMappingURL=vido.d.ts.map

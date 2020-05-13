@@ -1,4 +1,4 @@
-import { vido, ComponentInstance, lithtml, Component } from './vido.d';
+import { ComponentInstance, lithtml, Component, AnyVido } from './vido';
 export declare type SlotInstances = {
     [key: string]: ComponentInstance[];
 };
@@ -10,7 +10,7 @@ export declare class Slots {
     private vido;
     private destroyed;
     private props;
-    constructor(vido: vido<unknown, unknown>, props: unknown);
+    constructor(vido: AnyVido, props: unknown);
     setComponents(slots: SlotStorage): void;
     destroy(): void;
     change(changedProps: unknown, options?: any): void;

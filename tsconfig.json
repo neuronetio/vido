@@ -1,5 +1,5 @@
 {
-  "exclude": ["**/*.js", "node_modules/**"],
+  "exclude": ["**/*.js", "dist/**", "types/**", "node_modules/**"],
   "compilerOptions": {
     "moduleResolution": "node",
     "baseUrl": ".",
@@ -12,6 +12,7 @@
     "target": "ES2015",
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "declaration": false
   }
 }
