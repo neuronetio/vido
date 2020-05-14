@@ -1,9 +1,10 @@
+// @ts-nocheck
 const path = require('path');
 const url = 'file:///' + path.resolve('./tests');
 
 describe('Basic', () => {
   beforeAll(async () => {
-    await page.goto(`${url}/basic.html`);
+    await page.goto(`${url}/basic/basic.html`);
     await page.evaluate((_) => {
       window.getComponents = function getComponents() {
         const c = [];
