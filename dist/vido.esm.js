@@ -67,9 +67,9 @@ class Directive {
     }
 }
 const isDirective = (o) => {
-    return o !== undefined && o !== null &&
+    return (o !== undefined && o !== null &&
         // tslint:disable-next-line:no-any
-        typeof o.isDirective === 'boolean';
+        typeof o.isDirective === 'boolean');
 };
 
 /**
@@ -88,11 +88,10 @@ const isDirective = (o) => {
 /**
  * True if the custom elements polyfill is in use.
  */
-const isCEPolyfill = typeof window !== 'undefined' ?
+const isCEPolyfill = typeof window !== 'undefined' &&
     window.customElements != null &&
-        window.customElements
-            .polyfillWrapFlushCallback !== undefined :
-    false;
+    window.customElements.polyfillWrapFlushCallback !==
+        undefined;
 /**
  * Reparents nodes, starting from `start` (inclusive) to `end` (exclusive),
  * into another container (could be the same container), before `before`. If
@@ -227,13 +226,7 @@ class Template {
                         const attributeValue = node.getAttribute(attributeLookupName);
                         node.removeAttribute(attributeLookupName);
                         const statics = attributeValue.split(markerRegex);
-                        this.parts.push({
-                            type: 'attribute',
-                            index,
-                            name,
-                            strings: statics,
-                            sanitizer: undefined
-                        });
+                        this.parts.push({ type: 'attribute', index, name, strings: statics });
                         partIndex += statics.length - 1;
                     }
                 }
@@ -481,12 +474,12 @@ class TemplateInstance {
             }
             // We've arrived at our part's node.
             if (part.type === 'node') {
-                const textPart = this.processor.handleTextExpression(this.options, part);
-                textPart.insertAfterNode(node.previousSibling);
-                this.__parts.push(textPart);
+                const part = this.processor.handleTextExpression(this.options);
+                part.insertAfterNode(node.previousSibling);
+                this.__parts.push(part);
             }
             else {
-                this.__parts.push(...this.processor.handleAttributeExpressions(node, part.name, part.strings, this.options, part));
+                this.__parts.push(...this.processor.handleAttributeExpressions(node, part.name, part.strings, this.options));
             }
             partIndex++;
         }
@@ -511,24 +504,16 @@ class TemplateInstance {
  * subject to an additional IP rights grant found at
  * http://polymer.github.io/PATENTS.txt
  */
-let policy;
 /**
- * Turns the value to trusted HTML. If the application uses Trusted Types the
- * value is transformed into TrustedHTML, which can be assigned to execution
- * sink. If the application doesn't use Trusted Types, the return value is the
- * same as the argument.
+ * Our TrustedTypePolicy for HTML which is declared using the html template
+ * tag function.
+ *
+ * That HTML is a developer-authored constant, and is parsed with innerHTML
+ * before any untrusted expressions have been mixed in. Therefor it is
+ * considered safe by construction.
  */
-function convertConstantTemplateStringToTrustedHTML(value) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const w = window;
-    // TrustedTypes have been renamed to trustedTypes
-    // (https://github.com/WICG/trusted-types/issues/177)
-    const trustedTypes = (w.trustedTypes || w.TrustedTypes);
-    if (trustedTypes && !policy) {
-        policy = trustedTypes.createPolicy('lit-html', { createHTML: (s) => s });
-    }
-    return policy ? policy.createHTML(value) : value;
-}
+const policy = window.trustedTypes &&
+    trustedTypes.createPolicy('lit-html', { createHTML: (s) => s });
 const commentMarker = ` ${marker} `;
 /**
  * Used to clone existing node instead of each time creating new one which is
@@ -604,11 +589,15 @@ class TemplateResult {
     }
     getTemplateElement() {
         const template = emptyTemplateNode.cloneNode();
-        // this is secure because `this.strings` is a TemplateStringsArray.
-        // TODO: validate this when
-        // https://github.com/tc39/proposal-array-is-template-object is implemented.
-        template.innerHTML =
-            convertConstantTemplateStringToTrustedHTML(this.getHTML());
+        let value = this.getHTML();
+        if (policy !== undefined) {
+            // this is secure because `this.strings` is a TemplateStringsArray.
+            // TODO: validate this when
+            // https://github.com/tc39/proposal-array-is-template-object is
+            // implemented.
+            value = policy.createHTML(value);
+        }
+        template.innerHTML = value;
         return template;
     }
 }
@@ -651,23 +640,9 @@ const isPrimitive = (value) => {
         !(typeof value === 'object' || typeof value === 'function'));
 };
 const isIterable = (value) => {
-    return Array.isArray(value) ||
-        // tslint:disable-next-line: no-any
-        !!(value && value[Symbol.iterator]);
-};
-const identityFunction = (value) => value;
-const noopSanitizer = (_node, _name, _type) => identityFunction;
-/**
- * A global callback used to get a sanitizer for a given field.
- */
-let sanitizerFactory = noopSanitizer;
-/** Sets the global sanitizer factory. */
-const setSanitizerFactory = (newSanitizer) => {
-    if (sanitizerFactory !== noopSanitizer) {
-        throw new Error(`Attempted to overwrite existing lit-html security policy.` +
-            ` setSanitizeDOMValueFactory should be called at most once.`);
-    }
-    sanitizerFactory = newSanitizer;
+    return (Array.isArray(value) ||
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        !!(value && value[Symbol.iterator]));
 };
 /**
  * Used to clone text node instead of each time creating new one which is slower
@@ -679,22 +654,12 @@ const emptyTextNode = document.createTextNode('');
  * for an attribute.
  */
 class AttributeCommitter {
-    constructor(element, name, strings, 
-    // Next breaking change, consider making this param required.
-    templatePart, kind = 'attribute') {
+    constructor(element, name, strings) {
         this.dirty = true;
         this.element = element;
         this.name = name;
         this.strings = strings;
         this.parts = [];
-        let sanitizer = templatePart && templatePart.sanitizer;
-        if (sanitizer === undefined) {
-            sanitizer = sanitizerFactory(element, name, kind);
-            if (templatePart !== undefined) {
-                templatePart.sanitizer = sanitizer;
-            }
-        }
-        this.sanitizer = sanitizer;
         for (let i = 0; i < strings.length - 1; i++) {
             this.parts[i] = this._createPart();
         }
@@ -707,8 +672,8 @@ class AttributeCommitter {
     }
     _getValue() {
         const strings = this.strings;
-        const parts = this.parts;
         const l = strings.length - 1;
+        const parts = this.parts;
         // If we're assigning an attribute via syntax like:
         //    attr="${foo}"  or  attr=${foo}
         // but not
@@ -722,10 +687,12 @@ class AttributeCommitter {
         //
         // This also allows trusted values (when using TrustedTypes) being
         // assigned to DOM sinks without being stringified in the process.
-        if (l === 1 && strings[0] === '' && strings[1] === '' &&
-            parts[0] !== undefined) {
+        if (l === 1 && strings[0] === '' && strings[1] === '') {
             const v = parts[0].value;
-            if (!isIterable(v)) {
+            if (typeof v === 'symbol') {
+                return String(v);
+            }
+            if (typeof v === 'string' || !isIterable(v)) {
                 return v;
             }
         }
@@ -751,13 +718,7 @@ class AttributeCommitter {
     commit() {
         if (this.dirty) {
             this.dirty = false;
-            let value = this._getValue();
-            value = this.sanitizer(value);
-            if (typeof value === 'symbol') {
-                // Native Symbols throw if they're coerced to string.
-                value = String(value);
-            }
-            this.element.setAttribute(this.name, value);
+            this.element.setAttribute(this.name, this._getValue());
         }
     }
 }
@@ -808,20 +769,10 @@ class AttributePart {
  * as well as arrays and iterables of those types.
  */
 class NodePart {
-    constructor(options, templatePart) {
+    constructor(options) {
         this.value = undefined;
         this.__pendingValue = undefined;
-        /**
-         * The sanitizer to use when writing text contents into this NodePart.
-         *
-         * We have to initialize this here rather than at the template literal level
-         * because the security of text content depends on the context into which
-         * it's written. e.g. the same text has different security requirements
-         * when a child of a <script> vs a <style> vs a <div>.
-         */
-        this.textSanitizer = undefined;
         this.options = options;
-        this.templatePart = templatePart;
     }
     /**
      * Appends this part into a container.
@@ -849,8 +800,8 @@ class NodePart {
      * This part must be empty, as its contents are not automatically moved.
      */
     appendIntoPart(part) {
-        part.__insert(this.startNode = createMarker());
-        part.__insert(this.endNode = createMarker());
+        part.__insert((this.startNode = createMarker()));
+        part.__insert((this.endNode = createMarker()));
     }
     /**
      * Inserts this part after the `ref` part.
@@ -858,7 +809,7 @@ class NodePart {
      * This part must be empty, as its contents are not automatically moved.
      */
     insertAfterPart(ref) {
-        ref.__insert(this.startNode = createMarker());
+        ref.__insert((this.startNode = createMarker()));
         this.endNode = ref.endNode;
         ref.endNode = this.startNode;
     }
@@ -866,6 +817,9 @@ class NodePart {
         this.__pendingValue = value;
     }
     commit() {
+        if (this.startNode.parentNode === null) {
+            return;
+        }
         while (isDirective(this.__pendingValue)) {
             const directive = this.__pendingValue;
             this.__pendingValue = noChange;
@@ -919,31 +873,20 @@ class NodePart {
     __commitText(value) {
         const node = this.startNode.nextSibling;
         value = value == null ? '' : value;
+        // If `value` isn't already a string, we explicitly convert it here in case
+        // it can't be implicitly converted - i.e. it's a symbol.
+        const valueAsString = typeof value === 'string' ? value : String(value);
         if (node === this.endNode.previousSibling &&
             node.nodeType === 3 /* Node.TEXT_NODE */) {
             // If we only have a single text node between the markers, we can just
             // set its value, rather than replacing it.
-            if (this.textSanitizer === undefined) {
-                this.textSanitizer = sanitizerFactory(node, 'data', 'property');
-            }
-            const renderedValue = this.textSanitizer(value);
-            node.data = typeof renderedValue === 'string' ?
-                renderedValue :
-                String(renderedValue);
+            // TODO(justinfagnani): Can we just check if this.value is primitive?
+            node.data = valueAsString;
         }
         else {
-            // When setting text content, for security purposes it matters a lot what
-            // the parent is. For example, <style> and <script> need to be handled
-            // with care, while <span> does not. So first we need to put a text node
-            // into the document, then we can sanitize its contentx.
             const textNode = emptyTextNode.cloneNode();
+            textNode.textContent = valueAsString;
             this.__commitNode(textNode);
-            if (this.textSanitizer === undefined) {
-                this.textSanitizer = sanitizerFactory(textNode, 'data', 'property');
-            }
-            const renderedValue = this.textSanitizer(value);
-            textNode.data = typeof renderedValue === 'string' ? renderedValue :
-                String(renderedValue);
         }
         this.value = value;
     }
@@ -954,21 +897,6 @@ class NodePart {
             this.value.update(value.values);
         }
         else {
-            // `value` is a template result that was constructed without knowledge of
-            // the parent we're about to write it into. sanitizeDOMValue hasn't been
-            // made aware of this relationship, and for scripts and style specifically
-            // this is known to be unsafe. So in the case where the user is in
-            // "secure mode" (i.e. when there's a sanitizeDOMValue set), we just want
-            // to forbid this because it's not a use case we want to support.
-            // We only apply this policy when sanitizerFactory has been set to
-            // prevent this from being a breaking change to the library.
-            const parent = this.endNode.parentNode;
-            if (sanitizerFactory !== noopSanitizer && parent.nodeName === 'STYLE' ||
-                parent.nodeName === 'SCRIPT') {
-                this.__commitText('/* lit-html will not write ' +
-                    'TemplateResults to scripts and styles */');
-                return;
-            }
             // Make sure we propagate the template processor from the TemplateResult
             // so that we use its syntax extension, etc. The template factory comes
             // from the render function options so that it can control template
@@ -1004,7 +932,7 @@ class NodePart {
             itemPart = itemParts[partIndex];
             // If no existing part, create a new one
             if (itemPart === undefined) {
-                itemPart = new NodePart(this.options, this.templatePart);
+                itemPart = new NodePart(this.options);
                 itemParts.push(itemPart);
                 if (partIndex === 0) {
                     itemPart.appendIntoPart(this);
@@ -1087,12 +1015,10 @@ class BooleanAttributePart {
  * a string first.
  */
 class PropertyCommitter extends AttributeCommitter {
-    constructor(element, name, strings, 
-    // Next breaking change, consider making this param required.
-    templatePart) {
-        super(element, name, strings, templatePart, 'property');
+    constructor(element, name, strings) {
+        super(element, name, strings);
         this.single =
-            (strings.length === 2 && strings[0] === '' && strings[1] === '');
+            strings.length === 2 && strings[0] === '' && strings[1] === '';
     }
     _createPart() {
         return new PropertyPart(this);
@@ -1106,10 +1032,8 @@ class PropertyCommitter extends AttributeCommitter {
     commit() {
         if (this.dirty) {
             this.dirty = false;
-            let value = this._getValue();
-            value = this.sanitizer(value);
-            // tslint:disable-next-line: no-any
-            this.element[this.name] = value;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            this.element[this.name] = this._getValue();
         }
     }
 }
@@ -1128,15 +1052,16 @@ let eventOptionsSupported = false;
             get capture() {
                 eventOptionsSupported = true;
                 return false;
-            }
+            },
         };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         window.addEventListener('test', options, options);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         window.removeEventListener('test', options, options);
+        // eslint-disable-next-line
     }
     catch (_e) {
-        // noop
+        // event options not supported
     }
 })();
 class EventPart {
@@ -1170,10 +1095,10 @@ class EventPart {
         const newListener = this.__pendingValue;
         const oldListener = this.value;
         const shouldRemoveListener = newListener == null ||
-            oldListener != null &&
+            (oldListener != null &&
                 (newListener.capture !== oldListener.capture ||
                     newListener.once !== oldListener.once ||
-                    newListener.passive !== oldListener.passive);
+                    newListener.passive !== oldListener.passive));
         const shouldAddListener = newListener != null && (oldListener == null || shouldRemoveListener);
         if (shouldRemoveListener) {
             this.element.removeEventListener(this.eventName, this.__boundHandleEvent, this.__options);
@@ -1228,10 +1153,10 @@ class DefaultTemplateProcessor {
      * @param strings The string literals. There are always at least two strings,
      *   event for fully-controlled bindings with a single expression.
      */
-    handleAttributeExpressions(element, name, strings, options, templatePart) {
+    handleAttributeExpressions(element, name, strings, options) {
         const prefix = name[0];
         if (prefix === '.') {
-            const committer = new PropertyCommitter(element, name.slice(1), strings, templatePart);
+            const committer = new PropertyCommitter(element, name.slice(1), strings);
             return committer.parts;
         }
         if (prefix === '@') {
@@ -1240,15 +1165,15 @@ class DefaultTemplateProcessor {
         if (prefix === '?') {
             return [new BooleanAttributePart(element, name.slice(1), strings)];
         }
-        const committer = new AttributeCommitter(element, name, strings, templatePart);
+        const committer = new AttributeCommitter(element, name, strings);
         return committer.parts;
     }
     /**
      * Create parts for a text-position binding.
      * @param templateFactory
      */
-    handleTextExpression(options, nodeTemplatePart) {
-        return new NodePart(options, nodeTemplatePart);
+    handleTextExpression(options) {
+        return new NodePart(options);
     }
 }
 const defaultTemplateProcessor = new DefaultTemplateProcessor();
@@ -1333,7 +1258,7 @@ const render = (result, container, options) => {
     let part = parts.get(container);
     if (part === undefined) {
         removeNodes(container, container.firstChild);
-        parts.set(container, part = new NodePart(Object.assign({ templateFactory }, options), undefined));
+        parts.set(container, part = new NodePart(Object.assign({ templateFactory }, options)));
         part.appendInto(container);
     }
     part.setValue(result);
@@ -1356,10 +1281,9 @@ const render = (result, container, options) => {
 // IMPORTANT: do not change the property name or the assignment expression.
 // This line will be used in regexes to search for lit-html usage.
 // TODO(justinfagnani): inject version number at build time
-const isBrowser = typeof window !== 'undefined';
-if (isBrowser) {
-    // If we run in the browser set version
-    (window['litHtmlVersions'] || (window['litHtmlVersions'] = [])).push('1.1.7');
+if (typeof window !== 'undefined') {
+    (window['litHtmlVersions'] || (window['litHtmlVersions'] = []))
+        .push('1.3.0-pre.1');
 }
 /**
  * Interprets a template literal as an HTML template that can efficiently
@@ -1394,8 +1318,6 @@ var lithtml = /*#__PURE__*/Object.freeze({
     NodePart: NodePart,
     PropertyCommitter: PropertyCommitter,
     PropertyPart: PropertyPart,
-    get sanitizerFactory () { return sanitizerFactory; },
-    setSanitizerFactory: setSanitizerFactory,
     parts: parts,
     render: render,
     templateCaches: templateCaches,
@@ -1499,7 +1421,7 @@ const asyncAppend = directive((value, mapper) => async (part) => {
                 itemPart.endNode = itemStartNode;
                 part.endNode.parentNode.insertBefore(itemStartNode, part.endNode);
             }
-            itemPart = new NodePart(part.options, part.templatePart);
+            itemPart = new NodePart(part.options);
             itemPart.insertAfterNode(itemStartNode);
             itemPart.setValue(v);
             itemPart.commit();
@@ -1565,7 +1487,7 @@ const asyncReplace = directive((value, mapper) => async (part) => {
     }
     // We nest a new part to keep track of previous item values separately
     // of the iterable as a value itself.
-    const itemPart = new NodePart(part.options, part.templatePart);
+    const itemPart = new NodePart(part.options);
     part.value = value;
     let i = 0;
     try {
@@ -1693,6 +1615,33 @@ const cache = directive((value) => (part) => {
  * subject to an additional IP rights grant found at
  * http://polymer.github.io/PATENTS.txt
  */
+// IE11 doesn't support classList on SVG elements, so we emulate it with a Set
+class ClassList {
+    constructor(element) {
+        this.classes = new Set();
+        this.changed = false;
+        this.element = element;
+        const classList = (element.getAttribute('class') || '').split(/\s+/);
+        for (const cls of classList) {
+            this.classes.add(cls);
+        }
+    }
+    add(cls) {
+        this.classes.add(cls);
+        this.changed = true;
+    }
+    remove(cls) {
+        this.classes.delete(cls);
+        this.changed = true;
+    }
+    commit() {
+        if (this.changed) {
+            let classString = '';
+            this.classes.forEach((cls) => classString += cls + ' ');
+            this.element.setAttribute('class', classString);
+        }
+    }
+}
 /**
  * Stores the ClassInfo object applied to a given AttributePart.
  * Used to unset existing values when a new ClassInfo object is applied.
@@ -1702,9 +1651,8 @@ const previousClassesCache = new WeakMap();
  * A directive that applies CSS classes. This must be used in the `class`
  * attribute and must be the only part used in the attribute. It takes each
  * property in the `classInfo` argument and adds the property name to the
- * element's `classList` if the property value is truthy; if the property value
- * is falsey, the property name is removed from the element's `classList`. For
- * example
+ * element's `class` if the property value is truthy; if the property value is
+ * falsey, the property name is removed from the element's `class`. For example
  * `{foo: bar}` applies the class `foo` if the value of `bar` is truthy.
  * @param classInfo {ClassInfo}
  */
@@ -1719,10 +1667,11 @@ const classMap = directive((classInfo) => (part) => {
     let previousClasses = previousClassesCache.get(part);
     if (previousClasses === undefined) {
         // Write static classes once
-        element.className = committer.strings.join(' ');
+        // Use setAttribute() because className isn't a string on SVG elements
+        element.setAttribute('class', committer.strings.join(' '));
         previousClassesCache.set(part, previousClasses = new Set());
     }
-    const { classList } = element;
+    const classList = (element.classList || new ClassList(element));
     // Remove old classes that no longer apply
     // We use forEach() instead of for-of so that re don't require down-level
     // iteration.
@@ -1735,9 +1684,9 @@ const classMap = directive((classInfo) => (part) => {
     // Add or remove classes based on their classMap value
     for (const name in classInfo) {
         const value = classInfo[name];
-        // We explicitly want a loose truthy check of `value` because it seems more
-        // convenient that '' and 0 are skipped.
         if (value != previousClasses.has(name)) {
+            // We explicitly want a loose truthy check of `value` because it seems
+            // more convenient that '' and 0 are skipped.
             if (value) {
                 classList.add(name);
                 previousClasses.add(name);
@@ -1747,6 +1696,9 @@ const classMap = directive((classInfo) => (part) => {
                 previousClasses.delete(name);
             }
         }
+    }
+    if (typeof classList.commit === 'function') {
+        classList.commit();
     }
 });
 
@@ -1831,6 +1783,7 @@ const guard = directive((value, f) => (part) => {
  * subject to an additional IP rights grant found at
  * http://polymer.github.io/PATENTS.txt
  */
+const previousValues$1 = new WeakMap();
 /**
  * For AttributeParts, sets the attribute if the value is defined and removes
  * the attribute if the value is undefined.
@@ -1838,15 +1791,19 @@ const guard = directive((value, f) => (part) => {
  * For other part types, this directive is a no-op.
  */
 const ifDefined = directive((value) => (part) => {
+    const previousValue = previousValues$1.get(part);
     if (value === undefined && part instanceof AttributePart) {
-        if (value !== part.value) {
+        // If the value is undefined, remove the attribute, but only if the value
+        // was previously defined.
+        if (previousValue !== undefined || !previousValues$1.has(part)) {
             const name = part.committer.name;
             part.committer.element.removeAttribute(name);
         }
     }
-    else {
+    else if (value !== previousValue) {
         part.setValue(value);
     }
+    previousValues$1.set(part, value);
 });
 
 /**
@@ -1866,10 +1823,11 @@ const ifDefined = directive((value) => (part) => {
 // TODO(kschaaf): Refactor into Part API?
 const createAndInsertPart = (containerPart, beforePart) => {
     const container = containerPart.startNode.parentNode;
-    const beforeNode = beforePart == null ? containerPart.endNode : beforePart.startNode;
+    const beforeNode = beforePart === undefined ? containerPart.endNode :
+        beforePart.startNode;
     const startNode = container.insertBefore(createMarker(), beforeNode);
     container.insertBefore(createMarker(), beforeNode);
-    const newPart = new NodePart(containerPart.options, undefined);
+    const newPart = new NodePart(containerPart.options);
     newPart.insertAfterNode(startNode);
     return newPart;
 };
@@ -2280,7 +2238,7 @@ const repeat = directive((items, keyFnOrTemplate, template) => {
 // The DocumentFragment is used as a unique key to check if the last value
 // rendered to the part was with unsafeHTML. If not, we'll always re-render the
 // value passed to unsafeHTML.
-const previousValues$1 = new WeakMap();
+const previousValues$2 = new WeakMap();
 /**
  * Used to clone existing node instead of each time creating new one which is
  * slower
@@ -2297,7 +2255,7 @@ const unsafeHTML = directive((value) => (part) => {
     if (!(part instanceof NodePart)) {
         throw new Error('unsafeHTML can only be used in text bindings');
     }
-    const previousValue = previousValues$1.get(part);
+    const previousValue = previousValues$2.get(part);
     if (previousValue !== undefined && isPrimitive(value) &&
         value === previousValue.value && part.value === previousValue.fragment) {
         return;
@@ -2306,7 +2264,7 @@ const unsafeHTML = directive((value) => (part) => {
     template.innerHTML = value; // innerHTML casts to string internally
     const fragment = document.importNode(template.content, true);
     part.setValue(fragment);
-    previousValues$1.set(part, { value, fragment });
+    previousValues$2.set(part, { value, fragment });
 });
 
 /**
@@ -2392,6 +2350,78 @@ const until = directive((...args) => (part) => {
         });
     }
 });
+
+/**
+ * @license
+ * Copyright (c) 2020 The Polymer Project Authors. All rights reserved.
+ * This code may only be used under the BSD style license found at
+ * http://polymer.github.io/LICENSE.txt
+ * The complete set of authors may be found at
+ * http://polymer.github.io/AUTHORS.txt
+ * The complete set of contributors may be found at
+ * http://polymer.github.io/CONTRIBUTORS.txt
+ * Code distributed by Google as part of the polymer project is also
+ * subject to an additional IP rights grant found at
+ * http://polymer.github.io/PATENTS.txt
+ */
+/**
+ * Checks binding values against live DOM values, instead of previously bound
+ * values, when determining whether to update the value.
+ *
+ * This is useful for cases where the DOM value may change from outside of
+ * lit-html, such as with a binding to an `<input>` element's `value` property,
+ * a content editable elements text, or to a custom element that changes it's
+ * own properties or attributes.
+ *
+ * In these cases if the DOM value changes, but the value set through lit-html
+ * bindings hasn't, lit-html won't know to update the DOM value and will leave
+ * it alone. If this is not what you want—if you want to overwrite the DOM
+ * value with the bound value no matter what—use the `live()` directive:
+ *
+ *     html`<input .value=${live(x)}>`
+ *
+ * `live()` performs a strict equality check agains the live DOM value, and if
+ * the new value is equal to the live value, does nothing. This means that
+ * `live()` should not be used when the binding will cause a type conversion. If
+ * you use `live()` with an attribute binding, make sure that only strings are
+ * passed in, or the binding will update every render.
+ */
+const live = directive((value) => (part) => {
+    let previousValue;
+    if (part instanceof EventPart || part instanceof NodePart) {
+        throw new Error('The `live` directive is not allowed on text or event bindings');
+    }
+    if (part instanceof BooleanAttributePart) {
+        checkStrings(part.strings);
+        previousValue = part.element.hasAttribute(part.name);
+        // This is a hack needed because BooleanAttributePart doesn't have a
+        // committer and does its own dirty checking after directives
+        part.value = previousValue;
+    }
+    else {
+        const { element, name, strings } = part.committer;
+        checkStrings(strings);
+        if (part instanceof PropertyPart) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            previousValue = element[name];
+            if (previousValue === value) {
+                return;
+            }
+        }
+        else if (part instanceof AttributePart) {
+            previousValue = element.getAttribute(name);
+        }
+        if (previousValue === String(value)) {
+            return;
+        }
+    }
+    part.setValue(value);
+});
+const checkStrings = (strings) => {
+    if (strings.length !== 2 || strings[0] !== '' || strings[1] !== '') {
+        throw new Error('`live` bindings can only contain a single expression');
+    }
+};
 
 const detached = new WeakMap();
 class Detach extends Directive {
@@ -3191,6 +3221,7 @@ function Vido(state, api) {
             this.cache = cache;
             this.classMap = classMap;
             this.guard = guard;
+            this.live = live;
             this.ifDefined = ifDefined;
             this.repeat = repeat;
             this.unsafeHTML = unsafeHTML;
@@ -3440,6 +3471,7 @@ Vido.prototype.asyncReplace = asyncReplace;
 Vido.prototype.cache = cache;
 Vido.prototype.classMap = classMap;
 Vido.prototype.guard = guard;
+Vido.prototype.live = live;
 Vido.prototype.ifDefined = ifDefined;
 Vido.prototype.repeat = repeat;
 Vido.prototype.unsafeHTML = unsafeHTML;

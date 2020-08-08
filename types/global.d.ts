@@ -169,6 +169,7 @@ declare module "vido" {
     import { repeat } from 'lit-html-optimised/directives/repeat';
     import { unsafeHTML } from 'lit-html-optimised/directives/unsafe-html';
     import { until } from 'lit-html-optimised/directives/until';
+    import { live } from 'lit-html-optimised/directives/live';
     import Detach from "Detach";
     import StyleMap from "StyleMap";
     import PointerAction from "PointerAction";
@@ -208,6 +209,7 @@ declare module "vido" {
         cache: typeof cache;
         classMap: typeof classMap;
         guard: typeof guard;
+        live: typeof live;
         ifDefined: typeof ifDefined;
         repeat: typeof repeat;
         unsafeHTML: typeof unsafeHTML;
