@@ -1288,8 +1288,7 @@
     // This line will be used in regexes to search for lit-html usage.
     // TODO(justinfagnani): inject version number at build time
     if (typeof window !== 'undefined') {
-        (window['litHtmlVersions'] || (window['litHtmlVersions'] = []))
-            .push('1.3.0-pre.1');
+        (window['litHtmlVersions'] || (window['litHtmlVersions'] = [])).push('1.3.0');
     }
     /**
      * Interprets a template literal as an HTML template that can efficiently
@@ -3178,6 +3177,12 @@
         html(placement, templateProps) {
             if (this.destroyed)
                 return;
+            if (this.slotInstances[placement].length === 0) {
+                if (templateProps instanceof TemplateResult)
+                    return [templateProps];
+                if (typeof templateProps === 'string')
+                    return [html `${templateProps}`];
+            }
             return this.slotInstances[placement].map((instance) => instance.html(templateProps));
         }
         getProps() {

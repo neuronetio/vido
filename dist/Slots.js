@@ -1,3 +1,4 @@
+import { lithtml } from './vido';
 export class Slots {
     constructor(vido, props) {
         this.slotInstances = {};
@@ -62,6 +63,12 @@ export class Slots {
     html(placement, templateProps) {
         if (this.destroyed)
             return;
+        if (this.slotInstances[placement].length === 0) {
+            if (templateProps instanceof lithtml.TemplateResult)
+                return [templateProps];
+            if (typeof templateProps === 'string')
+                return [lithtml.html `${templateProps}`];
+        }
         return this.slotInstances[placement].map((instance) => instance.html(templateProps));
     }
     getProps() {

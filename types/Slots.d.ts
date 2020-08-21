@@ -15,7 +15,7 @@ export declare class Slots {
     destroy(): void;
     change(changedProps: unknown, options?: any): void;
     getInstances(placement: string | undefined): ComponentInstance[] | SlotInstances;
-    html(placement: string, templateProps?: unknown): lithtml.TemplateResult[] | undefined;
+    html(placement: string, templateProps?: any): lithtml.TemplateResult[] | undefined;
     getProps(): unknown;
     isDestroyed(): boolean;
 }
