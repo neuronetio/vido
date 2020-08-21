@@ -48,6 +48,6 @@
   },
   "dependencies": {
     "csstype": "^2.6.10",
-    "lit-html-optimised": "^1.3.0-pre.1"
+    "lit-html-optimised": "^1.3.0"
   }
 }
