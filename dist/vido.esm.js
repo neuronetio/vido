@@ -3176,6 +3176,7 @@ class Slots {
                 return [templateProps];
             if (typeof templateProps === 'string')
                 return [html `${templateProps}`];
+            return null;
         }
         return this.slotInstances[placement].map((instance) => instance.html(templateProps));
     }
