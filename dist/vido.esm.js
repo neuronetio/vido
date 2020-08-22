@@ -3171,7 +3171,7 @@ class Slots {
     html(placement, templateProps) {
         if (this.destroyed)
             return;
-        if (this.slotInstances[placement].length === 0) {
+        if (!this.slotInstances[placement] || this.slotInstances[placement].length === 0) {
             if (templateProps instanceof TemplateResult)
                 return [templateProps];
             if (typeof templateProps === 'string')
