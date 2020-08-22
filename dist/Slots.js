@@ -68,6 +68,8 @@ export class Slots {
                 return [templateProps];
             if (typeof templateProps === 'string')
                 return [lithtml.html `${templateProps}`];
+            if (Array.isArray(templateProps))
+                return templateProps;
             return null;
         }
         return this.slotInstances[placement].map((instance) => instance.html(templateProps));
