@@ -3172,13 +3172,13 @@ class Slots {
         if (this.destroyed)
             return;
         if (!this.slotInstances[placement] || this.slotInstances[placement].length === 0) {
-            if (templateProps instanceof TemplateResult)
-                return [templateProps];
-            if (typeof templateProps === 'string')
-                return [html `${templateProps}`];
             return templateProps;
         }
-        return this.slotInstances[placement].map((instance) => instance.html(templateProps));
+        let result = templateProps;
+        for (const slotInstance of this.slotInstances[placement]) {
+            result = slotInstance.html(result);
+        }
+        return result;
     }
     getProps() {
         return this.props;

@@ -227,7 +227,7 @@ declare module "vido" {
     export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until, Slots, };
 }
 declare module "Slots" {
-    import { ComponentInstance, lithtml, Component, AnyVido } from "vido";
+    import { ComponentInstance, Component, AnyVido } from "vido";
     export type SlotInstances = {
         [key: string]: ComponentInstance[];
     };
@@ -244,7 +244,7 @@ declare module "Slots" {
         destroy(): void;
         change(changedProps: unknown, options?: any): void;
         getInstances(placement: string | undefined): ComponentInstance[] | SlotInstances;
-        html(placement: string, templateProps?: any): lithtml.TemplateResult[] | undefined;
+        html(placement: string, templateProps?: any): any;
         getProps(): unknown;
         isDestroyed(): boolean;
     }

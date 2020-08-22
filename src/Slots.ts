@@ -73,14 +73,16 @@ export class Slots {
     return this.slotInstances[placement];
   }
 
-  public html(placement: string, templateProps?: any): lithtml.TemplateResult[] | undefined {
+  public html(placement: string, templateProps?: any) {
     if (this.destroyed) return;
     if (!this.slotInstances[placement] || this.slotInstances[placement].length === 0) {
-      if (templateProps instanceof lithtml.TemplateResult) return [templateProps];
-      if (typeof templateProps === 'string') return [lithtml.html`${templateProps}`];
       return templateProps;
     }
-    return this.slotInstances[placement].map((instance) => instance.html(templateProps));
+    let result = templateProps;
+    for (const slotInstance of this.slotInstances[placement]) {
+      result = slotInstance.html(result);
+    }
+    return result;
   }
 
   public getProps() {

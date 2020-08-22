@@ -1,4 +1,4 @@
-import { ComponentInstance, lithtml, Component, AnyVido } from './vido';
+import { ComponentInstance, Component, AnyVido } from './vido';
 export declare type SlotInstances = {
     [key: string]: ComponentInstance[];
 };
@@ -15,7 +15,7 @@ export declare class Slots {
     destroy(): void;
     change(changedProps: unknown, options?: any): void;
     getInstances(placement: string | undefined): ComponentInstance[] | SlotInstances;
-    html(placement: string, templateProps?: any): lithtml.TemplateResult[] | undefined;
+    html(placement: string, templateProps?: any): any;
     getProps(): unknown;
     isDestroyed(): boolean;
 }
