@@ -32,6 +32,9 @@ declare module "Detach" {
         body(part: AttributePart): void;
     }
 }
+declare module "GetElement" {
+    export default function prepareGetElement(directive: any): (callback: (element: Element) => void) => any;
+}
 declare module "InternalComponentMethods" {
     export default function getInternalComponentMethods(components: any, actionsByInstance: any, clone: any): {
         new (instance: string, vidoInstance: any, renderFunction: any, content: any): {
@@ -203,6 +206,7 @@ declare module "vido" {
         createComponent: (component: Component, props?: unknown, content?: unknown) => ComponentInstance;
         createApp: (config: CreateAppConfig) => ComponentInstance;
         reuseComponents: (currentComponents: ComponentInstance[], dataArray: unknown[], getProps: any, component: Component, leaveTail?: boolean, debug?: boolean) => void;
+        getElement: (callback: (element: Element) => void) => void;
         directive: typeof directive;
         asyncAppend: typeof asyncAppend;
         asyncReplace: typeof asyncReplace;

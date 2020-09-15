@@ -18,6 +18,7 @@ import getInternalComponentMethods from './InternalComponentMethods';
 import { schedule, clone } from './helpers';
 import Action from './Action';
 import { Slots } from './Slots';
+import prepareGetElement from './GetElement';
 
 import * as lithtml from 'lit-html-optimised';
 
@@ -72,6 +73,7 @@ export interface vido<State, Api> {
     leaveTail?: boolean,
     debug?: boolean
   ) => void;
+  getElement: (callback: (element: Element) => void) => void;
   directive: typeof directive;
   asyncAppend: typeof asyncAppend;
   asyncReplace: typeof asyncReplace;
@@ -145,6 +147,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
     unsafeHTML = unsafeHTML;
     until = until;
     schedule = schedule;
+    getElement = prepareGetElement(directive);
     actionsByInstance = (componentActions, props) => {};
     StyleMap = StyleMap;
     Detach = Detach;

@@ -3188,6 +3188,14 @@ class Slots {
     }
 }
 
+function prepareGetElement(directive) {
+    return function getElement(callback) {
+        return directive(() => (part) => {
+            callback(part.committer.element);
+        })();
+    };
+}
+
 function Vido(state, api) {
     let componentId = 0;
     const components = new Map();
@@ -3233,6 +3241,7 @@ function Vido(state, api) {
             this.unsafeHTML = unsafeHTML;
             this.until = until;
             this.schedule = schedule;
+            this.getElement = prepareGetElement(directive);
             this.actionsByInstance = (componentActions, props) => { };
             this.StyleMap = StyleMap;
             this.Detach = Detach;

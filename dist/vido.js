@@ -18,6 +18,7 @@ import getInternalComponentMethods from './InternalComponentMethods';
 import { schedule, clone } from './helpers';
 import Action from './Action';
 import { Slots } from './Slots';
+import prepareGetElement from './GetElement';
 import * as lithtml from 'lit-html-optimised';
 export default function Vido(state, api) {
     let componentId = 0;
@@ -64,6 +65,7 @@ export default function Vido(state, api) {
             this.unsafeHTML = unsafeHTML;
             this.until = until;
             this.schedule = schedule;
+            this.getElement = prepareGetElement(directive);
             this.actionsByInstance = (componentActions, props) => { };
             this.StyleMap = StyleMap;
             this.Detach = Detach;

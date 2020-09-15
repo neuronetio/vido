@@ -42,6 +42,7 @@ export interface vido<State, Api> {
     createComponent: (component: Component, props?: unknown, content?: unknown) => ComponentInstance;
     createApp: (config: CreateAppConfig) => ComponentInstance;
     reuseComponents: (currentComponents: ComponentInstance[], dataArray: unknown[], getProps: any, component: Component, leaveTail?: boolean, debug?: boolean) => void;
+    getElement: (callback: (element: Element) => void) => void;
     directive: typeof directive;
     asyncAppend: typeof asyncAppend;
     asyncReplace: typeof asyncReplace;
