@@ -1,4 +1,10 @@
-export default function getPublicComponentMethods(components, actionsByInstance, clone) {
+import { AnyVido } from './vido';
+
+export default function getPublicComponentMethods(
+  components: Map<string, any>,
+  actionsByInstance: Map<string, any>,
+  clone: (obj: object) => object
+) {
   return class PublicComponentMethods {
     public instance: string;
     public name: string;
@@ -6,7 +12,7 @@ export default function getPublicComponentMethods(components, actionsByInstance,
     public props: any;
     public destroyed = false;
 
-    constructor(instance, vidoInstance, props = {}) {
+    constructor(instance: string, vidoInstance: AnyVido, props: unknown = {}) {
       this.instance = instance;
       this.name = vidoInstance.name;
       this.vidoInstance = vidoInstance;
@@ -35,7 +41,7 @@ export default function getPublicComponentMethods(components, actionsByInstance,
     /**
      * Update template - trigger rendering process
      */
-    public update(callback: () => void = undefined) {
+    public update(callback: (() => void) | undefined = undefined) {
       if (this.vidoInstance.debug) {
         console.groupCollapsed(`updating component ${this.instance}`);
         console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -49,7 +55,7 @@ export default function getPublicComponentMethods(components, actionsByInstance,
      * Change component input properties
      * @param {any} newProps
      */
-    public change(newProps, options) {
+    public change(newProps: unknown, options: unknown = {}) {
       if (this.vidoInstance.debug) {
         console.groupCollapsed(`changing component ${this.instance}`);
         console.log(clone({ props: this.props, newProps: newProps, components: components.keys(), actionsByInstance }));
@@ -64,7 +70,7 @@ export default function getPublicComponentMethods(components, actionsByInstance,
      * Get component lit-html template
      * @param {} templateProps
      */
-    public html(templateProps = {}) {
+    public html(templateProps: unknown = {}) {
       const component = components.get(this.instance);
       if (component && !component.destroyed) {
         return component.update(templateProps, this.vidoInstance);

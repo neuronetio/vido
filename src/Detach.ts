@@ -4,9 +4,9 @@ const detached: WeakMap<AttributePart, ElementData> = new WeakMap();
 
 export interface ElementData {
   element: Element;
-  nextSibling: Node;
-  previousSibling: Node;
-  parent: Node;
+  nextSibling: ChildNode | null;
+  previousSibling: ChildNode | null;
+  parent: (Node & ParentNode) | null;
 }
 
 export default class Detach extends Directive {

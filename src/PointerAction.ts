@@ -1,22 +1,59 @@
 import Action from './Action';
+
+export type EventToNormalize = PointerEvent | TouchEvent | WheelEvent | Event;
+
 export interface Options {
   element?: HTMLElement;
   axis?: string;
   threshold?: number;
-  onDown?: (data) => void;
-  onMove?: (data) => void;
-  onUp?: (data) => void;
-  onWheel?: (data) => void;
+  onDown?: (data: NormalizedEvent) => void;
+  onMove?: (data: NormalizedEvent) => void;
+  onUp?: (data: NormalizedEvent) => void;
+  onWheel?: (data: NormalizedEvent) => void;
+}
+
+export interface InternalOptions extends Options {
+  element: HTMLElement;
+  axis: string;
+  threshold: number;
+  onDown: (data: NormalizedEvent) => void;
+  onMove: (data: NormalizedEvent) => void;
+  onUp: (data: NormalizedEvent) => void;
+  onWheel: (data: NormalizedEvent) => void;
+}
+
+export interface Props {
+  pointerOptions: InternalOptions;
+  [key: string]: unknown;
+}
+
+export interface NormalizedEvent {
+  x: number;
+  y: number;
+  z?: number;
+  pageX?: number;
+  pageY?: number;
+  clientX?: number;
+  clientY?: number;
+  screenX?: number;
+  screenY?: number;
+  movementX?: number;
+  movementY?: number;
+  initialX?: number;
+  initialY?: number;
+  lastX?: number;
+  lastY?: number;
+  event: Event;
 }
 
 const defaultOptions = {
   element: document.createTextNode(''),
   axis: 'xy',
   threshold: 10,
-  onDown(data) {},
-  onMove(data) {},
-  onUp(data) {},
-  onWheel(data) {}
+  onDown() {},
+  onMove() {},
+  onUp() {},
+  onWheel() {},
 };
 
 const pointerEventsExists = typeof PointerEvent !== 'undefined';
@@ -29,10 +66,10 @@ export default class PointerAction extends Action {
   private initialY: number = 0;
   private lastY: number = 0;
   private lastX: number = 0;
-  private element: HTMLElement;
-  private options: Options;
+  private element: Element;
+  private options: InternalOptions;
 
-  constructor(element, data) {
+  constructor(element: Element, data: Props) {
     super();
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
@@ -40,7 +77,7 @@ export default class PointerAction extends Action {
     this.onWheel = this.onWheel.bind(this);
     this.element = element;
     this.id = ++id;
-    this.options = { ...defaultOptions, ...data.pointerOptions } as Options;
+    this.options = { ...defaultOptions, ...data.pointerOptions } as InternalOptions;
     if (pointerEventsExists) {
       element.addEventListener('pointerdown', this.onPointerDown);
       document.addEventListener('pointermove', this.onPointerMove);
@@ -56,7 +93,7 @@ export default class PointerAction extends Action {
     }
   }
 
-  private normalizeMouseWheelEvent(event) {
+  private normalizeMouseWheelEvent(event: EventToNormalize): NormalizedEvent {
     // @ts-ignore
     let x = event.deltaX || 0;
     // @ts-ignore
@@ -83,12 +120,12 @@ export default class PointerAction extends Action {
     return { x, y, z, event };
   }
 
-  public onWheel(event) {
+  public onWheel(event: WheelEvent) {
     const normalized = this.normalizeMouseWheelEvent(event);
     this.options.onWheel(normalized);
   }
 
-  private normalizePointerEvent(event) {
+  private normalizePointerEvent(event: EventToNormalize): NormalizedEvent {
     let result = { x: 0, y: 0, pageX: 0, pageY: 0, clientX: 0, clientY: 0, screenX: 0, screenY: 0, event };
     switch (event.type) {
       case 'wheel':
@@ -106,31 +143,31 @@ export default class PointerAction extends Action {
       case 'touchmove':
       case 'touchend':
       case 'touchcancel':
-        result.x = event.changedTouches[0].screenX;
-        result.y = event.changedTouches[0].screenY;
-        result.pageX = event.changedTouches[0].pageX;
-        result.pageY = event.changedTouches[0].pageY;
-        result.screenX = event.changedTouches[0].screenX;
-        result.screenY = event.changedTouches[0].screenY;
-        result.clientX = event.changedTouches[0].clientX;
-        result.clientY = event.changedTouches[0].clientY;
+        result.x = (event as TouchEvent).changedTouches[0].screenX;
+        result.y = (event as TouchEvent).changedTouches[0].screenY;
+        result.pageX = (event as TouchEvent).changedTouches[0].pageX;
+        result.pageY = (event as TouchEvent).changedTouches[0].pageY;
+        result.screenX = (event as TouchEvent).changedTouches[0].screenX;
+        result.screenY = (event as TouchEvent).changedTouches[0].screenY;
+        result.clientX = (event as TouchEvent).changedTouches[0].clientX;
+        result.clientY = (event as TouchEvent).changedTouches[0].clientY;
         break;
       default:
-        result.x = event.x;
-        result.y = event.y;
-        result.pageX = event.pageX;
-        result.pageY = event.pageY;
-        result.screenX = event.screenX;
-        result.screenY = event.screenY;
-        result.clientX = event.clientX;
-        result.clientY = event.clientY;
+        result.x = (event as PointerEvent).x;
+        result.y = (event as PointerEvent).y;
+        result.pageX = (event as PointerEvent).pageX;
+        result.pageY = (event as PointerEvent).pageY;
+        result.screenX = (event as PointerEvent).screenX;
+        result.screenY = (event as PointerEvent).screenY;
+        result.clientX = (event as PointerEvent).clientX;
+        result.clientY = (event as PointerEvent).clientY;
         break;
     }
     return result;
   }
 
-  private onPointerDown(event) {
-    if (event.type === 'mousedown' && event.button !== 0) return;
+  private onPointerDown(event: EventToNormalize) {
+    if (event.type === 'mousedown' && (event as MouseEvent).button !== 0) return;
     this.moving = 'xy';
     const normalized = this.normalizePointerEvent(event);
     this.lastX = normalized.x;
@@ -140,22 +177,22 @@ export default class PointerAction extends Action {
     this.options.onDown(normalized);
   }
 
-  private handleX(normalized) {
+  private handleX(normalized: NormalizedEvent) {
     let movementX = normalized.x - this.lastX;
     this.lastY = normalized.y;
     this.lastX = normalized.x;
     return movementX;
   }
 
-  private handleY(normalized) {
+  private handleY(normalized: NormalizedEvent) {
     let movementY = normalized.y - this.lastY;
     this.lastY = normalized.y;
     this.lastX = normalized.x;
     return movementY;
   }
 
-  private onPointerMove(event) {
-    if (this.moving === '' || (event.type === 'mousemove' && event.button !== 0)) return;
+  private onPointerMove(event: EventToNormalize) {
+    if (this.moving === '' || (event.type === 'mousemove' && (event as MouseEvent).button !== 0)) return;
     const normalized = this.normalizePointerEvent(event);
     if (this.options.axis === 'x|y') {
       let movementX = 0,
@@ -183,7 +220,7 @@ export default class PointerAction extends Action {
         initialY: this.initialY,
         lastX: this.lastX,
         lastY: this.lastY,
-        event
+        event,
       });
     } else if (this.options.axis === 'xy') {
       let movementX = 0,
@@ -203,7 +240,7 @@ export default class PointerAction extends Action {
         initialY: this.initialY,
         lastX: this.lastX,
         lastY: this.lastY,
-        event
+        event,
       });
     } else if (this.options.axis === 'x') {
       if (
@@ -211,6 +248,7 @@ export default class PointerAction extends Action {
         (this.moving === 'xy' && Math.abs(normalized.x - this.initialX) > this.options.threshold)
       ) {
         this.moving = 'x';
+        // @ts-ignore
         this.options.onMove({
           movementX: this.handleX(normalized),
           movementY: 0,
@@ -218,7 +256,7 @@ export default class PointerAction extends Action {
           initialY: this.initialY,
           lastX: this.lastX,
           lastY: this.lastY,
-          event
+          event,
         });
       }
     } else if (this.options.axis === 'y') {
@@ -239,12 +277,12 @@ export default class PointerAction extends Action {
         initialY: this.initialY,
         lastX: this.lastX,
         lastY: this.lastY,
-        event
+        event,
       });
     }
   }
 
-  private onPointerUp(event) {
+  private onPointerUp(event: EventToNormalize) {
     this.moving = '';
     const normalized = this.normalizePointerEvent(event);
     this.options.onUp({
@@ -256,13 +294,13 @@ export default class PointerAction extends Action {
       initialY: this.initialY,
       lastX: this.lastX,
       lastY: this.lastY,
-      event
+      event,
     });
     this.lastY = 0;
     this.lastX = 0;
   }
 
-  public destroy(element) {
+  public destroy(element: Element) {
     if (pointerEventsExists) {
       element.removeEventListener('pointerdown', this.onPointerDown);
       document.removeEventListener('pointermove', this.onPointerMove);

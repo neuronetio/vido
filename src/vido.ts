@@ -36,7 +36,15 @@ import { until } from '../lit-html/directives/until';
 import { Directive } from '../lit-html/lib/directive';
 */
 
-export type UpdateTemplate = (props: unknown) => lithtml.TemplateResult;
+export type htmlResult =
+  | lithtml.TemplateResult
+  | lithtml.TemplateResult[]
+  | lithtml.SVGTemplateResult
+  | lithtml.SVGTemplateResult[]
+  | undefined
+  | null;
+
+export type UpdateTemplate = (props: unknown) => htmlResult;
 
 export type Component = (vido: AnyVido, props: unknown) => UpdateTemplate;
 
@@ -55,20 +63,26 @@ export interface CreateAppConfig {
   props: unknown;
 }
 
+export type Callback = () => void;
+export type OnChangeCallback = (props: any, options: any) => void;
+export type GetPropsFn = (arg: unknown) => unknown | any;
+
 export interface vido<State, Api> {
+  instance: string;
+  name: string;
   state: State;
   api: Api;
   html: (strings: TemplateStringsArray, ...values: unknown[]) => lithtml.TemplateResult;
   svg: (strings: TemplateStringsArray, ...values: unknown[]) => lithtml.SVGTemplateResult;
-  onDestroy: (callback) => void;
-  onChange: (callback) => void;
+  onDestroy: (callback: Callback) => void;
+  onChange: (callback: OnChangeCallback) => void;
   update: (callback?: any) => Promise<unknown>;
   createComponent: (component: Component, props?: unknown, content?: unknown) => ComponentInstance;
   createApp: (config: CreateAppConfig) => ComponentInstance;
   reuseComponents: (
     currentComponents: ComponentInstance[],
     dataArray: unknown[],
-    getProps,
+    getProps: GetPropsFn,
     component: Component,
     leaveTail?: boolean,
     debug?: boolean
@@ -100,7 +114,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
   let componentId = 0;
   const components = new Map();
   let actionsByInstance = new Map();
-  let app, element;
+  let app: string, element: HTMLElement;
   let shouldUpdateCount = 0;
   const afterUpdateCallbacks: (() => void)[] = [];
   const resolved = Promise.resolve();
@@ -126,9 +140,12 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
   const InternalComponentMethods = getInternalComponentMethods(components, actionsByInstance, clone);
 
   class VidoInstance {
-    destroyable = [];
+    instance: string = '';
+    name: string = '';
+    Actions: InstanceActionsCollector;
+    destroyable: Callback[] = [];
     destroyed = false;
-    onChangeFunctions = [];
+    onChangeFunctions: OnChangeCallback[] = [];
     debug = false;
     state = state as State;
     api = api as Api;
@@ -148,7 +165,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
     until = until;
     schedule = schedule;
     getElement = prepareGetElement(directive);
-    actionsByInstance = (componentActions, props) => {};
+    actionsByInstance = (/* componentActions, props */) => {};
     StyleMap = StyleMap;
     Detach = Detach;
     PointerAction = PointerAction;
@@ -157,30 +174,35 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
     _components = components;
     _actions = actionsByInstance;
 
-    constructor() {
+    constructor(instance: string = '', name: string = '') {
+      this.instance = instance;
       this.reuseComponents = this.reuseComponents.bind(this);
       this.onDestroy = this.onDestroy.bind(this);
       this.onChange = this.onChange.bind(this);
       this.update = this.update.bind(this);
       this.destroyComponent = this.destroyComponent.bind(this);
       for (const name in additionalMethods) {
+        // @ts-ignore
         this[name] = additionalMethods[name].bind(this);
       }
+      this.name = name;
+      this.Actions = new InstanceActionsCollector(instance);
     }
 
     public static addMethod(name: string, body: (...args: unknown[]) => unknown) {
+      // @ts-ignore
       additionalMethods[name] = body;
     }
 
-    public onDestroy(fn) {
+    public onDestroy(fn: Callback) {
       this.destroyable.push(fn);
     }
 
-    public onChange(fn) {
+    public onChange(fn: OnChangeCallback) {
       this.onChangeFunctions.push(fn);
     }
 
-    public update(callback) {
+    public update(callback: Callback) {
       return this.updateTemplate(callback);
     }
 
@@ -198,7 +220,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
     public reuseComponents(
       currentComponents: ComponentInstance[],
       dataArray: unknown[],
-      getProps,
+      getProps: GetPropsFn,
       component: Component,
       leaveTail = true,
       debug = false
@@ -253,20 +275,15 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       }
     }
 
-    public createComponent(component, props = {}, content = null): ComponentInstance {
+    public createComponent(component: Component, props: unknown = {}): ComponentInstance {
       const instance = component.name + ':' + componentId++;
       let vidoInstance;
-      vidoInstance = new VidoInstance();
-      vidoInstance.instance = instance;
-      vidoInstance.destroyed = false;
-      vidoInstance.name = component.name;
-      vidoInstance.Actions = new InstanceActionsCollector(instance);
+      vidoInstance = new VidoInstance(instance, name);
       const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
       const internalMethods = new InternalComponentMethods(
         instance,
         vidoInstance,
-        component(vidoInstance, props, content),
-        content
+        component(vidoInstance as AnyVido, props)
       );
       components.set(instance, internalMethods);
       components.get(instance).change(props);
@@ -279,7 +296,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       return publicMethods;
     }
 
-    public destroyComponent(instance, vidoInstance) {
+    public destroyComponent(instance: string, vidoInstance: VidoInstance) {
       if (vidoInstance.debug) {
         console.groupCollapsed(`destroying component ${instance}...`);
         console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -356,7 +373,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       }
     }
 
-    private updateTemplate(callback: () => void = undefined) {
+    private updateTemplate(callback: (() => void) | undefined = undefined) {
       if (callback) afterUpdateCallbacks.push(callback);
       return new Promise((resolve) => {
         const currentShouldUpdateCount = ++shouldUpdateCount;

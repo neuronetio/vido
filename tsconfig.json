@@ -4,7 +4,7 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "esModuleInterop": true,
-    "strict": false,
+    "strict": true,
     "module": "ESNext",
     "downlevelIteration": true,
     "allowSyntheticDefaultImports": true,
@@ -13,6 +13,7 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "outDir": "dist",
-    "declaration": false
+    "declaration": false,
+    "noImplicitAny": true
   }
 }

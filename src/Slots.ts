@@ -1,4 +1,4 @@
-import { ComponentInstance, lithtml, Component, AnyVido } from './vido';
+import { ComponentInstance, Component, AnyVido } from './vido';
 
 export type SlotInstances = {
   [key: string]: ComponentInstance[];
@@ -68,7 +68,7 @@ export class Slots {
   }
 
   public getInstances(placement: string | undefined): ComponentInstance[] | SlotInstances {
-    if (this.destroyed) return;
+    if (this.destroyed) return [];
     if (placement === undefined) return this.slotInstances;
     return this.slotInstances[placement];
   }

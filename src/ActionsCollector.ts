@@ -1,12 +1,12 @@
 import { Directive, AttributePart } from 'lit-html-optimised';
 
-export default function getActionsCollector(actionsByInstance) {
+export default function getActionsCollector(actionsByInstance: Map<string, any>) {
   return class ActionsCollector extends Directive {
     instance: string;
-    actions: unknown[];
+    actions: unknown[] = [];
     props: unknown;
 
-    constructor(instance) {
+    constructor(instance: string) {
       super();
       this.instance = instance;
     }
@@ -38,7 +38,7 @@ export default function getActionsCollector(actionsByInstance) {
             const componentAction = {
               create,
               update() {},
-              destroy() {}
+              destroy() {},
             };
             const action = { instance: this.instance, componentAction, element, props: this.props };
             let byInstance = [];

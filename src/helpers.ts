@@ -4,9 +4,9 @@
  * @param {function} fn
  * @returns {function}
  */
-export function schedule(fn: (argument) => void | any) {
+export function schedule(fn: (argument: unknown) => void | any) {
   let frameId = 0;
-  function wrapperFn(argument) {
+  function wrapperFn(argument: unknown) {
     if (frameId) {
       return;
     }
@@ -25,7 +25,7 @@ export function schedule(fn: (argument) => void | any) {
  * @param {any} item
  * @returns {boolean}
  */
-function isObject(item) {
+function isObject(item: unknown) {
   return item && typeof item === 'object' && item.constructor && item.constructor.name === 'Object';
 }
 
@@ -36,7 +36,7 @@ function isObject(item) {
  * @params {[object]} sources
  * @returns {object}
  */
-export function mergeDeep(target, ...sources) {
+export function mergeDeep(target: any, ...sources: any[]): object {
   const source = sources.shift();
   if (isObject(target) && isObject(source)) {
     for (const key in source) {
@@ -81,8 +81,10 @@ export function mergeDeep(target, ...sources) {
  * @param source
  * @returns {object} cloned source
  */
-export function clone(source) {
+export function clone(source: object) {
+  // @ts-ignore
   if (typeof source.actions !== 'undefined') {
+    // @ts-ignore
     const actns = source.actions.map((action) => {
       const result = { ...action };
       const props = { ...result.props };
@@ -92,6 +94,7 @@ export function clone(source) {
       result.props = props;
       return result;
     });
+    // @ts-ignore
     source.actions = actns;
   }
   return mergeDeep({}, source);

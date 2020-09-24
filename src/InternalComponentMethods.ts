@@ -1,4 +1,10 @@
-export default function getInternalComponentMethods(components, actionsByInstance, clone) {
+import { AnyVido, htmlResult } from './vido';
+
+export default function getInternalComponentMethods(
+  components: Map<string, any>,
+  actionsByInstance: Map<string, any>,
+  clone: (obj: object) => object
+) {
   return class InternalComponentMethods {
     public instance: string;
     public vidoInstance: any;
@@ -6,11 +12,10 @@ export default function getInternalComponentMethods(components, actionsByInstanc
     public content: any;
     public destroyed = false;
 
-    constructor(instance: string, vidoInstance, renderFunction, content) {
+    constructor(instance: string, vidoInstance: AnyVido, renderFunction: (arg: any) => htmlResult) {
       this.instance = instance;
       this.vidoInstance = vidoInstance;
       this.renderFunction = renderFunction;
-      this.content = content;
       this.destroy = this.destroy.bind(this);
       this.update = this.update.bind(this);
       this.change = this.change.bind(this);
@@ -54,7 +59,7 @@ export default function getInternalComponentMethods(components, actionsByInstanc
       return this.renderFunction(props);
     }
 
-    public change(changedProps, options = { leave: false }) {
+    public change(changedProps: unknown, options = { leave: false }) {
       const props = changedProps;
       if (this.vidoInstance.debug) {
         console.groupCollapsed(`component change method fired ${this.instance}`);
