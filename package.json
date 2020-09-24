@@ -10,7 +10,7 @@
     "autobuild": "rollup -c -w",
     "test": "jest"
   },
-  "types": "types/global.d.ts",
+  "types": "types/vido.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/neuronetio/vido.git"
