@@ -175,7 +175,7 @@ declare module "helpers" {
      * @param source
      * @returns {object} cloned source
      */
-    export function clone(source: object): unknown;
+    export function clone<T>(source: object): T;
     const _default: {
         mergeDeep: typeof mergeDeep;
         clone: typeof clone;

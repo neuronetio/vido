@@ -15,14 +15,14 @@ export interface UnknownObject {
  * @params {[object]} sources
  * @returns {object}
  */
-export declare function mergeDeep(target: any, ...sources: any[]): UnknownObject;
+export declare function mergeDeep<T>(target: any, ...sources: any[]): T;
 /**
  * Clone helper function
  *
  * @param source
  * @returns {object} cloned source
  */
-export declare function clone(source: object): UnknownObject;
+export declare function clone<T>(source: object): T;
 declare const _default: {
     mergeDeep: typeof mergeDeep;
     clone: typeof clone;
