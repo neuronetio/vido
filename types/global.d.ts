@@ -158,6 +158,9 @@ declare module "helpers" {
      * @returns {function}
      */
     export function schedule(fn: (argument: unknown) => void | any): (argument: unknown) => void;
+    export interface UnknownObject {
+        [key: string]: unknown;
+    }
     /**
      * Merge deep - helper function which will merge objects recursively - creating brand new one - like clone
      *
@@ -165,14 +168,14 @@ declare module "helpers" {
      * @params {[object]} sources
      * @returns {object}
      */
-    export function mergeDeep(target: any, ...sources: any[]): object;
+    export function mergeDeep(target: any, ...sources: any[]): UnknownObject;
     /**
      * Clone helper function
      *
      * @param source
      * @returns {object} cloned source
      */
-    export function clone(source: object): object;
+    export function clone(source: object): UnknownObject;
     const _default: {
         mergeDeep: typeof mergeDeep;
         clone: typeof clone;

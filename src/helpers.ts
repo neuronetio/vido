@@ -29,6 +29,10 @@ function isObject(item: unknown) {
   return item && typeof item === 'object' && item !== null && item.constructor && item.constructor.name === 'Object';
 }
 
+export interface UnknownObject {
+  [key: string]: unknown;
+}
+
 /**
  * Merge deep - helper function which will merge objects recursively - creating brand new one - like clone
  *
@@ -36,7 +40,7 @@ function isObject(item: unknown) {
  * @params {[object]} sources
  * @returns {object}
  */
-export function mergeDeep(target: any, ...sources: any[]): object {
+export function mergeDeep(target: any, ...sources: any[]): UnknownObject {
   const source = sources.shift();
   if (isObject(target) && isObject(source)) {
     for (const key in source) {
