@@ -3,10 +3,10 @@ const defaultOptions = {
     element: document.createTextNode(''),
     axis: 'xy',
     threshold: 10,
-    onDown(data) { },
-    onMove(data) { },
-    onUp(data) { },
-    onWheel(data) { }
+    onDown() { },
+    onMove() { },
+    onUp() { },
+    onWheel() { },
 };
 const pointerEventsExists = typeof PointerEvent !== 'undefined';
 let id = 0;
@@ -158,7 +158,7 @@ export default class PointerAction extends Action {
                 initialY: this.initialY,
                 lastX: this.lastX,
                 lastY: this.lastY,
-                event
+                event,
             });
         }
         else if (this.options.axis === 'xy') {
@@ -178,13 +178,14 @@ export default class PointerAction extends Action {
                 initialY: this.initialY,
                 lastX: this.lastX,
                 lastY: this.lastY,
-                event
+                event,
             });
         }
         else if (this.options.axis === 'x') {
             if (this.moving === 'x' ||
                 (this.moving === 'xy' && Math.abs(normalized.x - this.initialX) > this.options.threshold)) {
                 this.moving = 'x';
+                // @ts-ignore
                 this.options.onMove({
                     movementX: this.handleX(normalized),
                     movementY: 0,
@@ -192,7 +193,7 @@ export default class PointerAction extends Action {
                     initialY: this.initialY,
                     lastX: this.lastX,
                     lastY: this.lastY,
-                    event
+                    event,
                 });
             }
         }
@@ -212,7 +213,7 @@ export default class PointerAction extends Action {
                 initialY: this.initialY,
                 lastX: this.lastX,
                 lastY: this.lastY,
-                event
+                event,
             });
         }
     }
@@ -228,7 +229,7 @@ export default class PointerAction extends Action {
             initialY: this.initialY,
             lastX: this.lastX,
             lastY: this.lastY,
-            event
+            event,
         });
         this.lastY = 0;
         this.lastX = 0;

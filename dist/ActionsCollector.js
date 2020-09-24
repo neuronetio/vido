@@ -3,6 +3,7 @@ export default function getActionsCollector(actionsByInstance) {
     return class ActionsCollector extends Directive {
         constructor(instance) {
             super();
+            this.actions = [];
             this.instance = instance;
         }
         set(actions, props) {
@@ -32,7 +33,7 @@ export default function getActionsCollector(actionsByInstance) {
                         const componentAction = {
                             create,
                             update() { },
-                            destroy() { }
+                            destroy() { },
                         };
                         const action = { instance: this.instance, componentAction, element, props: this.props };
                         let byInstance = [];

@@ -2487,12 +2487,14 @@ class StyleMap extends Directive {
         const elementStyle = element.style;
         let previous = this.previous;
         if (element.attributes.getNamedItem('style')) {
+            // @ts-ignore
             const currentElementStyles = element.attributes
                 .getNamedItem('style')
                 .value.split(';')
                 .map((item) => item.substr(0, item.indexOf(':')).trim())
                 .filter((item) => !!item);
             for (const name of currentElementStyles) {
+                // @ts-ignore
                 if (this.style[name] === undefined) {
                     if (!this.toRemove.includes(name))
                         this.toRemove.push(name);
@@ -2502,6 +2504,7 @@ class StyleMap extends Directive {
         for (const name in previous) {
             if (!this.style.hasOwnProperty(name))
                 continue;
+            // @ts-ignore
             if (this.style[name] === undefined) {
                 if (!this.toRemove.includes(name))
                     this.toRemove.push(name);
@@ -2510,7 +2513,9 @@ class StyleMap extends Directive {
         for (const name in this.style) {
             if (!this.style.hasOwnProperty(name))
                 continue;
+            // @ts-ignore
             const value = this.style[name];
+            // @ts-ignore
             const prev = previous[name];
             if (prev !== undefined && prev === value) {
                 continue;
@@ -2532,12 +2537,15 @@ class StyleMap extends Directive {
             }
             for (const name of this.toRemove) {
                 elementStyle.removeProperty(name);
+                // @ts-ignore
                 if (elementStyle[name])
                     delete elementStyle[name];
             }
             for (const name of this.toUpdate) {
+                // @ts-ignore
                 const value = this.style[name];
                 if (!name.includes('-')) {
+                    // @ts-ignore
                     elementStyle[name] = value;
                 }
                 else {
@@ -2545,6 +2553,7 @@ class StyleMap extends Directive {
                 }
             }
             if (this.detach && parent) {
+                // @ts-ignore
                 parent.insertBefore(element, nextSibling);
             }
             this.previous = Object.assign({}, this.style);
@@ -2563,10 +2572,10 @@ const defaultOptions = {
     element: document.createTextNode(''),
     axis: 'xy',
     threshold: 10,
-    onDown(data) { },
-    onMove(data) { },
-    onUp(data) { },
-    onWheel(data) { }
+    onDown() { },
+    onMove() { },
+    onUp() { },
+    onWheel() { },
 };
 const pointerEventsExists = typeof PointerEvent !== 'undefined';
 let id = 0;
@@ -2718,7 +2727,7 @@ class PointerAction extends Action {
                 initialY: this.initialY,
                 lastX: this.lastX,
                 lastY: this.lastY,
-                event
+                event,
             });
         }
         else if (this.options.axis === 'xy') {
@@ -2738,13 +2747,14 @@ class PointerAction extends Action {
                 initialY: this.initialY,
                 lastX: this.lastX,
                 lastY: this.lastY,
-                event
+                event,
             });
         }
         else if (this.options.axis === 'x') {
             if (this.moving === 'x' ||
                 (this.moving === 'xy' && Math.abs(normalized.x - this.initialX) > this.options.threshold)) {
                 this.moving = 'x';
+                // @ts-ignore
                 this.options.onMove({
                     movementX: this.handleX(normalized),
                     movementY: 0,
@@ -2752,7 +2762,7 @@ class PointerAction extends Action {
                     initialY: this.initialY,
                     lastX: this.lastX,
                     lastY: this.lastY,
-                    event
+                    event,
                 });
             }
         }
@@ -2772,7 +2782,7 @@ class PointerAction extends Action {
                 initialY: this.initialY,
                 lastX: this.lastX,
                 lastY: this.lastY,
-                event
+                event,
             });
         }
     }
@@ -2788,7 +2798,7 @@ class PointerAction extends Action {
             initialY: this.initialY,
             lastX: this.lastX,
             lastY: this.lastY,
-            event
+            event,
         });
         this.lastY = 0;
         this.lastX = 0;
@@ -2855,7 +2865,7 @@ function getPublicComponentMethods(components, actionsByInstance, clone) {
          * Change component input properties
          * @param {any} newProps
          */
-        change(newProps, options) {
+        change(newProps, options = {}) {
             if (this.vidoInstance.debug) {
                 console.groupCollapsed(`changing component ${this.instance}`);
                 console.log(clone({ props: this.props, newProps: newProps, components: components.keys(), actionsByInstance }));
@@ -2890,6 +2900,7 @@ function getActionsCollector(actionsByInstance) {
     return class ActionsCollector extends Directive {
         constructor(instance) {
             super();
+            this.actions = [];
             this.instance = instance;
         }
         set(actions, props) {
@@ -2919,7 +2930,7 @@ function getActionsCollector(actionsByInstance) {
                         const componentAction = {
                             create,
                             update() { },
-                            destroy() { }
+                            destroy() { },
                         };
                         const action = { instance: this.instance, componentAction, element, props: this.props };
                         let byInstance = [];
@@ -2940,12 +2951,11 @@ function getActionsCollector(actionsByInstance) {
 
 function getInternalComponentMethods(components, actionsByInstance, clone) {
     return class InternalComponentMethods {
-        constructor(instance, vidoInstance, renderFunction, content) {
+        constructor(instance, vidoInstance, renderFunction) {
             this.destroyed = false;
             this.instance = instance;
             this.vidoInstance = vidoInstance;
             this.renderFunction = renderFunction;
-            this.content = content;
             this.destroy = this.destroy.bind(this);
             this.update = this.update.bind(this);
             this.change = this.change.bind(this);
@@ -3033,7 +3043,7 @@ function schedule(fn) {
  * @returns {boolean}
  */
 function isObject(item) {
-    return item && typeof item === 'object' && item.constructor && item.constructor.name === 'Object';
+    return item && typeof item === 'object' && item !== null && item.constructor && item.constructor.name === 'Object';
 }
 /**
  * Merge deep - helper function which will merge objects recursively - creating brand new one - like clone
@@ -3092,7 +3102,9 @@ function mergeDeep(target, ...sources) {
  * @returns {object} cloned source
  */
 function clone(source) {
+    // @ts-ignore
     if (typeof source.actions !== 'undefined') {
+        // @ts-ignore
         const actns = source.actions.map((action) => {
             const result = Object.assign({}, action);
             const props = Object.assign({}, result.props);
@@ -3102,6 +3114,7 @@ function clone(source) {
             result.props = props;
             return result;
         });
+        // @ts-ignore
         source.actions = actns;
     }
     return mergeDeep({}, source);
@@ -3163,7 +3176,7 @@ class Slots {
     }
     getInstances(placement) {
         if (this.destroyed)
-            return;
+            return [];
         if (placement === undefined)
             return this.slotInstances;
         return this.slotInstances[placement];
@@ -3219,7 +3232,9 @@ function Vido(state, api) {
     const PublicComponentMethods = getPublicComponentMethods(components, actionsByInstance, clone);
     const InternalComponentMethods = getInternalComponentMethods(components, actionsByInstance, clone);
     class VidoInstance {
-        constructor() {
+        constructor(instance = '', name = '') {
+            this.instance = '';
+            this.name = '';
             this.destroyable = [];
             this.destroyed = false;
             this.onChangeFunctions = [];
@@ -3242,7 +3257,7 @@ function Vido(state, api) {
             this.until = until;
             this.schedule = schedule;
             this.getElement = prepareGetElement(directive);
-            this.actionsByInstance = (componentActions, props) => { };
+            this.actionsByInstance = ( /* componentActions, props */) => { };
             this.StyleMap = StyleMap;
             this.Detach = Detach;
             this.PointerAction = PointerAction;
@@ -3250,16 +3265,21 @@ function Vido(state, api) {
             this.Slots = Slots;
             this._components = components;
             this._actions = actionsByInstance;
+            this.instance = instance;
             this.reuseComponents = this.reuseComponents.bind(this);
             this.onDestroy = this.onDestroy.bind(this);
             this.onChange = this.onChange.bind(this);
             this.update = this.update.bind(this);
             this.destroyComponent = this.destroyComponent.bind(this);
             for (const name in additionalMethods) {
+                // @ts-ignore
                 this[name] = additionalMethods[name].bind(this);
             }
+            this.name = name;
+            this.Actions = new InstanceActionsCollector(instance);
         }
         static addMethod(name, body) {
+            // @ts-ignore
             additionalMethods[name] = body;
         }
         onDestroy(fn) {
@@ -3338,16 +3358,12 @@ function Vido(state, api) {
                 index++;
             }
         }
-        createComponent(component, props = {}, content = null) {
+        createComponent(component, props = {}) {
             const instance = component.name + ':' + componentId++;
             let vidoInstance;
-            vidoInstance = new VidoInstance();
-            vidoInstance.instance = instance;
-            vidoInstance.destroyed = false;
-            vidoInstance.name = component.name;
-            vidoInstance.Actions = new InstanceActionsCollector(instance);
+            vidoInstance = new VidoInstance(instance, name);
             const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
-            const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props, content), content);
+            const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props));
             components.set(instance, internalMethods);
             components.get(instance).change(props);
             if (vidoInstance.debug) {

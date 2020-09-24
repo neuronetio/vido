@@ -16,7 +16,8 @@ import { schedule } from './helpers';
 import Action from './Action';
 import { Slots } from './Slots';
 import * as lithtml from 'lit-html-optimised';
-export declare type UpdateTemplate = (props: unknown) => lithtml.TemplateResult;
+export declare type htmlResult = lithtml.TemplateResult | lithtml.TemplateResult[] | lithtml.SVGTemplateResult | lithtml.SVGTemplateResult[] | undefined | null;
+export declare type UpdateTemplate = (props: unknown) => htmlResult;
 export declare type Component = (vido: AnyVido, props: unknown) => UpdateTemplate;
 export interface ComponentInstance {
     instance: string;
@@ -31,17 +32,22 @@ export interface CreateAppConfig {
     component: Component;
     props: unknown;
 }
+export declare type Callback = () => void;
+export declare type OnChangeCallback = (props: any, options: any) => void;
+export declare type GetPropsFn = (arg: unknown) => unknown | any;
 export interface vido<State, Api> {
+    instance: string;
+    name: string;
     state: State;
     api: Api;
     html: (strings: TemplateStringsArray, ...values: unknown[]) => lithtml.TemplateResult;
     svg: (strings: TemplateStringsArray, ...values: unknown[]) => lithtml.SVGTemplateResult;
-    onDestroy: (callback: any) => void;
-    onChange: (callback: any) => void;
+    onDestroy: (callback: Callback) => void;
+    onChange: (callback: OnChangeCallback) => void;
     update: (callback?: any) => Promise<unknown>;
     createComponent: (component: Component, props?: unknown, content?: unknown) => ComponentInstance;
     createApp: (config: CreateAppConfig) => ComponentInstance;
-    reuseComponents: (currentComponents: ComponentInstance[], dataArray: unknown[], getProps: any, component: Component, leaveTail?: boolean, debug?: boolean) => void;
+    reuseComponents: (currentComponents: ComponentInstance[], dataArray: unknown[], getProps: GetPropsFn, component: Component, leaveTail?: boolean, debug?: boolean) => void;
     getElement: (callback: (element: Element) => void) => void;
     directive: typeof directive;
     asyncAppend: typeof asyncAppend;

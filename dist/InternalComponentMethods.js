@@ -1,11 +1,10 @@
 export default function getInternalComponentMethods(components, actionsByInstance, clone) {
     return class InternalComponentMethods {
-        constructor(instance, vidoInstance, renderFunction, content) {
+        constructor(instance, vidoInstance, renderFunction) {
             this.destroyed = false;
             this.instance = instance;
             this.vidoInstance = vidoInstance;
             this.renderFunction = renderFunction;
-            this.content = content;
             this.destroy = this.destroy.bind(this);
             this.update = this.update.bind(this);
             this.change = this.change.bind(this);

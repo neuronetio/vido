@@ -1,5 +1,6 @@
-export default function getInternalComponentMethods(components: any, actionsByInstance: any, clone: any): {
-    new (instance: string, vidoInstance: any, renderFunction: any, content: any): {
+import { AnyVido, htmlResult } from './vido';
+export default function getInternalComponentMethods(components: Map<string, any>, actionsByInstance: Map<string, any>, clone: (obj: object) => object): {
+    new (instance: string, vidoInstance: AnyVido, renderFunction: (arg: any) => htmlResult): {
         instance: string;
         vidoInstance: any;
         renderFunction: (changedProps: any) => void;
@@ -7,7 +8,7 @@ export default function getInternalComponentMethods(components: any, actionsByIn
         destroyed: boolean;
         destroy(): void;
         update(props?: {}): void;
-        change(changedProps: any, options?: {
+        change(changedProps: unknown, options?: {
             leave: boolean;
         }): void;
     };

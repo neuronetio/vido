@@ -42,7 +42,7 @@ export default function getPublicComponentMethods(components, actionsByInstance,
          * Change component input properties
          * @param {any} newProps
          */
-        change(newProps, options) {
+        change(newProps, options = {}) {
             if (this.vidoInstance.debug) {
                 console.groupCollapsed(`changing component ${this.instance}`);
                 console.log(clone({ props: this.props, newProps: newProps, components: components.keys(), actionsByInstance }));

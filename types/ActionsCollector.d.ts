@@ -1,6 +1,6 @@
 import { AttributePart } from 'lit-html-optimised';
-export default function getActionsCollector(actionsByInstance: any): {
-    new (instance: any): {
+export default function getActionsCollector(actionsByInstance: Map<string, any>): {
+    new (instance: string): {
         instance: string;
         actions: unknown[];
         props: unknown;

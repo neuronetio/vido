@@ -25,7 +25,7 @@ export function schedule(fn) {
  * @returns {boolean}
  */
 function isObject(item) {
-    return item && typeof item === 'object' && item.constructor && item.constructor.name === 'Object';
+    return item && typeof item === 'object' && item !== null && item.constructor && item.constructor.name === 'Object';
 }
 /**
  * Merge deep - helper function which will merge objects recursively - creating brand new one - like clone
@@ -84,7 +84,9 @@ export function mergeDeep(target, ...sources) {
  * @returns {object} cloned source
  */
 export function clone(source) {
+    // @ts-ignore
     if (typeof source.actions !== 'undefined') {
+        // @ts-ignore
         const actns = source.actions.map((action) => {
             const result = Object.assign({}, action);
             const props = Object.assign({}, result.props);
@@ -94,6 +96,7 @@ export function clone(source) {
             result.props = props;
             return result;
         });
+        // @ts-ignore
         source.actions = actns;
     }
     return mergeDeep({}, source);

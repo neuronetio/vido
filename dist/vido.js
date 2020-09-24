@@ -43,7 +43,9 @@ export default function Vido(state, api) {
     const PublicComponentMethods = getPublicComponentMethods(components, actionsByInstance, clone);
     const InternalComponentMethods = getInternalComponentMethods(components, actionsByInstance, clone);
     class VidoInstance {
-        constructor() {
+        constructor(instance = '', name = '') {
+            this.instance = '';
+            this.name = '';
             this.destroyable = [];
             this.destroyed = false;
             this.onChangeFunctions = [];
@@ -66,7 +68,7 @@ export default function Vido(state, api) {
             this.until = until;
             this.schedule = schedule;
             this.getElement = prepareGetElement(directive);
-            this.actionsByInstance = (componentActions, props) => { };
+            this.actionsByInstance = ( /* componentActions, props */) => { };
             this.StyleMap = StyleMap;
             this.Detach = Detach;
             this.PointerAction = PointerAction;
@@ -74,16 +76,21 @@ export default function Vido(state, api) {
             this.Slots = Slots;
             this._components = components;
             this._actions = actionsByInstance;
+            this.instance = instance;
             this.reuseComponents = this.reuseComponents.bind(this);
             this.onDestroy = this.onDestroy.bind(this);
             this.onChange = this.onChange.bind(this);
             this.update = this.update.bind(this);
             this.destroyComponent = this.destroyComponent.bind(this);
             for (const name in additionalMethods) {
+                // @ts-ignore
                 this[name] = additionalMethods[name].bind(this);
             }
+            this.name = name;
+            this.Actions = new InstanceActionsCollector(instance);
         }
         static addMethod(name, body) {
+            // @ts-ignore
             additionalMethods[name] = body;
         }
         onDestroy(fn) {
@@ -162,16 +169,12 @@ export default function Vido(state, api) {
                 index++;
             }
         }
-        createComponent(component, props = {}, content = null) {
+        createComponent(component, props = {}) {
             const instance = component.name + ':' + componentId++;
             let vidoInstance;
-            vidoInstance = new VidoInstance();
-            vidoInstance.instance = instance;
-            vidoInstance.destroyed = false;
-            vidoInstance.name = component.name;
-            vidoInstance.Actions = new InstanceActionsCollector(instance);
+            vidoInstance = new VidoInstance(instance, name);
             const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
-            const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props, content), content);
+            const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props));
             components.set(instance, internalMethods);
             components.get(instance).change(props);
             if (vidoInstance.debug) {

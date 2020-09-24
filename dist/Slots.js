@@ -54,7 +54,7 @@ export class Slots {
     }
     getInstances(placement) {
         if (this.destroyed)
-            return;
+            return [];
         if (placement === undefined)
             return this.slotInstances;
         return this.slotInstances[placement];

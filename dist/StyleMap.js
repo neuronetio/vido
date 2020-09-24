@@ -26,12 +26,14 @@ export default class StyleMap extends Directive {
         const elementStyle = element.style;
         let previous = this.previous;
         if (element.attributes.getNamedItem('style')) {
+            // @ts-ignore
             const currentElementStyles = element.attributes
                 .getNamedItem('style')
                 .value.split(';')
                 .map((item) => item.substr(0, item.indexOf(':')).trim())
                 .filter((item) => !!item);
             for (const name of currentElementStyles) {
+                // @ts-ignore
                 if (this.style[name] === undefined) {
                     if (!this.toRemove.includes(name))
                         this.toRemove.push(name);
@@ -41,6 +43,7 @@ export default class StyleMap extends Directive {
         for (const name in previous) {
             if (!this.style.hasOwnProperty(name))
                 continue;
+            // @ts-ignore
             if (this.style[name] === undefined) {
                 if (!this.toRemove.includes(name))
                     this.toRemove.push(name);
@@ -49,7 +52,9 @@ export default class StyleMap extends Directive {
         for (const name in this.style) {
             if (!this.style.hasOwnProperty(name))
                 continue;
+            // @ts-ignore
             const value = this.style[name];
+            // @ts-ignore
             const prev = previous[name];
             if (prev !== undefined && prev === value) {
                 continue;
@@ -71,12 +76,15 @@ export default class StyleMap extends Directive {
             }
             for (const name of this.toRemove) {
                 elementStyle.removeProperty(name);
+                // @ts-ignore
                 if (elementStyle[name])
                     delete elementStyle[name];
             }
             for (const name of this.toUpdate) {
+                // @ts-ignore
                 const value = this.style[name];
                 if (!name.includes('-')) {
+                    // @ts-ignore
                     elementStyle[name] = value;
                 }
                 else {
@@ -84,6 +92,7 @@ export default class StyleMap extends Directive {
                 }
             }
             if (this.detach && parent) {
+                // @ts-ignore
                 parent.insertBefore(element, nextSibling);
             }
             this.previous = Object.assign({}, this.style);

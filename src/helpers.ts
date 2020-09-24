@@ -26,7 +26,7 @@ export function schedule(fn: (argument: unknown) => void | any) {
  * @returns {boolean}
  */
 function isObject(item: unknown) {
-  return item && typeof item === 'object' && item.constructor && item.constructor.name === 'Object';
+  return item && typeof item === 'object' && item !== null && item.constructor && item.constructor.name === 'Object';
 }
 
 /**

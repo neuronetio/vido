@@ -6,8 +6,8 @@ declare module "Action" {
 }
 declare module "ActionsCollector" {
     import { AttributePart } from 'lit-html-optimised';
-    export default function getActionsCollector(actionsByInstance: any): {
-        new (instance: any): {
+    export default function getActionsCollector(actionsByInstance: Map<string, any>): {
+        new (instance: string): {
             instance: string;
             actions: unknown[];
             props: unknown;
@@ -22,9 +22,9 @@ declare module "Detach" {
     import { AttributePart, Directive } from 'lit-html-optimised';
     export interface ElementData {
         element: Element;
-        nextSibling: Node;
-        previousSibling: Node;
-        parent: Node;
+        nextSibling: ChildNode | null;
+        previousSibling: ChildNode | null;
+        parent: (Node & ParentNode) | null;
     }
     export default class Detach extends Directive {
         private ifFn;
@@ -33,34 +33,69 @@ declare module "Detach" {
     }
 }
 declare module "GetElement" {
-    export default function prepareGetElement(directive: any): (callback: (element: Element) => void) => any;
+    import { AttributePart } from 'lit-html-optimised';
+    import { DirectiveFactory } from 'lit-html-optimised/lib/directive';
+    export default function prepareGetElement(directive: <F extends DirectiveFactory>(f: F) => F): (callback: (element: Element) => void) => (part: AttributePart) => void;
 }
-declare module "InternalComponentMethods" {
-    export default function getInternalComponentMethods(components: any, actionsByInstance: any, clone: any): {
-        new (instance: string, vidoInstance: any, renderFunction: any, content: any): {
-            instance: string;
-            vidoInstance: any;
-            renderFunction: (changedProps: any) => void;
-            content: any;
-            destroyed: boolean;
-            destroy(): void;
-            update(props?: {}): void;
-            change(changedProps: any, options?: {
-                leave: boolean;
-            }): void;
-        };
-    };
+declare module "StyleMap" {
+    import { Directive, Part } from 'lit-html-optimised';
+    import { PropertiesHyphenFallback as CSSProp } from 'csstype';
+    export default class StyleMap extends Directive {
+        style: CSSProp;
+        private previous;
+        private detach;
+        private toRemove;
+        private toUpdate;
+        private debug;
+        constructor(styleInfo: CSSProp, detach?: boolean);
+        setStyle(styleInfo: CSSProp): void;
+        setDebug(debug?: boolean): void;
+        setDetach(detach: boolean): void;
+        body(part: Part): void;
+    }
 }
 declare module "PointerAction" {
     import Action from "Action";
+    export type EventToNormalize = PointerEvent | TouchEvent | WheelEvent | Event;
     export interface Options {
         element?: HTMLElement;
         axis?: string;
         threshold?: number;
-        onDown?: (data: any) => void;
-        onMove?: (data: any) => void;
-        onUp?: (data: any) => void;
-        onWheel?: (data: any) => void;
+        onDown?: (data: NormalizedEvent) => void;
+        onMove?: (data: NormalizedEvent) => void;
+        onUp?: (data: NormalizedEvent) => void;
+        onWheel?: (data: NormalizedEvent) => void;
+    }
+    export interface InternalOptions extends Options {
+        element: HTMLElement;
+        axis: string;
+        threshold: number;
+        onDown: (data: NormalizedEvent) => void;
+        onMove: (data: NormalizedEvent) => void;
+        onUp: (data: NormalizedEvent) => void;
+        onWheel: (data: NormalizedEvent) => void;
+    }
+    export interface Props {
+        pointerOptions: InternalOptions;
+        [key: string]: unknown;
+    }
+    export interface NormalizedEvent {
+        x: number;
+        y: number;
+        z?: number;
+        pageX?: number;
+        pageY?: number;
+        clientX?: number;
+        clientY?: number;
+        screenX?: number;
+        screenY?: number;
+        movementX?: number;
+        movementY?: number;
+        initialX?: number;
+        initialY?: number;
+        lastX?: number;
+        lastY?: number;
+        event: Event;
     }
     export default class PointerAction extends Action {
         private id;
@@ -71,21 +106,22 @@ declare module "PointerAction" {
         private lastX;
         private element;
         private options;
-        constructor(element: any, data: any);
+        constructor(element: Element, data: Props);
         private normalizeMouseWheelEvent;
-        onWheel(event: any): void;
+        onWheel(event: WheelEvent): void;
         private normalizePointerEvent;
         private onPointerDown;
         private handleX;
         private handleY;
         private onPointerMove;
         private onPointerUp;
-        destroy(element: any): void;
+        destroy(element: Element): void;
     }
 }
 declare module "PublicComponentMethods" {
-    export default function getPublicComponentMethods(components: any, actionsByInstance: any, clone: any): {
-        new (instance: any, vidoInstance: any, props?: {}): {
+    import { AnyVido } from "vido";
+    export default function getPublicComponentMethods(components: Map<string, any>, actionsByInstance: Map<string, any>, clone: (obj: object) => object): {
+        new (instance: string, vidoInstance: AnyVido, props?: unknown): {
             instance: string;
             name: string;
             vidoInstance: any;
@@ -103,33 +139,16 @@ declare module "PublicComponentMethods" {
              * Change component input properties
              * @param {any} newProps
              */
-            change(newProps: any, options: any): void;
+            change(newProps: unknown, options?: unknown): void;
             /**
              * Get component lit-html template
              * @param {} templateProps
              */
-            html(templateProps?: {}): any;
-            _getComponents(): any;
-            _getActions(): any;
+            html(templateProps?: unknown): any;
+            _getComponents(): Map<string, any>;
+            _getActions(): Map<string, any>;
         };
     };
-}
-declare module "StyleMap" {
-    import { Directive, Part } from 'lit-html-optimised';
-    import { PropertiesHyphenFallback as CSSProp } from 'csstype';
-    export default class StyleMap extends Directive {
-        style: CSSProp;
-        private previous;
-        private detach;
-        private toRemove;
-        private toUpdate;
-        private debug;
-        constructor(styleInfo: CSSProp, detach?: boolean);
-        setStyle(styleInfo: CSSProp): void;
-        setDebug(debug?: boolean): void;
-        setDetach(detach: any): void;
-        body(part: Part): void;
-    }
 }
 declare module "helpers" {
     /**
@@ -138,7 +157,7 @@ declare module "helpers" {
      * @param {function} fn
      * @returns {function}
      */
-    export function schedule(fn: (argument: any) => void | any): (argument: any) => void;
+    export function schedule(fn: (argument: unknown) => void | any): (argument: unknown) => void;
     /**
      * Merge deep - helper function which will merge objects recursively - creating brand new one - like clone
      *
@@ -146,20 +165,43 @@ declare module "helpers" {
      * @params {[object]} sources
      * @returns {object}
      */
-    export function mergeDeep(target: any, ...sources: any[]): any;
+    export function mergeDeep(target: any, ...sources: any[]): object;
     /**
      * Clone helper function
      *
      * @param source
      * @returns {object} cloned source
      */
-    export function clone(source: any): any;
+    export function clone(source: object): object;
     const _default: {
         mergeDeep: typeof mergeDeep;
         clone: typeof clone;
         schedule: typeof schedule;
     };
     export default _default;
+}
+declare module "Slots" {
+    import { ComponentInstance, Component, AnyVido } from "vido";
+    export type SlotInstances = {
+        [key: string]: ComponentInstance[];
+    };
+    export interface SlotStorage {
+        [key: string]: Component[];
+    }
+    export class Slots {
+        private slotInstances;
+        private vido;
+        private destroyed;
+        private props;
+        constructor(vido: AnyVido, props: unknown);
+        setComponents(slots: SlotStorage): void;
+        destroy(): void;
+        change(changedProps: unknown, options?: any): void;
+        getInstances(placement: string | undefined): ComponentInstance[] | SlotInstances;
+        html(placement: string, templateProps?: any): any;
+        getProps(): unknown;
+        isDestroyed(): boolean;
+    }
 }
 declare module "vido" {
     import { directive, Directive } from 'lit-html-optimised';
@@ -180,7 +222,8 @@ declare module "vido" {
     import Action from "Action";
     import { Slots } from "Slots";
     import * as lithtml from 'lit-html-optimised';
-    export type UpdateTemplate = (props: unknown) => lithtml.TemplateResult;
+    export type htmlResult = lithtml.TemplateResult | lithtml.TemplateResult[] | lithtml.SVGTemplateResult | lithtml.SVGTemplateResult[] | undefined | null;
+    export type UpdateTemplate = (props: unknown) => htmlResult;
     export type Component = (vido: AnyVido, props: unknown) => UpdateTemplate;
     export interface ComponentInstance {
         instance: string;
@@ -195,17 +238,22 @@ declare module "vido" {
         component: Component;
         props: unknown;
     }
+    export type Callback = () => void;
+    export type OnChangeCallback = (props: any, options: any) => void;
+    export type GetPropsFn = (arg: unknown) => unknown | any;
     export interface vido<State, Api> {
+        instance: string;
+        name: string;
         state: State;
         api: Api;
         html: (strings: TemplateStringsArray, ...values: unknown[]) => lithtml.TemplateResult;
         svg: (strings: TemplateStringsArray, ...values: unknown[]) => lithtml.SVGTemplateResult;
-        onDestroy: (callback: any) => void;
-        onChange: (callback: any) => void;
+        onDestroy: (callback: Callback) => void;
+        onChange: (callback: OnChangeCallback) => void;
         update: (callback?: any) => Promise<unknown>;
         createComponent: (component: Component, props?: unknown, content?: unknown) => ComponentInstance;
         createApp: (config: CreateAppConfig) => ComponentInstance;
-        reuseComponents: (currentComponents: ComponentInstance[], dataArray: unknown[], getProps: any, component: Component, leaveTail?: boolean, debug?: boolean) => void;
+        reuseComponents: (currentComponents: ComponentInstance[], dataArray: unknown[], getProps: GetPropsFn, component: Component, leaveTail?: boolean, debug?: boolean) => void;
         getElement: (callback: (element: Element) => void) => void;
         directive: typeof directive;
         asyncAppend: typeof asyncAppend;
@@ -230,28 +278,22 @@ declare module "vido" {
     export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
     export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until, Slots, };
 }
-declare module "Slots" {
-    import { ComponentInstance, Component, AnyVido } from "vido";
-    export type SlotInstances = {
-        [key: string]: ComponentInstance[];
+declare module "InternalComponentMethods" {
+    import { AnyVido, htmlResult } from "vido";
+    export default function getInternalComponentMethods(components: Map<string, any>, actionsByInstance: Map<string, any>, clone: (obj: object) => object): {
+        new (instance: string, vidoInstance: AnyVido, renderFunction: (arg: any) => htmlResult): {
+            instance: string;
+            vidoInstance: any;
+            renderFunction: (changedProps: any) => void;
+            content: any;
+            destroyed: boolean;
+            destroy(): void;
+            update(props?: {}): void;
+            change(changedProps: unknown, options?: {
+                leave: boolean;
+            }): void;
+        };
     };
-    export interface SlotStorage {
-        [key: string]: Component[];
-    }
-    export class Slots {
-        private slotInstances;
-        private vido;
-        private destroyed;
-        private props;
-        constructor(vido: AnyVido, props: unknown);
-        setComponents(slots: SlotStorage): void;
-        destroy(): void;
-        change(changedProps: unknown, options?: any): void;
-        getInstances(placement: string | undefined): ComponentInstance[] | SlotInstances;
-        html(placement: string, templateProps?: any): any;
-        getProps(): unknown;
-        isDestroyed(): boolean;
-    }
 }
 declare module "vido.umd" {
     import Vido from "vido";

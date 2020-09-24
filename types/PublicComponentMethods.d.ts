@@ -1,5 +1,6 @@
-export default function getPublicComponentMethods(components: any, actionsByInstance: any, clone: any): {
-    new (instance: any, vidoInstance: any, props?: {}): {
+import { AnyVido } from './vido';
+export default function getPublicComponentMethods(components: Map<string, any>, actionsByInstance: Map<string, any>, clone: (obj: object) => object): {
+    new (instance: string, vidoInstance: AnyVido, props?: unknown): {
         instance: string;
         name: string;
         vidoInstance: any;
@@ -17,13 +18,13 @@ export default function getPublicComponentMethods(components: any, actionsByInst
          * Change component input properties
          * @param {any} newProps
          */
-        change(newProps: any, options: any): void;
+        change(newProps: unknown, options?: unknown): void;
         /**
          * Get component lit-html template
          * @param {} templateProps
          */
-        html(templateProps?: {}): any;
-        _getComponents(): any;
-        _getActions(): any;
+        html(templateProps?: unknown): any;
+        _getComponents(): Map<string, any>;
+        _getActions(): Map<string, any>;
     };
 };
