@@ -19,6 +19,7 @@ import { schedule, clone } from './helpers';
 import Action from './Action';
 import { Slots } from './Slots';
 import prepareGetElement from './GetElement';
+import helpers from './helpers';
 
 import * as lithtml from 'lit-html-optimised';
 
@@ -452,4 +453,5 @@ export {
   unsafeHTML,
   until,
   Slots,
+  helpers,
 };

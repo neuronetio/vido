@@ -3119,6 +3119,11 @@ function clone(source) {
     }
     return mergeDeep({}, source);
 }
+var helpers = {
+    mergeDeep,
+    clone,
+    schedule,
+};
 
 class Slots {
     constructor(vido, props) {
@@ -3510,5 +3515,5 @@ Vido.prototype.until = until;
 Vido.prototype.Slots = Slots;
 
 export default Vido;
-export { Action, Detach, Directive, PointerAction, Slots, StyleMap, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, lithtml, repeat, schedule, unsafeHTML, until };
+export { Action, Detach, Directive, PointerAction, Slots, StyleMap, asyncAppend, asyncReplace, cache, classMap, guard, helpers, ifDefined, lithtml, repeat, schedule, unsafeHTML, until };
 //# sourceMappingURL=vido.esm.js.map

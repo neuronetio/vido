@@ -224,6 +224,7 @@ declare module "vido" {
     import { schedule } from "helpers";
     import Action from "Action";
     import { Slots } from "Slots";
+    import helpers from "helpers";
     import * as lithtml from 'lit-html-optimised';
     export type htmlResult = lithtml.TemplateResult | lithtml.TemplateResult[] | lithtml.SVGTemplateResult | lithtml.SVGTemplateResult[] | undefined | null;
     export type UpdateTemplate = (props: unknown) => htmlResult;
@@ -279,7 +280,7 @@ declare module "vido" {
     }
     export type AnyVido = vido<any, any>;
     export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
-    export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until, Slots, };
+    export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, };
 }
 declare module "InternalComponentMethods" {
     import { AnyVido, htmlResult } from "vido";

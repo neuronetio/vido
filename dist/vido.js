@@ -19,6 +19,7 @@ import { schedule, clone } from './helpers';
 import Action from './Action';
 import { Slots } from './Slots';
 import prepareGetElement from './GetElement';
+import helpers from './helpers';
 import * as lithtml from 'lit-html-optimised';
 export default function Vido(state, api) {
     let componentId = 0;
@@ -319,4 +320,4 @@ Vido.prototype.repeat = repeat;
 Vido.prototype.unsafeHTML = unsafeHTML;
 Vido.prototype.until = until;
 Vido.prototype.Slots = Slots;
-export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until, Slots, };
+export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, };

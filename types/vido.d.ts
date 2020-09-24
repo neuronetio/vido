@@ -15,6 +15,7 @@ import PointerAction from './PointerAction';
 import { schedule } from './helpers';
 import Action from './Action';
 import { Slots } from './Slots';
+import helpers from './helpers';
 import * as lithtml from 'lit-html-optimised';
 export declare type htmlResult = lithtml.TemplateResult | lithtml.TemplateResult[] | lithtml.SVGTemplateResult | lithtml.SVGTemplateResult[] | undefined | null;
 export declare type UpdateTemplate = (props: unknown) => htmlResult;
@@ -70,4 +71,4 @@ export interface vido<State, Api> {
 }
 export declare type AnyVido = vido<any, any>;
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
-export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until, Slots, };
+export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, };
