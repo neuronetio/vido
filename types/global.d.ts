@@ -168,14 +168,14 @@ declare module "helpers" {
      * @params {[object]} sources
      * @returns {object}
      */
-    export function mergeDeep(target: any, ...sources: any[]): UnknownObject;
+    export function mergeDeep<T>(target: any, ...sources: any[]): T;
     /**
      * Clone helper function
      *
      * @param source
      * @returns {object} cloned source
      */
-    export function clone(source: object): UnknownObject;
+    export function clone(source: object): unknown;
     const _default: {
         mergeDeep: typeof mergeDeep;
         clone: typeof clone;

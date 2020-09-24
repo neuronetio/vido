@@ -85,7 +85,7 @@ export function mergeDeep<T>(target: any, ...sources: any[]): T {
  * @param source
  * @returns {object} cloned source
  */
-export function clone(source: object) {
+export function clone<T>(source: object): T {
   // @ts-ignore
   if (typeof source.actions !== 'undefined') {
     // @ts-ignore
