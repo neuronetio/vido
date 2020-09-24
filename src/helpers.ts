@@ -40,7 +40,7 @@ export interface UnknownObject {
  * @params {[object]} sources
  * @returns {object}
  */
-export function mergeDeep(target: any, ...sources: any[]): UnknownObject {
+export function mergeDeep<T>(target: any, ...sources: any[]): T {
   const source = sources.shift();
   if (isObject(target) && isObject(source)) {
     for (const key in source) {
