@@ -6,8 +6,8 @@
   "module": "dist/vido.esm.min.js",
   "types": "types/vido.d.ts",
   "scripts": {
-    "build": "tsc -p ./tsconfig.global.json && tsc -p ./tsconfig.types.json && tsc -p ./tsconfig.json && rollup -c",
-    "types": "tsc -p ./tsconfig.global.json && tsc -p ./tsconfig.types.json",
+    "build": "tsc -p ./tsconfig.types.json && tsc -p ./tsconfig.json && rollup -c",
+    "types": "tsc -p ./tsconfig.types.json",
     "autobuild": "rollup -c -w",
     "test": "jest"
   },
