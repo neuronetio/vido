@@ -1,3 +1,4 @@
+import Action from './Action';
 import { AnyVido, htmlResult } from './vido';
 
 export default function getInternalComponentMethods(
@@ -78,6 +79,12 @@ export default function getInternalComponentMethods(
       for (const fn of this.vidoInstance.onChangeFunctions) {
         fn(changedProps, options);
       }
+      // update action props
+      const actions = actionsByInstance.get(this.instance);
+      if (actions)
+        for (const action of actions) {
+          action.props = changedProps;
+        }
     }
   };
 }

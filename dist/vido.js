@@ -173,7 +173,7 @@ export default function Vido(state, api) {
         createComponent(component, props = {}) {
             const instance = component.name + ':' + componentId++;
             let vidoInstance;
-            vidoInstance = new VidoInstance(instance, name);
+            vidoInstance = new VidoInstance(instance, component.name);
             const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
             const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props));
             components.set(instance, internalMethods);
@@ -276,7 +276,7 @@ export default function Vido(state, api) {
                             cb();
                         }
                         afterUpdateCallbacks.length = 0;
-                        resolve();
+                        resolve(null);
                     }
                 }
                 resolved.then(flush);

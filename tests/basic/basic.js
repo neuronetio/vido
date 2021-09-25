@@ -1,7 +1,7 @@
-window.itemsDestroyed = 0;
-window.actionsCreated = 0;
-window.actionsDestroyed = 0;
-window.itemChildDestroyed = 0;
+globalThis.itemsDestroyed = 0;
+globalThis.actionsCreated = 0;
+globalThis.actionsDestroyed = 0;
+globalThis.itemChildDestroyed = 0;
 
 function itemAction(element, data) {
   actionsCreated++;
@@ -68,7 +68,7 @@ function Item(vido, props = {}) {
   const { html, reuseComponents, onDestroy, createComponent, Slots, Actions } = vido;
 
   if (typeof window.ItemInstance === 'undefined') {
-    window.ItemInstance = vido.instance;
+    globalThis.ItemInstance = vido.instance;
   }
 
   const slots = new Slots(vido, props);
@@ -117,7 +117,7 @@ function Main(vido, props) {
   });
 
   onDestroy(() => {
-    window.appDestroyed = true;
+    globalThis.appDestroyed = true;
   });
 
   function remove() {
@@ -133,19 +133,19 @@ function Main(vido, props) {
     `;
 }
 
-window.vido = Vido({}, {});
-window.app = vido.createApp({
+globalThis.vido = Vido({}, {});
+globalThis.app = vido.createApp({
   component: Main,
   props: { components: [1, 2, 3, 4, 5] },
   element: document.querySelector('.app'),
 });
 
 function destroyMain() {
-  app.destroy();
+  globalThis.app.destroy();
 }
 
 function destroyItemInstance() {
   var i = window.vido._components.get(window.ItemInstance);
   i.destroy();
-  window.app.update();
+  globalThis.app.update();
 }

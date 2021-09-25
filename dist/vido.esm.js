@@ -3012,6 +3012,12 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
             for (const fn of this.vidoInstance.onChangeFunctions) {
                 fn(changedProps, options);
             }
+            // update action props
+            const actions = actionsByInstance.get(this.instance);
+            if (actions)
+                for (const action of actions) {
+                    action.props = changedProps;
+                }
         }
     };
 }
@@ -3366,7 +3372,7 @@ function Vido(state, api) {
         createComponent(component, props = {}) {
             const instance = component.name + ':' + componentId++;
             let vidoInstance;
-            vidoInstance = new VidoInstance(instance, name);
+            vidoInstance = new VidoInstance(instance, component.name);
             const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
             const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props));
             components.set(instance, internalMethods);
@@ -3469,7 +3475,7 @@ function Vido(state, api) {
                             cb();
                         }
                         afterUpdateCallbacks.length = 0;
-                        resolve();
+                        resolve(null);
                     }
                 }
                 resolved.then(flush);
