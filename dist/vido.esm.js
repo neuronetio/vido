@@ -3012,12 +3012,6 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
             for (const fn of this.vidoInstance.onChangeFunctions) {
                 fn(changedProps, options);
             }
-            // update action props
-            const actions = actionsByInstance.get(this.instance);
-            if (actions)
-                for (const action of actions) {
-                    action.props = changedProps;
-                }
         }
     };
 }
