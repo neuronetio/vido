@@ -25,8 +25,11 @@ export function schedule(fn: (argument: unknown) => void | any) {
  * @param {any} item
  * @returns {boolean}
  */
-function isObject(item: unknown) {
-  return item && typeof item === 'object' && item !== null && item.constructor && item.constructor.name === 'Object';
+function isObject(item: any) {
+  if (item && item.constructor) {
+    return item.constructor.name === 'Object';
+  }
+  return item && typeof item === 'object' && item !== null;
 }
 
 export interface UnknownObject {
