@@ -25,7 +25,10 @@ export function schedule(fn) {
  * @returns {boolean}
  */
 function isObject(item) {
-    return item && typeof item === 'object' && item !== null && item.constructor && item.constructor.name === 'Object';
+    if (item && item.constructor) {
+        return item.constructor.name === 'Object';
+    }
+    return typeof item === 'object' && item !== null;
 }
 /**
  * Merge deep - helper function which will merge objects recursively - creating brand new one - like clone
