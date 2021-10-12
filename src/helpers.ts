@@ -29,7 +29,7 @@ function isObject(item: any) {
   if (item && item.constructor) {
     return item.constructor.name === 'Object';
   }
-  return item && typeof item === 'object' && item !== null;
+  return typeof item === 'object' && item !== null;
 }
 
 export interface UnknownObject {
