@@ -1,4 +1,4 @@
-import { html, svg } from 'lit-html';
+import { render, html, svg } from 'lit-html';
 import { directive, Directive } from 'lit-html/directive.js';
 import { asyncAppend } from 'lit-html/directives/async-append.js';
 import { asyncReplace } from 'lit-html/directives/async-replace.js';
@@ -79,4 +79,4 @@ export interface vido<State, Api> {
 export declare type AnyVido = vido<any, any>;
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
 declare const lit: typeof lithtml;
-export { lithtml, lit, Action, Directive, schedule, detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, };
+export { lithtml, render, html, svg, lit, Action, Directive, schedule, detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, };

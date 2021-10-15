@@ -434,6 +434,9 @@ Vido.prototype.Slots = Slots;
 const lit = lithtml;
 export {
   lithtml,
+  render,
+  html,
+  svg,
   lit,
   Action,
   Directive,

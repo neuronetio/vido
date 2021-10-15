@@ -324,4 +324,4 @@ Vido.prototype.unsafeHTML = unsafeHTML;
 Vido.prototype.until = until;
 Vido.prototype.Slots = Slots;
 const lit = lithtml;
-export { lithtml, lit, Action, Directive, schedule, detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, };
+export { lithtml, render, html, svg, lit, Action, Directive, schedule, detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, };
