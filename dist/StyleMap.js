@@ -1,35 +1,28 @@
-import { Directive } from 'lit-html-optimised';
+import { Directive } from 'lit-html/directive';
 export default class StyleMap extends Directive {
-    constructor(styleInfo, detach = false) {
-        super();
+    constructor() {
+        super(...arguments);
+        this.style = {};
+        this.previous = {};
+        this.detach = false;
         this.toRemove = [];
         this.toUpdate = [];
         this.debug = false;
+    }
+    update(part, props) {
+        var _a;
         this.previous = {};
-        this.style = styleInfo;
-        this.detach = detach;
-    }
-    setStyle(styleInfo) {
-        this.style = styleInfo;
-    }
-    setDebug(debug = true) {
-        this.debug = debug;
-    }
-    setDetach(detach) {
-        this.detach = detach;
-    }
-    body(part) {
+        this.style = props[0];
+        this.detach = (_a = props[1]) !== null && _a !== void 0 ? _a : false;
         this.toRemove.length = 0;
         this.toUpdate.length = 0;
-        // @ts-ignore
-        const element = part.committer.element;
+        const element = part.element;
         const elementStyle = element.style;
         let previous = this.previous;
-        if (element.attributes.getNamedItem('style')) {
-            // @ts-ignore
-            const currentElementStyles = element.attributes
-                .getNamedItem('style')
-                .value.split(';')
+        const namedItem = element.attributes.getNamedItem('style');
+        if (namedItem) {
+            const currentElementStyles = namedItem.value
+                .split(';')
                 .map((item) => item.substr(0, item.indexOf(':')).trim())
                 .filter((item) => !!item);
             for (const name of currentElementStyles) {
@@ -97,5 +90,17 @@ export default class StyleMap extends Directive {
             }
             this.previous = Object.assign({}, this.style);
         }
+        return this.render(this.style, this.detach);
     }
+    render(styleMap, detach = false) { }
+    setStyle(styleInfo) {
+        this.style = styleInfo;
+    }
+    setDebug(debug = true) {
+        this.debug = debug;
+    }
+    setDetach(detach) {
+        this.detach = detach;
+    }
+    body(part) { }
 }

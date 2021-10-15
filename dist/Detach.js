@@ -1,13 +1,20 @@
-import { Directive } from 'lit-html-optimised';
+import { nothing } from 'lit-html';
+import { Directive } from 'lit-html/directive';
 const detached = new WeakMap();
 export default class Detach extends Directive {
-    constructor(ifFn) {
-        super();
+    constructor() {
+        super(...arguments);
+        this.ifFn = () => false;
+    }
+    set(ifFn) {
         this.ifFn = ifFn;
     }
-    body(part) {
+    render() {
+        return nothing;
+    }
+    update(part) {
         const detach = this.ifFn();
-        const element = part.committer.element;
+        const element = part.element;
         if (detach) {
             if (!detached.has(part)) {
                 detached.set(part, {
@@ -34,5 +41,6 @@ export default class Detach extends Directive {
                 detached.delete(part);
             }
         }
+        return this.render();
     }
 }

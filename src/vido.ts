@@ -1,16 +1,17 @@
-import { render, html, directive, svg, Directive } from 'lit-html-optimised';
-import { asyncAppend } from 'lit-html-optimised/directives/async-append';
-import { asyncReplace } from 'lit-html-optimised/directives/async-replace';
-import { cache } from 'lit-html-optimised/directives/cache';
-import { classMap } from 'lit-html-optimised/directives/class-map';
-import { guard } from 'lit-html-optimised/directives/guard';
-import { ifDefined } from 'lit-html-optimised/directives/if-defined';
-import { repeat } from 'lit-html-optimised/directives/repeat';
-import { unsafeHTML } from 'lit-html-optimised/directives/unsafe-html';
-import { until } from 'lit-html-optimised/directives/until';
-import { live } from 'lit-html-optimised/directives/live';
+import { render, html, svg } from 'lit-html';
+import { directive, Directive } from 'lit-html/directive';
+import { asyncAppend } from 'lit-html/directives/async-append';
+import { asyncReplace } from 'lit-html/directives/async-replace';
+import { cache } from 'lit-html/directives/cache';
+import { guard } from 'lit-html/directives/guard';
+import { ifDefined } from 'lit-html/directives/if-defined';
+import { repeat } from 'lit-html/directives/repeat';
+import { unsafeHTML } from 'lit-html/directives/unsafe-html';
+import { until } from 'lit-html/directives/until';
+import { live } from 'lit-html/directives/live';
 import Detach from './Detach';
-import StyleMap from './StyleMap';
+import { styleMap } from 'lit-html/directives/style-map';
+import { classMap } from 'lit-html/directives/class-map';
 import PointerAction from './PointerAction';
 import getPublicComponentMethods from './PublicComponentMethods';
 import getActionsCollector from './ActionsCollector';
@@ -18,24 +19,10 @@ import getInternalComponentMethods from './InternalComponentMethods';
 import { schedule, clone } from './helpers';
 import Action from './Action';
 import { Slots } from './Slots';
-import prepareGetElement from './GetElement';
+import GetElementDirective from './GetElement';
 import helpers from './helpers';
 
-import * as lithtml from 'lit-html-optimised';
-
-/* dev imports
-import { render, html, directive, svg, Part } from '../lit-html';
-import { asyncAppend } from '../lit-html/directives/async-append';
-import { asyncReplace } from '../lit-html/directives/async-replace';
-import { cache } from '../lit-html/directives/cache';
-import { classMap } from '../lit-html/directives/class-map';
-import { guard } from '../lit-html/directives/guard';
-import { ifDefined } from '../lit-html/directives/if-defined';
-import { repeat } from '../lit-html/directives/repeat';
-import { unsafeHTML } from '../lit-html/directives/unsafe-html';
-import { until } from '../lit-html/directives/until';
-import { Directive } from '../lit-html/lib/directive';
-*/
+import * as lithtml from 'lit-html';
 
 export type htmlResult =
   | lithtml.TemplateResult
@@ -94,6 +81,7 @@ export interface vido<State, Api> {
   asyncReplace: typeof asyncReplace;
   cache: typeof cache;
   classMap: typeof classMap;
+  styleMap: typeof styleMap;
   guard: typeof guard;
   live: typeof live;
   ifDefined: typeof ifDefined;
@@ -101,7 +89,6 @@ export interface vido<State, Api> {
   unsafeHTML: typeof unsafeHTML;
   until: typeof until;
   schedule: typeof schedule;
-  StyleMap: typeof StyleMap;
   Detach: typeof Detach;
   PointerAction: typeof PointerAction;
   Action: typeof Action;
@@ -131,8 +118,10 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
     }
 
     public create(actions: unknown[], props: object) {
-      const actionsInstance = new ActionsCollector(this.instance);
-      actionsInstance.set(actions, props);
+      const actionsInstanceDirective = directive(ActionsCollector);
+      const actionsInstance = () => {
+        return actionsInstanceDirective(this.instance, actions, props);
+      };
       return actionsInstance;
     }
   }
@@ -158,6 +147,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
     asyncReplace = asyncReplace;
     cache = cache;
     classMap = classMap;
+    styleMap = styleMap;
     guard = guard;
     live = live;
     ifDefined = ifDefined;
@@ -165,9 +155,8 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
     unsafeHTML = unsafeHTML;
     until = until;
     schedule = schedule;
-    getElement = prepareGetElement(directive);
+    getElement = directive(GetElementDirective);
     actionsByInstance = (/* componentActions, props */) => {};
-    StyleMap = StyleMap;
     Detach = Detach;
     PointerAction = PointerAction;
     Action = Action;
@@ -421,12 +410,12 @@ Vido.prototype.Action = Action;
 Vido.prototype.Directive = Directive;
 Vido.prototype.schedule = schedule;
 Vido.prototype.Detach = Detach;
-Vido.prototype.StyleMap = StyleMap;
+Vido.prototype.styleMap = styleMap;
+Vido.prototype.classMap = classMap;
 Vido.prototype.PointerAction = PointerAction;
 Vido.prototype.asyncAppend = asyncAppend;
 Vido.prototype.asyncReplace = asyncReplace;
 Vido.prototype.cache = cache;
-Vido.prototype.classMap = classMap;
 Vido.prototype.guard = guard;
 Vido.prototype.live = live;
 Vido.prototype.ifDefined = ifDefined;
@@ -441,12 +430,12 @@ export {
   Directive,
   schedule,
   Detach,
-  StyleMap,
+  styleMap,
+  classMap,
   PointerAction,
   asyncAppend,
   asyncReplace,
   cache,
-  classMap,
   guard,
   ifDefined,
   repeat,

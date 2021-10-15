@@ -1,46 +1,27 @@
-import { Directive, Part } from 'lit-html-optimised';
+import { Directive, Part, AttributePart } from 'lit-html/directive';
 import { PropertiesHyphenFallback as CSSProp } from 'csstype';
 
 export default class StyleMap extends Directive {
-  public style: CSSProp;
-  private previous: {};
-  private detach: boolean;
+  public style: CSSProp = {};
+  private previous = {};
+  private detach: boolean = false;
   private toRemove: string[] = [];
   private toUpdate: string[] = [];
   private debug = false;
 
-  constructor(styleInfo: CSSProp, detach: boolean = false) {
-    super();
+  update(part: AttributePart, props: unknown[]) {
     this.previous = {};
-    this.style = styleInfo;
-    this.detach = detach;
-  }
-
-  public setStyle(styleInfo: CSSProp) {
-    this.style = styleInfo;
-  }
-
-  public setDebug(debug = true) {
-    this.debug = debug;
-  }
-
-  public setDetach(detach: boolean) {
-    this.detach = detach;
-  }
-
-  public body(part: Part) {
+    this.style = props[0] as CSSProp;
+    this.detach = (props[1] as boolean) ?? false;
     this.toRemove.length = 0;
     this.toUpdate.length = 0;
-    // @ts-ignore
-    const element = part.committer.element as HTMLElement;
+    const element = part.element;
     const elementStyle = element.style;
     let previous = this.previous;
-
-    if (element.attributes.getNamedItem('style')) {
-      // @ts-ignore
-      const currentElementStyles = element.attributes
-        .getNamedItem('style')
-        .value.split(';')
+    const namedItem = element.attributes.getNamedItem('style');
+    if (namedItem) {
+      const currentElementStyles = namedItem.value
+        .split(';')
         .map((item) => item.substr(0, item.indexOf(':')).trim())
         .filter((item) => !!item);
       for (const name of currentElementStyles) {
@@ -105,5 +86,22 @@ export default class StyleMap extends Directive {
       }
       this.previous = { ...this.style };
     }
+    return this.render(this.style, this.detach);
   }
+
+  render(styleMap: CSSProp, detach: boolean = false) {}
+
+  public setStyle(styleInfo: CSSProp) {
+    this.style = styleInfo;
+  }
+
+  public setDebug(debug = true) {
+    this.debug = debug;
+  }
+
+  public setDetach(detach: boolean) {
+    this.detach = detach;
+  }
+
+  public body(part: Part) {}
 }

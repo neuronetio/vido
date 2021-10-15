@@ -1,31 +1,19 @@
-import { Directive, AttributePart } from 'lit-html-optimised';
+import { Directive, AttributePart } from 'lit-html/directive';
+import { nothing } from 'lit-html';
 
 export default function getActionsCollector(actionsByInstance: Map<string, any>) {
   return class ActionsCollector extends Directive {
-    instance: string;
-    actions: unknown[] = [];
-    props: unknown;
+    public update(part: AttributePart, props: unknown[]) {
+      const element = part.element;
+      const instance = props[0] as string;
+      const actions = props[1] as unknown[];
+      const actionProps = props[2] as object;
 
-    constructor(instance: string) {
-      super();
-      this.instance = instance;
-    }
-
-    public set(actions: unknown[], props: object) {
-      this.actions = actions;
-      this.props = props;
-      // props must be mutable! (do not do this -> {...props})
-      // because we will modify action props with onChange and can reuse existin instance
-      return this;
-    }
-
-    public body(part: AttributePart) {
-      const element = part.committer.element as HTMLElement;
-      for (const create of this.actions) {
+      for (const create of actions) {
         if (typeof create !== 'undefined') {
           let exists;
-          if (actionsByInstance.has(this.instance)) {
-            for (const action of actionsByInstance.get(this.instance)) {
+          if (actionsByInstance.has(instance)) {
+            for (const action of actionsByInstance.get(instance)) {
               if (action.componentAction.create === create && action.element === element) {
                 exists = action;
                 break;
@@ -40,18 +28,22 @@ export default function getActionsCollector(actionsByInstance: Map<string, any>)
               update() {},
               destroy() {},
             };
-            const action = { instance: this.instance, componentAction, element, props: this.props };
+            const action = { instance: instance, componentAction, element, props: actionProps };
             let byInstance = [];
-            if (actionsByInstance.has(this.instance)) {
-              byInstance = actionsByInstance.get(this.instance);
+            if (actionsByInstance.has(instance)) {
+              byInstance = actionsByInstance.get(instance);
             }
             byInstance.push(action);
-            actionsByInstance.set(this.instance, byInstance);
+            actionsByInstance.set(instance, byInstance);
           } else {
-            exists.props = this.props;
+            exists.props = actionProps;
           }
         }
       }
+    }
+
+    render(instance: string, actions: any[], props: object) {
+      return nothing;
     }
   };
 }

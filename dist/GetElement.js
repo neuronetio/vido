@@ -1,7 +1,13 @@
-export default function prepareGetElement(directive) {
-    return function getElement(callback) {
-        return directive(() => (part) => {
-            callback(part.committer.element);
-        })();
-    };
+import { Directive } from 'lit-html/directive';
+export default class GetElementDirective extends Directive {
+    update(part, props) {
+        const callback = props[0];
+        if (typeof callback !== 'function') {
+            throw new Error('[vido] Argument for getElement directive should be a function.');
+        }
+        callback(part.element);
+    }
+    render() {
+        return null;
+    }
 }

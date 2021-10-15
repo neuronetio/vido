@@ -1,4 +1,5 @@
-import { AttributePart, Directive } from 'lit-html-optimised';
+import { nothing } from 'lit-html';
+import { AttributePart, Directive } from 'lit-html/directive';
 
 const detached: WeakMap<AttributePart, ElementData> = new WeakMap();
 
@@ -10,16 +11,19 @@ export interface ElementData {
 }
 
 export default class Detach extends Directive {
-  private ifFn: () => boolean;
+  private ifFn: () => boolean = () => false;
 
-  constructor(ifFn: () => boolean) {
-    super();
+  set(ifFn: () => boolean) {
     this.ifFn = ifFn;
   }
 
-  public body(part: AttributePart) {
+  render() {
+    return nothing;
+  }
+
+  update(part: AttributePart) {
     const detach = this.ifFn();
-    const element: Element = part.committer.element;
+    const element: Element = part.element;
     if (detach) {
       if (!detached.has(part)) {
         detached.set(part, {
@@ -43,5 +47,6 @@ export default class Detach extends Directive {
         detached.delete(part);
       }
     }
+    return this.render();
   }
 }

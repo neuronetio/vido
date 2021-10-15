@@ -1,16 +1,17 @@
-import { render, html, directive, svg, Directive } from 'lit-html-optimised';
-import { asyncAppend } from 'lit-html-optimised/directives/async-append';
-import { asyncReplace } from 'lit-html-optimised/directives/async-replace';
-import { cache } from 'lit-html-optimised/directives/cache';
-import { classMap } from 'lit-html-optimised/directives/class-map';
-import { guard } from 'lit-html-optimised/directives/guard';
-import { ifDefined } from 'lit-html-optimised/directives/if-defined';
-import { repeat } from 'lit-html-optimised/directives/repeat';
-import { unsafeHTML } from 'lit-html-optimised/directives/unsafe-html';
-import { until } from 'lit-html-optimised/directives/until';
-import { live } from 'lit-html-optimised/directives/live';
+import { render, html, svg } from 'lit-html';
+import { directive, Directive } from 'lit-html/directive';
+import { asyncAppend } from 'lit-html/directives/async-append';
+import { asyncReplace } from 'lit-html/directives/async-replace';
+import { cache } from 'lit-html/directives/cache';
+import { guard } from 'lit-html/directives/guard';
+import { ifDefined } from 'lit-html/directives/if-defined';
+import { repeat } from 'lit-html/directives/repeat';
+import { unsafeHTML } from 'lit-html/directives/unsafe-html';
+import { until } from 'lit-html/directives/until';
+import { live } from 'lit-html/directives/live';
 import Detach from './Detach';
-import StyleMap from './StyleMap';
+import { styleMap } from 'lit-html/directives/style-map';
+import { classMap } from 'lit-html/directives/class-map';
 import PointerAction from './PointerAction';
 import getPublicComponentMethods from './PublicComponentMethods';
 import getActionsCollector from './ActionsCollector';
@@ -18,9 +19,9 @@ import getInternalComponentMethods from './InternalComponentMethods';
 import { schedule, clone } from './helpers';
 import Action from './Action';
 import { Slots } from './Slots';
-import prepareGetElement from './GetElement';
+import GetElementDirective from './GetElement';
 import helpers from './helpers';
-import * as lithtml from 'lit-html-optimised';
+import * as lithtml from 'lit-html';
 export default function Vido(state, api) {
     let componentId = 0;
     const components = new Map();
@@ -36,8 +37,10 @@ export default function Vido(state, api) {
             this.instance = instance;
         }
         create(actions, props) {
-            const actionsInstance = new ActionsCollector(this.instance);
-            actionsInstance.set(actions, props);
+            const actionsInstanceDirective = directive(ActionsCollector);
+            const actionsInstance = () => {
+                return actionsInstanceDirective(this.instance, actions, props);
+            };
             return actionsInstance;
         }
     }
@@ -61,6 +64,7 @@ export default function Vido(state, api) {
             this.asyncReplace = asyncReplace;
             this.cache = cache;
             this.classMap = classMap;
+            this.styleMap = styleMap;
             this.guard = guard;
             this.live = live;
             this.ifDefined = ifDefined;
@@ -68,9 +72,8 @@ export default function Vido(state, api) {
             this.unsafeHTML = unsafeHTML;
             this.until = until;
             this.schedule = schedule;
-            this.getElement = prepareGetElement(directive);
+            this.getElement = directive(GetElementDirective);
             this.actionsByInstance = ( /* componentActions, props */) => { };
-            this.StyleMap = StyleMap;
             this.Detach = Detach;
             this.PointerAction = PointerAction;
             this.Action = Action;
@@ -307,12 +310,12 @@ Vido.prototype.Action = Action;
 Vido.prototype.Directive = Directive;
 Vido.prototype.schedule = schedule;
 Vido.prototype.Detach = Detach;
-Vido.prototype.StyleMap = StyleMap;
+Vido.prototype.styleMap = styleMap;
+Vido.prototype.classMap = classMap;
 Vido.prototype.PointerAction = PointerAction;
 Vido.prototype.asyncAppend = asyncAppend;
 Vido.prototype.asyncReplace = asyncReplace;
 Vido.prototype.cache = cache;
-Vido.prototype.classMap = classMap;
 Vido.prototype.guard = guard;
 Vido.prototype.live = live;
 Vido.prototype.ifDefined = ifDefined;
@@ -320,4 +323,4 @@ Vido.prototype.repeat = repeat;
 Vido.prototype.unsafeHTML = unsafeHTML;
 Vido.prototype.until = until;
 Vido.prototype.Slots = Slots;
-export { lithtml, Action, Directive, schedule, Detach, StyleMap, PointerAction, asyncAppend, asyncReplace, cache, classMap, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, };
+export { lithtml, Action, Directive, schedule, Detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, };

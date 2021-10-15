@@ -13,7 +13,7 @@ export default function getPublicComponentMethods(components: Map<string, any>, 
         /**
          * Update template - trigger rendering process
          */
-        update(callback?: () => void): any;
+        update(callback?: (() => void) | undefined): any;
         /**
          * Change component input properties
          * @param {any} newProps

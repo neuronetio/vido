@@ -1,4 +1,4 @@
-import { AttributePart, Directive } from 'lit-html-optimised';
+import { AttributePart, Directive } from 'lit-html/directive';
 export interface ElementData {
     element: Element;
     nextSibling: ChildNode | Node | null;
@@ -7,6 +7,7 @@ export interface ElementData {
 }
 export default class Detach extends Directive {
     private ifFn;
-    constructor(ifFn: () => boolean);
-    body(part: AttributePart): void;
+    set(ifFn: () => boolean): void;
+    render(): symbol;
+    update(part: AttributePart): symbol;
 }
