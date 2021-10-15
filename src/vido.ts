@@ -67,8 +67,8 @@ export interface vido<State, Api> {
   name: string;
   state: State;
   api: Api;
-  html: (strings: TemplateStringsArray, ...values: unknown[]) => lithtml.TemplateResult;
-  svg: (strings: TemplateStringsArray, ...values: unknown[]) => lithtml.SVGTemplateResult;
+  html: typeof html;
+  svg: typeof svg;
   onDestroy: (callback: Callback) => void;
   onChange: (callback: OnChangeCallback) => void;
   update: (callback?: any) => Promise<unknown>;

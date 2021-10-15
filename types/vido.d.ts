@@ -1,3 +1,4 @@
+import { html, svg } from 'lit-html';
 import { directive, Directive } from 'lit-html/directive.js';
 import { asyncAppend } from 'lit-html/directives/async-append.js';
 import { asyncReplace } from 'lit-html/directives/async-replace.js';
@@ -47,8 +48,8 @@ export interface vido<State, Api> {
     name: string;
     state: State;
     api: Api;
-    html: (strings: TemplateStringsArray, ...values: unknown[]) => lithtml.TemplateResult;
-    svg: (strings: TemplateStringsArray, ...values: unknown[]) => lithtml.SVGTemplateResult;
+    html: typeof html;
+    svg: typeof svg;
     onDestroy: (callback: Callback) => void;
     onChange: (callback: OnChangeCallback) => void;
     update: (callback?: any) => Promise<unknown>;
