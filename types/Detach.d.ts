@@ -6,8 +6,8 @@ export interface ElementData {
     parent: (Node & ParentNode) | null;
 }
 export declare class Detach extends Directive {
-    render(): symbol;
+    render(shouldDetach: boolean): symbol;
     update(part: AttributePart, props: unknown[]): symbol;
 }
-declare const detach: () => import("lit-html/directive").DirectiveResult<typeof Detach>;
+declare const detach: (shouldDetach: boolean) => import("lit-html/directive").DirectiveResult<typeof Detach>;
 export default detach;

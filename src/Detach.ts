@@ -11,15 +11,15 @@ export interface ElementData {
 }
 
 export class Detach extends Directive {
-  render() {
+  render(shouldDetach: boolean) {
     return nothing;
   }
 
   update(part: AttributePart, props: unknown[]) {
-    if (typeof props[0] !== 'function') {
-      throw new Error('[vido] Detach directive argument should be a function.');
+    if (typeof props[0] !== 'boolean') {
+      throw new Error('[vido] Detach directive argument should be a boolean.');
     }
-    const detach = props[0]();
+    let detach = props[0];
     const element: Element = part.element;
     if (detach) {
       if (!detached.has(part)) {
@@ -44,7 +44,7 @@ export class Detach extends Directive {
         detached.delete(part);
       }
     }
-    return this.render();
+    return this.render(detach);
   }
 }
 

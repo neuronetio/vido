@@ -101,14 +101,14 @@ const u$2=(e,s,t)=>{const r=new Map;for(let l=s;l<=t;l++)r.set(e[l],l);return r}
 
 const detached = new WeakMap();
 class Detach extends i$1 {
-    render() {
+    render(shouldDetach) {
         return T;
     }
     update(part, props) {
-        if (typeof props[0] !== 'function') {
-            throw new Error('[vido] Detach directive argument should be a function.');
+        if (typeof props[0] !== 'boolean') {
+            throw new Error('[vido] Detach directive argument should be a boolean.');
         }
-        const detach = props[0]();
+        let detach = props[0];
         const element = part.element;
         if (detach) {
             if (!detached.has(part)) {
@@ -136,7 +136,7 @@ class Detach extends i$1 {
                 detached.delete(part);
             }
         }
-        return this.render();
+        return this.render(detach);
     }
 }
 const detach = e$1(Detach);
