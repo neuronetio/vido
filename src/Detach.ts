@@ -1,5 +1,5 @@
 import { nothing } from 'lit-html';
-import { AttributePart, directive, Directive } from 'lit-html/directive';
+import { AttributePart, directive, Directive } from 'lit-html/directive.js';
 
 const detached: WeakMap<AttributePart, ElementData> = new WeakMap();
 

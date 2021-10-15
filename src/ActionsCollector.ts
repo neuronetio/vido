@@ -1,4 +1,4 @@
-import { Directive, AttributePart } from 'lit-html/directive';
+import { Directive, AttributePart } from 'lit-html/directive.js';
 import { nothing } from 'lit-html';
 
 export default function getActionsCollector(actionsByInstance: Map<string, any>) {

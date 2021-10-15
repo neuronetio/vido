@@ -1,6 +1,6 @@
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
-import typescript from 'rollup-plugin-typescript';
+import { nodeResolve as resolve } from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import typescript from '@rollup/plugin-typescript';
 import { terser } from 'rollup-plugin-terser';
 
 export default [
@@ -13,11 +13,11 @@ export default [
       name: 'Vido',
     },
     plugins: [
-      typescript({ target: 'es6' }),
       resolve({
         browser: true,
         //module: true
       }),
+      typescript({ target: 'es6' }),
       commonjs({ extensions: ['.js', '.ts'] }),
     ],
   },
@@ -30,11 +30,11 @@ export default [
       name: 'Vido',
     },
     plugins: [
-      typescript({ target: 'es6' }),
       resolve({
         browser: true,
         //module: true
       }),
+      typescript({ target: 'es6' }),
       commonjs({ extensions: ['.js', '.ts'] }),
       terser(),
     ],
@@ -48,11 +48,11 @@ export default [
       name: 'Vido',
     },
     plugins: [
-      typescript({ target: 'es6' }),
       resolve({
         browser: true,
         //module: true
       }),
+      typescript({ target: 'es6' }),
       commonjs({ extensions: ['.js', '.ts'] }),
     ],
   },
@@ -65,11 +65,11 @@ export default [
       name: 'Vido',
     },
     plugins: [
-      typescript({ target: 'es6' }),
       resolve({
         browser: true,
         //module: true
       }),
+      typescript({ target: 'es6' }),
       commonjs({ extensions: ['.js', '.ts'] }),
       terser(),
     ],

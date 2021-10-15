@@ -1,17 +1,17 @@
 import { render, html, svg } from 'lit-html';
-import { directive, Directive } from 'lit-html/directive';
-import { asyncAppend } from 'lit-html/directives/async-append';
-import { asyncReplace } from 'lit-html/directives/async-replace';
-import { cache } from 'lit-html/directives/cache';
-import { guard } from 'lit-html/directives/guard';
-import { ifDefined } from 'lit-html/directives/if-defined';
-import { repeat } from 'lit-html/directives/repeat';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html';
-import { until } from 'lit-html/directives/until';
-import { live } from 'lit-html/directives/live';
+import { directive, Directive } from 'lit-html/directive.js';
+import { asyncAppend } from 'lit-html/directives/async-append.js';
+import { asyncReplace } from 'lit-html/directives/async-replace.js';
+import { cache } from 'lit-html/directives/cache.js';
+import { guard } from 'lit-html/directives/guard.js';
+import { ifDefined } from 'lit-html/directives/if-defined.js';
+import { repeat } from 'lit-html/directives/repeat.js';
+import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
+import { until } from 'lit-html/directives/until.js';
+import { live } from 'lit-html/directives/live.js';
 import detach from './Detach';
-import { styleMap } from 'lit-html/directives/style-map';
-import { classMap } from 'lit-html/directives/class-map';
+import { styleMap, StyleInfo } from 'lit-html/directives/style-map.js';
+import { classMap, ClassInfo } from 'lit-html/directives/class-map.js';
 import PointerAction from './PointerAction';
 import getPublicComponentMethods from './PublicComponentMethods';
 import getActionsCollector from './ActionsCollector';
@@ -21,8 +21,6 @@ import Action from './Action';
 import { Slots } from './Slots';
 import GetElementDirective from './GetElement';
 import helpers from './helpers';
-import { PropertiesHyphenFallback as CSSProps } from 'csstype';
-
 import * as lithtml from 'lit-html';
 
 export type htmlResult =
@@ -425,8 +423,10 @@ Vido.prototype.unsafeHTML = unsafeHTML;
 Vido.prototype.until = until;
 Vido.prototype.Slots = Slots;
 
+const lit = lithtml;
 export {
   lithtml,
+  lit,
   Action,
   Directive,
   schedule,
@@ -444,5 +444,6 @@ export {
   until,
   Slots,
   helpers,
-  CSSProps,
+  StyleInfo,
+  ClassInfo,
 };

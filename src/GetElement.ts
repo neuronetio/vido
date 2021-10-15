@@ -1,5 +1,5 @@
 import { nothing } from 'lit-html';
-import { AttributePart, Directive } from 'lit-html/directive';
+import { AttributePart, Directive } from 'lit-html/directive.js';
 
 export default class GetElementDirective extends Directive {
   update(part: AttributePart, props: unknown[]) {

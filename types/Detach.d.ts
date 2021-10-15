@@ -1,4 +1,4 @@
-import { AttributePart, Directive } from 'lit-html/directive';
+import { AttributePart, Directive } from 'lit-html/directive.js';
 export interface ElementData {
     element: Element;
     nextSibling: ChildNode | Node | null;
@@ -9,5 +9,5 @@ export declare class Detach extends Directive {
     render(shouldDetach: boolean): symbol;
     update(part: AttributePart, props: unknown[]): symbol;
 }
-declare const detach: (shouldDetach: boolean) => import("lit-html/directive").DirectiveResult<typeof Detach>;
+declare const detach: (shouldDetach: boolean) => import("lit-html/directive.js").DirectiveResult<typeof Detach>;
 export default detach;
