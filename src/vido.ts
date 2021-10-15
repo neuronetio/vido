@@ -158,6 +158,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
     cache = cache;
     classMap = classMap;
     styleMap = styleMap;
+    StyleMap = StyleMap;
     guard = guard;
     live = live;
     ifDefined = ifDefined;
@@ -422,6 +423,7 @@ Vido.prototype.schedule = schedule;
 Vido.prototype.detach = detach;
 Vido.prototype.styleMap = styleMap;
 Vido.prototype.classMap = classMap;
+Vido.prototype.StyleMap = StyleMap;
 Vido.prototype.PointerAction = PointerAction;
 Vido.prototype.asyncAppend = asyncAppend;
 Vido.prototype.asyncReplace = asyncReplace;

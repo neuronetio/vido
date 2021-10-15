@@ -953,6 +953,7 @@ function Vido(state, api) {
             this.cache = d;
             this.classMap = o;
             this.styleMap = i;
+            this.StyleMap = StyleMap;
             this.guard = i$1;
             this.live = l;
             this.ifDefined = l$1;
@@ -1200,6 +1201,7 @@ Vido.prototype.schedule = schedule;
 Vido.prototype.detach = detach;
 Vido.prototype.styleMap = i;
 Vido.prototype.classMap = o;
+Vido.prototype.StyleMap = StyleMap;
 Vido.prototype.PointerAction = PointerAction;
 Vido.prototype.asyncAppend = c$2;
 Vido.prototype.asyncReplace = h$1;
