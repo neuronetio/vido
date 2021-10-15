@@ -1,4 +1,4 @@
-import { Directive, directive } from 'lit-html/directive';
+import { Directive, directive } from 'lit-html/directive.js';
 import { noChange } from 'lit-html';
 class _StyleMap extends Directive {
     update(part, params) {
@@ -10,7 +10,7 @@ class _StyleMap extends Directive {
         return styleMap.toString();
     }
 }
-export default class StyleMap {
+export class StyleMap {
     constructor(styleInfo) {
         this.toRemove = [];
         this.toUpdate = [];
@@ -19,14 +19,14 @@ export default class StyleMap {
         this._directive = directive(_StyleMap);
     }
     directive() {
-        this._directive(this);
+        return this._directive(this);
     }
     setStyle(styleInfo) {
         this.style = styleInfo;
     }
     toString() {
         return Object.keys(this.style).reduce((style, prop) => {
-            const value = style[prop];
+            const value = this.style[prop];
             if (value == null) {
                 return style;
             }
@@ -39,7 +39,7 @@ export default class StyleMap {
             //  `--my-button-color` --> `--my-button-color`
             prop = prop.replace(/(?:^(webkit|moz|ms|o)|)(?=[A-Z])/g, '-$&').toLowerCase();
             return style + `${prop}:${value};`;
-        });
+        }, '');
     }
     execute(part) {
         this.toRemove.length = 0;

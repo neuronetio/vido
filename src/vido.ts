@@ -11,6 +11,7 @@ import { until } from 'lit-html/directives/until.js';
 import { live } from 'lit-html/directives/live.js';
 import detach from './Detach';
 import { styleMap } from 'lit-html/directives/style-map.js';
+import { StyleMap } from './StyleMap';
 import { classMap } from 'lit-html/directives/class-map.js';
 import PointerAction from './PointerAction';
 import getPublicComponentMethods from './PublicComponentMethods';
@@ -438,16 +439,12 @@ const lit = lithtml;
 export {
   vido,
   lithtml,
-  render,
-  html,
-  svg,
   lit,
   Action,
-  Directive,
-  directive,
   schedule,
   detach,
   styleMap,
+  StyleMap,
   classMap,
   PointerAction,
   asyncAppend,

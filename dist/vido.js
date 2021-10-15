@@ -145,6 +145,110 @@ const detach = e$4(Detach);
  * SPDX-License-Identifier: BSD-3-Clause
  */const i=e$4(class extends i$4{constructor(t){var e;if(super(t),t.type!==t$2.ATTRIBUTE||"style"!==t.name||(null===(e=t.strings)||void 0===e?void 0:e.length)>2)throw Error("The `styleMap` directive must be used in the `style` attribute and must be the only part in the attribute.")}render(t){return Object.keys(t).reduce(((e,r)=>{const s=t[r];return null==s?e:e+`${r=r.replace(/(?:^(webkit|moz|ms|o)|)(?=[A-Z])/g,"-$&").toLowerCase()}:${s};`}),"")}update(e,[r]){const{style:s}=e.element;if(void 0===this.ut){this.ut=new Set;for(const t in r)this.ut.add(t);return this.render(r)}this.ut.forEach((t=>{null==r[t]&&(this.ut.delete(t),t.includes("-")?s.removeProperty(t):s[t]="");}));for(const t in r){const e=r[t];null!=e&&(this.ut.add(t),t.includes("-")?s.setProperty(t,e):s[t]=e);}return b}});
 
+class _StyleMap extends i$4 {
+    update(part, params) {
+        const styleMap = params[0];
+        styleMap.execute(part);
+        return b;
+    }
+    render(styleMap) {
+        return styleMap.toString();
+    }
+}
+class StyleMap {
+    constructor(styleInfo) {
+        this.toRemove = [];
+        this.toUpdate = [];
+        this.previousStyle = {};
+        this.style = styleInfo;
+        this._directive = e$4(_StyleMap);
+    }
+    directive() {
+        return this._directive(this);
+    }
+    setStyle(styleInfo) {
+        this.style = styleInfo;
+    }
+    toString() {
+        return Object.keys(this.style).reduce((style, prop) => {
+            const value = this.style[prop];
+            if (value == null) {
+                return style;
+            }
+            // Convert property names from camel-case to dash-case, i.e.:
+            //  `backgroundColor` -> `background-color`
+            // Vendor-prefixed names need an extra `-` appended to front:
+            //  `webkitAppearance` -> `-webkit-appearance`
+            // Exception is any property name containing a dash, including
+            // custom properties; we assume these are already dash-cased i.e.:
+            //  `--my-button-color` --> `--my-button-color`
+            prop = prop.replace(/(?:^(webkit|moz|ms|o)|)(?=[A-Z])/g, '-$&').toLowerCase();
+            return style + `${prop}:${value};`;
+        }, '');
+    }
+    execute(part) {
+        this.toRemove.length = 0;
+        this.toUpdate.length = 0;
+        const element = part.element;
+        const elementStyle = element.style;
+        const previous = this.previousStyle;
+        if (element.attributes.getNamedItem('style')) {
+            // @ts-ignore
+            const currentElementStyles = element.attributes
+                .getNamedItem('style')
+                .value.split(';')
+                .map((item) => item.substr(0, item.indexOf(':')).trim())
+                .filter((item) => !!item);
+            for (const name of currentElementStyles) {
+                // @ts-ignore
+                if (this.style[name] === undefined) {
+                    if (!this.toRemove.includes(name))
+                        this.toRemove.push(name);
+                }
+            }
+        }
+        for (const name in previous) {
+            if (!(name in this.style))
+                continue;
+            // @ts-ignore
+            if (this.style[name] === undefined) {
+                if (!this.toRemove.includes(name))
+                    this.toRemove.push(name);
+            }
+        }
+        for (const name in this.style) {
+            if (!(name in this.style))
+                continue;
+            const value = this.style[name];
+            const prev = previous[name];
+            if (prev !== undefined && prev === value) {
+                continue;
+            }
+            this.toUpdate.push(name);
+        }
+        if (this.toRemove.length || this.toUpdate.length) {
+            for (const name of this.toRemove) {
+                elementStyle.removeProperty(name);
+                // @ts-ignore
+                if (elementStyle[name])
+                    delete elementStyle[name];
+            }
+            for (const name of this.toUpdate) {
+                // @ts-ignore
+                const value = this.style[name];
+                if (!name.includes('-')) {
+                    // @ts-ignore
+                    elementStyle[name] = value;
+                }
+                else {
+                    elementStyle.setProperty(name, value);
+                }
+            }
+            this.previousStyle = Object.assign({}, this.style);
+        }
+    }
+}
+
 /**
  * @license
  * Copyright 2018 Google LLC
@@ -1109,5 +1213,5 @@ Vido.prototype.until = c;
 Vido.prototype.Slots = Slots;
 const lit = lithtml;
 
-export { Action, i$4 as Directive, t$2 as PartType, PointerAction, Slots, L as _$LH, c$2 as asyncAppend, h$1 as asyncReplace, d as cache, o as classMap, Vido as default, detach, e$4 as directive, i$1 as guard, helpers, p$1 as html, l$1 as ifDefined, lit, lithtml, b as noChange, T as nothing, w as render, c$1 as repeat, schedule, i as styleMap, y as svg, o$1 as unsafeHTML, c as until };
+export { Action, i$4 as Directive, t$2 as PartType, PointerAction, Slots, StyleMap, L as _$LH, c$2 as asyncAppend, h$1 as asyncReplace, d as cache, o as classMap, Vido as default, detach, e$4 as directive, i$1 as guard, helpers, p$1 as html, l$1 as ifDefined, lit, lithtml, b as noChange, T as nothing, w as render, c$1 as repeat, schedule, i as styleMap, y as svg, o$1 as unsafeHTML, c as until };
 //# sourceMappingURL=vido.js.map

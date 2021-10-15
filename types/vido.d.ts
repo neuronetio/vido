@@ -1,5 +1,5 @@
-import { render, html, svg } from 'lit-html';
-import { directive, Directive } from 'lit-html/directive.js';
+import { html, svg } from 'lit-html';
+import { directive } from 'lit-html/directive.js';
 import { asyncAppend } from 'lit-html/directives/async-append.js';
 import { asyncReplace } from 'lit-html/directives/async-replace.js';
 import { cache } from 'lit-html/directives/cache.js';
@@ -11,6 +11,7 @@ import { until } from 'lit-html/directives/until.js';
 import { live } from 'lit-html/directives/live.js';
 import detach from './Detach';
 import { styleMap } from 'lit-html/directives/style-map.js';
+import { StyleMap } from './StyleMap';
 import { classMap } from 'lit-html/directives/class-map.js';
 import PointerAction from './PointerAction';
 import { schedule } from './helpers';
@@ -81,4 +82,4 @@ interface vido<State, Api> {
 declare type AnyVido = vido<any, any>;
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
 declare const lit: typeof lithtml;
-export { vido, lithtml, render, html, svg, lit, Action, Directive, directive, schedule, detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, ClassInfo, StyleInfo, htmlResult, UpdateTemplate, Component, ComponentInstance, CreateAppConfig, OnChangeCallback, Callback, GetPropsFn, AnyVido, };
+export { vido, lithtml, lit, Action, schedule, detach, styleMap, StyleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, ClassInfo, StyleInfo, htmlResult, UpdateTemplate, Component, ComponentInstance, CreateAppConfig, OnChangeCallback, Callback, GetPropsFn, AnyVido, };
