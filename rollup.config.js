@@ -43,7 +43,7 @@ export default [
     input: 'src/vido.ts',
     output: {
       sourcemap: true,
-      file: 'dist/vido.esm.js',
+      file: 'dist/vido.js',
       format: 'esm',
       name: 'Vido',
     },
@@ -60,7 +60,7 @@ export default [
     input: 'src/vido.ts',
     output: {
       sourcemap: true,
-      file: 'dist/vido.esm.min.js',
+      file: 'dist/vido.min.js',
       format: 'esm',
       name: 'Vido',
     },
