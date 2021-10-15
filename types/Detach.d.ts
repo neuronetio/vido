@@ -5,7 +5,9 @@ export interface ElementData {
     previousSibling: ChildNode | Node | null;
     parent: (Node & ParentNode) | null;
 }
-export default class Detach extends Directive {
+export declare class Detach extends Directive {
     render(): symbol;
     update(part: AttributePart, props: unknown[]): symbol;
 }
+declare const detach: () => import("lit-html/directive").DirectiveResult<typeof Detach>;
+export default detach;

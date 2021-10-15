@@ -1,7 +1,7 @@
 import { nothing } from 'lit-html';
-import { Directive } from 'lit-html/directive';
+import { directive, Directive } from 'lit-html/directive';
 const detached = new WeakMap();
-export default class Detach extends Directive {
+export class Detach extends Directive {
     render() {
         return nothing;
     }
@@ -40,3 +40,5 @@ export default class Detach extends Directive {
         return this.render();
     }
 }
+const detach = directive(Detach);
+export default detach;

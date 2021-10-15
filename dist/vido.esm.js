@@ -1,3 +1,5 @@
+export { PropertiesHyphenFallback as CSSProp } from 'csstype';
+
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -137,6 +139,7 @@ class Detach extends i$1 {
         return this.render();
     }
 }
+const detach = e$1(Detach);
 
 /**
  * @license
@@ -857,7 +860,7 @@ function Vido(state, api) {
             this.schedule = schedule;
             this.getElement = e$1(GetElementDirective);
             this.actionsByInstance = ( /* componentActions, props */) => { };
-            this.Detach = Detach;
+            this.detach = detach;
             this.PointerAction = PointerAction;
             this.Action = Action;
             this.Slots = Slots;
@@ -1092,7 +1095,7 @@ Vido.prototype.lithtml = lithtml;
 Vido.prototype.Action = Action;
 Vido.prototype.Directive = i$1;
 Vido.prototype.schedule = schedule;
-Vido.prototype.Detach = Detach;
+Vido.prototype.detach = detach;
 Vido.prototype.styleMap = i$5;
 Vido.prototype.classMap = o$4;
 Vido.prototype.PointerAction = PointerAction;
@@ -1108,5 +1111,5 @@ Vido.prototype.until = c$4;
 Vido.prototype.Slots = Slots;
 
 export default Vido;
-export { Action, Detach, i$1 as Directive, PointerAction, Slots, c$2 as asyncAppend, h$2 as asyncReplace, d$2 as cache, o$4 as classMap, i$4 as guard, helpers, l$2 as ifDefined, lithtml, c$3 as repeat, schedule, i$5 as styleMap, o$3 as unsafeHTML, c$4 as until };
+export { Action, i$1 as Directive, PointerAction, Slots, c$2 as asyncAppend, h$2 as asyncReplace, d$2 as cache, o$4 as classMap, detach, i$4 as guard, helpers, l$2 as ifDefined, lithtml, c$3 as repeat, schedule, i$5 as styleMap, o$3 as unsafeHTML, c$4 as until };
 //# sourceMappingURL=vido.esm.js.map

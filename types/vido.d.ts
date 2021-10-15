@@ -8,7 +8,7 @@ import { repeat } from 'lit-html/directives/repeat';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import { until } from 'lit-html/directives/until';
 import { live } from 'lit-html/directives/live';
-import Detach from './Detach';
+import detach from './Detach';
 import { styleMap } from 'lit-html/directives/style-map';
 import { classMap } from 'lit-html/directives/class-map';
 import PointerAction from './PointerAction';
@@ -16,6 +16,7 @@ import { schedule } from './helpers';
 import Action from './Action';
 import { Slots } from './Slots';
 import helpers from './helpers';
+import { PropertiesHyphenFallback as CSSProp } from 'csstype';
 import * as lithtml from 'lit-html';
 export declare type htmlResult = lithtml.TemplateResult | lithtml.TemplateResult[] | lithtml.SVGTemplateResult | lithtml.SVGTemplateResult[] | undefined | null;
 export declare type UpdateTemplate = (props: unknown) => htmlResult;
@@ -63,7 +64,7 @@ export interface vido<State, Api> {
     unsafeHTML: typeof unsafeHTML;
     until: typeof until;
     schedule: typeof schedule;
-    Detach: typeof Detach;
+    detach: typeof detach;
     PointerAction: typeof PointerAction;
     Action: typeof Action;
     Slots: typeof Slots;
@@ -71,4 +72,4 @@ export interface vido<State, Api> {
 }
 export declare type AnyVido = vido<any, any>;
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
-export { lithtml, Action, Directive, schedule, Detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, };
+export { lithtml, Action, Directive, schedule, detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, CSSProp, };

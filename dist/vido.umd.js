@@ -1,8 +1,8 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global = global || self, global.Vido = factory());
-}(this, (function () { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('csstype')) :
+  typeof define === 'function' && define.amd ? define(['csstype'], factory) :
+  (global = global || self, global.Vido = factory(global.csstype));
+}(this, (function (csstype) { 'use strict';
 
   /**
    * @license
@@ -143,6 +143,7 @@
           return this.render();
       }
   }
+  const detach = e$1(Detach);
 
   /**
    * @license
@@ -858,7 +859,7 @@
               this.schedule = schedule;
               this.getElement = e$1(GetElementDirective);
               this.actionsByInstance = ( /* componentActions, props */) => { };
-              this.Detach = Detach;
+              this.detach = detach;
               this.PointerAction = PointerAction;
               this.Action = Action;
               this.Slots = Slots;
@@ -1093,7 +1094,7 @@
   Vido.prototype.Action = Action;
   Vido.prototype.Directive = i$1;
   Vido.prototype.schedule = schedule;
-  Vido.prototype.Detach = Detach;
+  Vido.prototype.detach = detach;
   Vido.prototype.styleMap = i$5;
   Vido.prototype.classMap = o$4;
   Vido.prototype.PointerAction = PointerAction;

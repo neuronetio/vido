@@ -1,6 +1,8 @@
 import { Directive, Part, AttributePart } from 'lit-html/directive';
 import { PropertiesHyphenFallback as CSSProp } from 'csstype';
 
+export { CSSProp };
+
 export default class StyleMap extends Directive {
   public style: CSSProp = {};
   private previous = {};
