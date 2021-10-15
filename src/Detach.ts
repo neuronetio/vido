@@ -11,18 +11,15 @@ export interface ElementData {
 }
 
 export default class Detach extends Directive {
-  private ifFn: () => boolean = () => false;
-
-  set(ifFn: () => boolean) {
-    this.ifFn = ifFn;
-  }
-
   render() {
     return nothing;
   }
 
-  update(part: AttributePart) {
-    const detach = this.ifFn();
+  update(part: AttributePart, props: unknown[]) {
+    if (typeof props[0] !== 'function') {
+      throw new Error('[vido] Detach directive argument should be a function.');
+    }
+    const detach = props[0]();
     const element: Element = part.element;
     if (detach) {
       if (!detached.has(part)) {

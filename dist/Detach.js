@@ -2,18 +2,14 @@ import { nothing } from 'lit-html';
 import { Directive } from 'lit-html/directive';
 const detached = new WeakMap();
 export default class Detach extends Directive {
-    constructor() {
-        super(...arguments);
-        this.ifFn = () => false;
-    }
-    set(ifFn) {
-        this.ifFn = ifFn;
-    }
     render() {
         return nothing;
     }
-    update(part) {
-        const detach = this.ifFn();
+    update(part, props) {
+        if (typeof props[0] !== 'function') {
+            throw new Error('[vido] Detach directive argument should be a function.');
+        }
+        const detach = props[0]();
         const element = part.element;
         if (detach) {
             if (!detached.has(part)) {

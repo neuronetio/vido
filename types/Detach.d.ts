@@ -6,8 +6,6 @@ export interface ElementData {
     parent: (Node & ParentNode) | null;
 }
 export default class Detach extends Directive {
-    private ifFn;
-    set(ifFn: () => boolean): void;
     render(): symbol;
-    update(part: AttributePart): symbol;
+    update(part: AttributePart, props: unknown[]): symbol;
 }

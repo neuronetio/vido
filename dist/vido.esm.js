@@ -99,18 +99,14 @@ const u$2=(e,s,t)=>{const r=new Map;for(let l=s;l<=t;l++)r.set(e[l],l);return r}
 
 const detached = new WeakMap();
 class Detach extends i$1 {
-    constructor() {
-        super(...arguments);
-        this.ifFn = () => false;
-    }
-    set(ifFn) {
-        this.ifFn = ifFn;
-    }
     render() {
         return T;
     }
-    update(part) {
-        const detach = this.ifFn();
+    update(part, props) {
+        if (typeof props[0] !== 'function') {
+            throw new Error('[vido] Detach directive argument should be a function.');
+        }
+        const detach = props[0]();
         const element = part.element;
         if (detach) {
             if (!detached.has(part)) {
@@ -798,14 +794,14 @@ class Slots {
 
 class GetElementDirective extends i$1 {
     update(part, props) {
-        const callback = props[0];
-        if (typeof callback !== 'function') {
-            throw new Error('[vido] Argument for getElement directive should be a function.');
+        if (typeof props[0] !== 'function') {
+            throw new Error('[vido] GetElementDirective argument should be a function.');
         }
+        const callback = props[0];
         callback(part.element);
     }
     render() {
-        return null;
+        return T;
     }
 }
 

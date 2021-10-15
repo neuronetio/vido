@@ -1,4 +1,3 @@
-import Action from './Action';
 import { AnyVido, htmlResult } from './vido';
 
 export default function getInternalComponentMethods(
