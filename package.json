@@ -3,8 +3,8 @@
   "version": "4.0.10",
   "description": "Compilation-less and eval free frontend framework for fast scalable apps.",
   "main": "dist/vido.umd.js",
-  "module": "dist/vido.esm.js",
-  "types": "types/vido.d.ts",
+  "module": "dist/vido.js",
+  "types": "dist/vido.d.ts",
   "scripts": {
     "build": "tsc -p ./tsconfig.types.json && tsc -p ./tsconfig.json && rollup -c",
     "types": "tsc -p ./tsconfig.types.json",
