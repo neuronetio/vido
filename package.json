@@ -11,6 +11,9 @@
     "autobuild": "rollup -c -w",
     "test": "jest"
   },
+  "files": [
+    "dist","types"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/neuronetio/vido.git"
