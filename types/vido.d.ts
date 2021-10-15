@@ -18,6 +18,8 @@ import Action from './Action';
 import { Slots } from './Slots';
 import helpers from './helpers';
 import * as lithtml from 'lit-html';
+export * from 'lit-html/directive.js';
+export * from 'lit-html';
 declare type htmlResult = lithtml.TemplateResult | lithtml.TemplateResult[] | lithtml.SVGTemplateResult | lithtml.SVGTemplateResult[] | undefined | null;
 interface ClassInfo {
     [name: string]: string | boolean | number;
@@ -79,5 +81,4 @@ interface vido<State, Api> {
 declare type AnyVido = vido<any, any>;
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
 declare const lit: typeof lithtml;
-export { vido, lithtml, render, html, svg, lit, Action, Directive, schedule, detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, ClassInfo, StyleInfo, htmlResult, UpdateTemplate, Component, ComponentInstance, CreateAppConfig, OnChangeCallback, Callback, GetPropsFn, AnyVido, };
-//# sourceMappingURL=vido.d.ts.map
+export { vido, lithtml, render, html, svg, lit, Action, Directive, directive, schedule, detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, ClassInfo, StyleInfo, htmlResult, UpdateTemplate, Component, ComponentInstance, CreateAppConfig, OnChangeCallback, Callback, GetPropsFn, AnyVido, };

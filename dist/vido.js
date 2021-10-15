@@ -1109,5 +1109,5 @@ Vido.prototype.until = c;
 Vido.prototype.Slots = Slots;
 const lit = lithtml;
 
-export { Action, i$4 as Directive, PointerAction, Slots, c$2 as asyncAppend, h$1 as asyncReplace, d as cache, o as classMap, Vido as default, detach, i$1 as guard, helpers, p$1 as html, l$1 as ifDefined, lit, lithtml, w as render, c$1 as repeat, schedule, i as styleMap, y as svg, o$1 as unsafeHTML, c as until };
+export { Action, i$4 as Directive, t$2 as PartType, PointerAction, Slots, L as _$LH, c$2 as asyncAppend, h$1 as asyncReplace, d as cache, o as classMap, Vido as default, detach, e$4 as directive, i$1 as guard, helpers, p$1 as html, l$1 as ifDefined, lit, lithtml, b as noChange, T as nothing, w as render, c$1 as repeat, schedule, i as styleMap, y as svg, o$1 as unsafeHTML, c as until };
 //# sourceMappingURL=vido.js.map

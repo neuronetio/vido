@@ -22,6 +22,8 @@ import { Slots } from './Slots';
 import GetElementDirective from './GetElement';
 import helpers from './helpers';
 import * as lithtml from 'lit-html';
+export * from 'lit-html/directive.js';
+export * from 'lit-html';
 
 type htmlResult =
   | lithtml.TemplateResult
@@ -432,6 +434,7 @@ Vido.prototype.until = until;
 Vido.prototype.Slots = Slots;
 
 const lit = lithtml;
+
 export {
   vido,
   lithtml,
@@ -441,6 +444,7 @@ export {
   lit,
   Action,
   Directive,
+  directive,
   schedule,
   detach,
   styleMap,
