@@ -6,3 +6,4 @@ export default function getActionsCollector(actionsByInstance: Map<string, any>)
         readonly _$isConnected: boolean;
     };
 };
+//# sourceMappingURL=ActionsCollector.d.ts.map

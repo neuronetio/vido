@@ -2,11 +2,11 @@
   "name": "@neuronet.io/vido",
   "version": "4.0.11",
   "description": "Compilation-less and eval free frontend framework for fast scalable apps.",
-  "main": "dist/vido.umd.js",
-  "module": "dist/vido.js",
-  "types": "dist/vido.d.ts",
+  "main": "src/vido.umd.js",
+  "module": "src/vido.js",
+  "types": "src/vido.d.ts",
   "scripts": {
-    "build": "tsc -p ./tsconfig.types.json && tsc -p ./tsconfig.json && rollup -c",
+    "build": "tsc -p ./tsconfig.json && rollup -c",
     "types": "tsc -p ./tsconfig.types.json",
     "autobuild": "rollup -c -w",
     "test": "jest"

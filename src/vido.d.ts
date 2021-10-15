@@ -80,3 +80,4 @@ export declare type AnyVido = vido<any, any>;
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
 declare const lit: typeof lithtml;
 export { lithtml, render, html, svg, lit, Action, Directive, schedule, detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, };
+//# sourceMappingURL=vido.d.ts.map

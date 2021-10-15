@@ -28,3 +28,4 @@ export default function getPublicComponentMethods(components: Map<string, any>, 
         _getActions(): Map<string, any>;
     };
 };
+//# sourceMappingURL=PublicComponentMethods.d.ts.map
