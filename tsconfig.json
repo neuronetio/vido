@@ -11,8 +11,6 @@
     "allowJs": true,
     "target": "ES2015",
     "skipLibCheck": false,
-    "skipDefaultLibCheck": false,
-    "declaration": true,
-    "declarationMap": true
+    "skipDefaultLibCheck": false
   }
 }

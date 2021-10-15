@@ -1,0 +1,1 @@
+{"version":3,"file":"GetElement.d.ts","sourceRoot":"","sources":["../src/GetElement.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,aAAa,EAAE,SAAS,EAAE,MAAM,uBAAuB,CAAC;AAEjE,MAAM,CAAC,OAAO,OAAO,mBAAoB,SAAQ,SAAS;IACxD,MAAM,CAAC,IAAI,EAAE,aAAa,EAAE,KAAK,EAAE,OAAO,EAAE;IAQ5C,MAAM;CAGP"}

@@ -23,7 +23,7 @@ import GetElementDirective from './GetElement';
 import helpers from './helpers';
 import * as lithtml from 'lit-html';
 
-export type htmlResult =
+type htmlResult =
   | lithtml.TemplateResult
   | lithtml.TemplateResult[]
   | lithtml.SVGTemplateResult
@@ -31,19 +31,19 @@ export type htmlResult =
   | undefined
   | null;
 
-export interface ClassInfo {
+interface ClassInfo {
   [name: string]: string | boolean | number;
 }
 
-export interface StyleInfo {
+interface StyleInfo {
   [name: string]: string | undefined | null;
 }
 
-export type UpdateTemplate = (props: unknown) => htmlResult;
+type UpdateTemplate = (props: unknown) => htmlResult;
 
-export type Component = (vido: AnyVido, props: unknown) => UpdateTemplate;
+type Component = (vido: AnyVido, props: unknown) => UpdateTemplate;
 
-export interface ComponentInstance {
+interface ComponentInstance {
   instance: string;
   update: () => Promise<unknown>;
   destroy: () => void;
@@ -52,17 +52,17 @@ export interface ComponentInstance {
   vidoInstance: AnyVido;
 }
 
-export interface CreateAppConfig {
+interface CreateAppConfig {
   element: HTMLElement;
   component: Component;
   props: unknown;
 }
 
-export type Callback = () => void;
-export type OnChangeCallback = (props: any, options: any) => void;
-export type GetPropsFn = (arg: unknown) => unknown | any;
+type Callback = () => void;
+type OnChangeCallback = (props: any, options: any) => void;
+type GetPropsFn = (arg: unknown) => unknown | any;
 
-export interface vido<State, Api> {
+interface vido<State, Api> {
   instance: string;
   name: string;
   state: State;
@@ -103,7 +103,7 @@ export interface vido<State, Api> {
   Actions?: any;
 }
 
-export type AnyVido = vido<any, any>;
+type AnyVido = vido<any, any>;
 
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api> {
   let componentId = 0;
@@ -433,6 +433,7 @@ Vido.prototype.Slots = Slots;
 
 const lit = lithtml;
 export {
+  vido,
   lithtml,
   render,
   html,
@@ -455,4 +456,15 @@ export {
   until,
   Slots,
   helpers,
+  ClassInfo,
+  StyleInfo,
+  htmlResult,
+  UpdateTemplate,
+  Component,
+  ComponentInstance,
+  CreateAppConfig,
+  OnChangeCallback,
+  Callback,
+  GetPropsFn,
+  AnyVido,
 };
