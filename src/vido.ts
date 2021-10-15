@@ -21,7 +21,7 @@ import Action from './Action';
 import { Slots } from './Slots';
 import GetElementDirective from './GetElement';
 import helpers from './helpers';
-import { PropertiesHyphenFallback as CSSProp } from 'csstype';
+import { PropertiesHyphenFallback as CSSProps } from 'csstype';
 
 import * as lithtml from 'lit-html';
 
@@ -444,5 +444,5 @@ export {
   until,
   Slots,
   helpers,
-  CSSProp,
+  CSSProps,
 };

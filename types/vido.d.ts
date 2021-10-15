@@ -16,7 +16,7 @@ import { schedule } from './helpers';
 import Action from './Action';
 import { Slots } from './Slots';
 import helpers from './helpers';
-import { PropertiesHyphenFallback as CSSProp } from 'csstype';
+import { PropertiesHyphenFallback as CSSProps } from 'csstype';
 import * as lithtml from 'lit-html';
 export declare type htmlResult = lithtml.TemplateResult | lithtml.TemplateResult[] | lithtml.SVGTemplateResult | lithtml.SVGTemplateResult[] | undefined | null;
 export declare type UpdateTemplate = (props: unknown) => htmlResult;
@@ -72,4 +72,4 @@ export interface vido<State, Api> {
 }
 export declare type AnyVido = vido<any, any>;
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
-export { lithtml, Action, Directive, schedule, detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, CSSProp, };
+export { lithtml, Action, Directive, schedule, detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, CSSProps, };

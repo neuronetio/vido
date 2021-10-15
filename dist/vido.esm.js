@@ -1,4 +1,4 @@
-export { PropertiesHyphenFallback as CSSProp } from 'csstype';
+export { PropertiesHyphenFallback as CSSProps } from 'csstype';
 
 /**
  * @license
