@@ -92,6 +92,7 @@ interface vido<State, Api> {
   cache: typeof cache;
   classMap: typeof classMap;
   styleMap: typeof styleMap;
+  StyleMap: typeof StyleMap;
   guard: typeof guard;
   live: typeof live;
   ifDefined: typeof ifDefined;
