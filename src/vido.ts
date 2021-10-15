@@ -10,8 +10,8 @@ import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { until } from 'lit-html/directives/until.js';
 import { live } from 'lit-html/directives/live.js';
 import detach from './Detach';
-import { styleMap, StyleInfo } from 'lit-html/directives/style-map.js';
-import { classMap, ClassInfo } from 'lit-html/directives/class-map.js';
+import { styleMap } from 'lit-html/directives/style-map.js';
+import { classMap } from 'lit-html/directives/class-map.js';
 import PointerAction from './PointerAction';
 import getPublicComponentMethods from './PublicComponentMethods';
 import getActionsCollector from './ActionsCollector';
@@ -30,6 +30,14 @@ export type htmlResult =
   | lithtml.SVGTemplateResult[]
   | undefined
   | null;
+
+export interface ClassInfo {
+  [name: string]: string | boolean | number;
+}
+
+export interface StyleInfo {
+  [name: string]: string | undefined | null;
+}
 
 export type UpdateTemplate = (props: unknown) => htmlResult;
 
@@ -444,6 +452,4 @@ export {
   until,
   Slots,
   helpers,
-  StyleInfo,
-  ClassInfo,
 };

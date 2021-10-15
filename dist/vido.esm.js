@@ -1107,6 +1107,7 @@ Vido.prototype.repeat = c$1;
 Vido.prototype.unsafeHTML = o$1;
 Vido.prototype.until = c;
 Vido.prototype.Slots = Slots;
+const lit = lithtml;
 
-export { Action, i$4 as Directive, PointerAction, Slots, c$2 as asyncAppend, h$1 as asyncReplace, d as cache, o as classMap, Vido as default, detach, i$1 as guard, helpers, l$1 as ifDefined, lithtml, c$1 as repeat, schedule, i as styleMap, o$1 as unsafeHTML, c as until };
+export { Action, i$4 as Directive, PointerAction, Slots, c$2 as asyncAppend, h$1 as asyncReplace, d as cache, o as classMap, Vido as default, detach, i$1 as guard, helpers, l$1 as ifDefined, lit, lithtml, c$1 as repeat, schedule, i as styleMap, o$1 as unsafeHTML, c as until };
 //# sourceMappingURL=vido.esm.js.map

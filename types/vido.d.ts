@@ -9,8 +9,8 @@ import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { until } from 'lit-html/directives/until.js';
 import { live } from 'lit-html/directives/live.js';
 import detach from './Detach';
-import { styleMap, StyleInfo } from 'lit-html/directives/style-map.js';
-import { classMap, ClassInfo } from 'lit-html/directives/class-map.js';
+import { styleMap } from 'lit-html/directives/style-map.js';
+import { classMap } from 'lit-html/directives/class-map.js';
 import PointerAction from './PointerAction';
 import { schedule } from './helpers';
 import Action from './Action';
@@ -18,6 +18,12 @@ import { Slots } from './Slots';
 import helpers from './helpers';
 import * as lithtml from 'lit-html';
 export declare type htmlResult = lithtml.TemplateResult | lithtml.TemplateResult[] | lithtml.SVGTemplateResult | lithtml.SVGTemplateResult[] | undefined | null;
+export interface ClassInfo {
+    [name: string]: string | boolean | number;
+}
+export interface StyleInfo {
+    [name: string]: string | undefined | null;
+}
 export declare type UpdateTemplate = (props: unknown) => htmlResult;
 export declare type Component = (vido: AnyVido, props: unknown) => UpdateTemplate;
 export interface ComponentInstance {
@@ -71,4 +77,5 @@ export interface vido<State, Api> {
 }
 export declare type AnyVido = vido<any, any>;
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
-export { lithtml, Action, Directive, schedule, detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, StyleInfo, ClassInfo, };
+declare const lit: typeof lithtml;
+export { lithtml, lit, Action, Directive, schedule, detach, styleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, Slots, helpers, };
