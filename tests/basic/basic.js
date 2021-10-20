@@ -105,8 +105,9 @@ function Item(vido, props = {}) {
 }
 
 function Main(vido, props) {
-  const { html, onDestroy, onChange, reuseComponents } = vido;
+  const { html, onDestroy, onChange, reuseComponents, StyleMap, update } = vido;
   let items = [];
+  const styleMap = new StyleMap({ width: '100px', height: '100px', background: 'red' });
   onChange((changedProps) => {
     props = changedProps;
     reuseComponents(items, props.components, (component) => ({ id: component }), Item, false);
@@ -125,9 +126,16 @@ function Main(vido, props) {
     reuseComponents(items, props.components, (component) => ({ id: component }), Item, false);
   }
 
+  function changeStyle() {
+    styleMap.style.background = 'green';
+    styleMap.style.color = 'white';
+    update();
+  }
+
   return (templateProps) =>
     html`
       <div class="test">Test text</div>
+      <div id="red-box" style=${styleMap.directive()}><button @click=${changeStyle}>c</button></div>
       <div><button id="remove-one" @click=${remove}>remove one</button></div>
       <div class="items">${items.map((item) => item.html())}</div>
     `;

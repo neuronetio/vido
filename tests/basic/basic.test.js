@@ -47,6 +47,12 @@ describe('Basic', () => {
     expect(c3.length).toEqual(5 + 3 * 7);
   });
 
+  it('should change background color', async () => {
+    await expect(page).toMatchElement('#red-box');
+    const style = await (await page.$('#red-box')).getProperty('style');
+    console.log(style);
+  });
+
   it('should destroy app', async () => {
     await page.click('#destroy-main');
     await expect(page).not.toMatchElement('.test');
