@@ -1,5 +1,6 @@
 import { Directive, directive } from 'lit-html/directive.js';
 import { noChange } from 'lit-html';
+import { schedule as _schedule } from './helpers';
 const elements = new WeakMap();
 class _StyleMap extends Directive {
     update(part, params) {
@@ -12,10 +13,13 @@ class _StyleMap extends Directive {
     }
 }
 export class StyleMap {
-    constructor(styleInfo) {
+    constructor(styleInfo, options = { schedule: false }) {
         this.style = styleInfo;
         this._directive = directive(_StyleMap);
         this.execute = this.execute.bind(this);
+        if (options.schedule) {
+            this.execute = _schedule(this.execute);
+        }
     }
     directive() {
         return this._directive(this);

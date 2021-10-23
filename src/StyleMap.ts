@@ -1,6 +1,7 @@
 import { Directive, directive, AttributePart } from 'lit-html/directive.js';
 import { noChange } from 'lit-html';
 import { StyleInfo } from './vido';
+import { schedule as _schedule } from './helpers';
 
 const elements = new WeakMap();
 
@@ -20,10 +21,13 @@ export class StyleMap {
   public style: StyleInfo;
   private _directive;
 
-  constructor(styleInfo) {
+  constructor(styleInfo, options: { schedule: boolean } = { schedule: false }) {
     this.style = styleInfo;
     this._directive = directive(_StyleMap);
     this.execute = this.execute.bind(this);
+    if (options.schedule) {
+      this.execute = _schedule(this.execute);
+    }
   }
   directive() {
     return this._directive(this);
