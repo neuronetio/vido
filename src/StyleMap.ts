@@ -3,6 +3,8 @@ import { noChange } from 'lit-html';
 import { StyleInfo } from './vido';
 import { schedule as _schedule } from './helpers';
 
+const elements = new WeakMap();
+
 class _StyleMap extends Directive {
   update(part: AttributePart, params: unknown[]) {
     const styleMap = params[0] as StyleMap;
@@ -24,7 +26,6 @@ export class StyleMap {
     this.style = styleInfo;
     this._directive = directive(_StyleMap);
     this.execute = this.execute.bind(this);
-    this.updateStyle = this.updateStyle.bind(this);
     this.schedule = options.schedule;
   }
   directive() {
@@ -51,53 +52,73 @@ export class StyleMap {
     }, '');
   }
 
-  updateStyle(elementStyle, currentElementStyles, styleParts) {
-    for (const part of styleParts) {
-      if (!part) continue;
-      let [name, value] = part.split(':');
-      name = name.trim().toLowerCase();
-      value = value.trim().toLowerCase();
-      if (name) currentElementStyles[name] = value;
-    }
-    for (const name in currentElementStyles) {
-      if (!name) continue;
-      const camelCase = name
-        .split('-')
-        .map((p, i) => (i > 0 ? (p.length >= 2 ? p[0].toUpperCase() + p.substring(1) : '') : p))
-        .join();
-      if (this.style[name] === undefined && this.style[camelCase] === undefined) {
-        if (!name.includes('-')) {
-          delete elementStyle[name];
-        } else {
-          elementStyle.removeProperty(name);
-        }
+  updateStyle(elementStyle, currentElementStyles, style) {
+    const previous = style.previousStyle;
+    for (const name of currentElementStyles) {
+      if (this.style[name] === undefined) {
+        if (!style.toRemove.includes(name)) style.toRemove.push(name);
       }
     }
-    for (let name in this.style) {
-      if (!name) continue;
-      const value = this.style[name].toLowerCase().trim();
-      name = name.replace(/(?:^(webkit|moz|ms|o)|)(?=[A-Z])/g, '-$&').toLowerCase();
-      if (currentElementStyles[name] === value) {
+    for (const name in previous) {
+      if (!(name in this.style)) continue;
+      // @ts-ignore
+      if (this.style[name] === undefined && currentElementStyles.includes(name)) {
+        if (!style.toRemove.includes(name)) style.toRemove.push(name);
+      }
+    }
+    for (const name in this.style) {
+      if (!(name in this.style)) continue;
+      const value = this.style[name];
+      const prev = previous[name];
+      if (prev !== undefined && prev === value && currentElementStyles.includes(name)) {
         continue;
       }
-      if (!name.includes('-')) {
-        elementStyle[name] = value;
-      } else {
-        elementStyle.setProperty(name, value);
+      style.toUpdate.push(name);
+    }
+    if (style.toRemove.length || style.toUpdate.length) {
+      for (const name of style.toRemove) {
+        elementStyle.removeProperty(name);
+        if (elementStyle[name]) delete elementStyle[name];
       }
+      for (const name of style.toUpdate) {
+        const value = this.style[name];
+        if (!name.includes('-')) {
+          elementStyle[name] = value;
+        } else {
+          elementStyle.setProperty(name, value);
+        }
+      }
+      style.previousStyle = Object.assign({}, this.style);
     }
   }
 
   execute(part: AttributePart) {
-    const elementStyle = part.element.style;
-    let currentElementStyles = {};
-    const styleParts = elementStyle.cssText.split(';');
+    const element = part.element;
+    let style;
+    if (!elements.has(element)) {
+      style = {
+        toUpdate: [],
+        toRemove: [],
+        previousStyle: {},
+      };
+      elements.set(element, style);
+    } else {
+      style = elements.get(element);
+    }
+    style.toRemove.length = 0;
+    style.toUpdate.length = 0;
+    const elementStyle = element.style;
+    const currentElementStyles = element.style.cssText
+      .split(';')
+      .map((item) => item.substr(0, item.indexOf(':')).trim())
+      .filter((item) => !!item);
     if (this.schedule) {
       requestAnimationFrame(() => {
-        this.updateStyle(elementStyle, currentElementStyles, styleParts);
+        this.updateStyle(elementStyle, currentElementStyles, style);
       });
     } else {
-      this.updateStyle(elementStyle, currentElementStyles, styleParts);
+      this.updateStyle(elementStyle, currentElementStyles, style);
     }
+    elements.set(element, style);
   }
 }
