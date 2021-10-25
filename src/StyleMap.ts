@@ -24,6 +24,7 @@ export class StyleMap {
     this.style = styleInfo;
     this._directive = directive(_StyleMap);
     this.execute = this.execute.bind(this);
+    this.updateStyle = this.updateStyle.bind(this);
     this.schedule = options.schedule;
   }
   directive() {
@@ -72,9 +73,10 @@ export class StyleMap {
         }
       }
     }
-    for (const name in this.style) {
+    for (let name in this.style) {
       if (!name) continue;
       const value = this.style[name].toLowerCase().trim();
+      name = name.replace(/(?:^(webkit|moz|ms|o)|)(?=[A-Z])/g, '-$&').toLowerCase();
       if (currentElementStyles[name] === value) {
         continue;
       }
