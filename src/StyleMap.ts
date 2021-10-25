@@ -62,7 +62,7 @@ export class StyleMap {
       if (!name) continue;
       const camelCase = name
         .split('-')
-        .map((p, i) => (i > 0 ? p[0].toUpperCase() + p.substring(1) : p))
+        .map((p, i) => (i > 0 ? (p.length >= 2 ? p[0].toUpperCase() + p.substring(1) : '') : p))
         .join();
       if (this.style[name] === undefined && this.style[camelCase] === undefined) {
         if (!name.includes('-')) {
