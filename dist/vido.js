@@ -197,9 +197,11 @@ class StyleMap {
                 currentElementStyles[name] = value;
         }
         for (const name in currentElementStyles) {
+            if (!name)
+                continue;
             const camelCase = name
                 .split('-')
-                .map((p, i) => (i >= 0 ? p[0].toUpperCase() + p.substring(1) : p))
+                .map((p, i) => (i > 0 ? p[0].toUpperCase() + p.substring(1) : p))
                 .join();
             if (this.style[name] === undefined && this.style[camelCase] === undefined) {
                 if (!name.includes('-')) {
@@ -211,6 +213,8 @@ class StyleMap {
             }
         }
         for (const name in this.style) {
+            if (!name)
+                continue;
             const value = this.style[name].toLowerCase().trim();
             if (currentElementStyles[name] === value) {
                 continue;
