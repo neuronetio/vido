@@ -33,7 +33,13 @@ export class StyleMap {
     return this._directive(this);
   }
   setStyle(styleInfo) {
-    this.style = styleInfo;
+    // reuse existing object to prevent GC
+    for (const prop in this.style) {
+      delete this.style[prop];
+    }
+    for (const prop in styleInfo) {
+      this.style[prop] = styleInfo[prop];
+    }
   }
   toString() {
     return Object.keys(this.style).reduce((style, prop) => {
