@@ -263,16 +263,20 @@
             style.toRemove.length = 0;
             style.toUpdate.length = 0;
             const elementStyle = element.style;
-            const currentElementStyles = element.style.cssText
-                .split(';')
-                .map((item) => item.substr(0, item.indexOf(':')).trim())
-                .filter((item) => !!item);
             if (this.schedule) {
                 requestAnimationFrame(() => {
+                    const currentElementStyles = element.style.cssText
+                        .split(';')
+                        .map((item) => item.substr(0, item.indexOf(':')).trim())
+                        .filter((item) => !!item);
                     this.updateStyle(elementStyle, currentElementStyles, style, element);
                 });
             }
             else {
+                const currentElementStyles = element.style.cssText
+                    .split(';')
+                    .map((item) => item.substr(0, item.indexOf(':')).trim())
+                    .filter((item) => !!item);
                 this.updateStyle(elementStyle, currentElementStyles, style, element);
             }
             elements.set(element, style);
