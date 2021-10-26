@@ -4,12 +4,14 @@ export declare class StyleMap {
     style: StyleInfo;
     private _directive;
     private schedule;
+    private element;
     constructor(styleInfo: any, options?: {
         schedule: boolean;
     });
     directive(): any;
     setStyle(styleInfo: any): void;
     toString(): string;
-    updateStyle(elementStyle: any, currentElementStyles: any, style: any, element: any): void;
+    _getInternalStyle(): any;
+    updateStyle(elementStyle: any, currentElementStyles: any, style: any): void;
     execute(part: AttributePart): void;
 }

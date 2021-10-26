@@ -187,7 +187,13 @@ class StyleMap {
             return style + `${prop}:${value};`;
         }, '');
     }
-    updateStyle(elementStyle, currentElementStyles, style, element) {
+    _getInternalStyle() {
+        if (this.element) {
+            return elements.get(this.element);
+        }
+        return null;
+    }
+    updateStyle(elementStyle, currentElementStyles, style) {
         const previous = style.previousStyle;
         for (const name of currentElementStyles) {
             if (name && this.style[name] === undefined) {
@@ -245,6 +251,7 @@ class StyleMap {
     }
     execute(part) {
         const element = part.element;
+        this.element = element;
         let style;
         if (!elements.has(element)) {
             style = {
@@ -275,11 +282,11 @@ class StyleMap {
         }
         if (this.schedule) {
             requestAnimationFrame(() => {
-                this.updateStyle(elementStyle, currentElementStyles, style, element);
+                this.updateStyle(elementStyle, currentElementStyles, style);
             });
         }
         else {
-            this.updateStyle(elementStyle, currentElementStyles, style, element);
+            this.updateStyle(elementStyle, currentElementStyles, style);
         }
         elements.set(element, style);
     }
