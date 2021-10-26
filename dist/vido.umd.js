@@ -231,6 +231,7 @@
                     elementStyle.removeProperty(name);
                     if (elementStyle[name])
                         delete elementStyle[name];
+                    style.elementStyles = style.elementStyles.filter((cur) => cur !== name);
                 }
                 for (const name of style.toUpdate) {
                     const value = this.style[name];
@@ -242,6 +243,8 @@
                     else {
                         elementStyle.setProperty(name, value);
                     }
+                    if (!style.elementStyles.includes(name))
+                        style.elementStyles.push(name);
                 }
                 style.previousStyle = Object.assign({}, this.style);
             }
@@ -254,6 +257,8 @@
                     toUpdate: [],
                     toRemove: [],
                     previousStyle: {},
+                    elementStyles: [],
+                    styleTaken: false,
                 };
                 elements.set(element, style);
             }
@@ -263,10 +268,17 @@
             style.toRemove.length = 0;
             style.toUpdate.length = 0;
             const elementStyle = element.style;
-            const currentElementStyles = elementStyle.cssText
-                .split(';')
-                .map((item) => item.substr(0, item.indexOf(':')).trim())
-                .filter((item) => !!item);
+            let currentElementStyles;
+            if (!style.styleTaken) {
+                style.elementStyles = currentElementStyles = [];
+                for (let i = style.length; i--;) {
+                    currentElementStyles.push(elementStyle[i]);
+                }
+                style.styleTaken = true;
+            }
+            else {
+                currentElementStyles = style.elementStyles;
+            }
             if (this.schedule) {
                 requestAnimationFrame(() => {
                     this.updateStyle(elementStyle, currentElementStyles, style, element);
