@@ -1080,15 +1080,13 @@ function Vido(state, api) {
                     leave = true;
                     leaveStartingAt = currentLen - diff;
                 }
-                while (diff) {
-                    const index = currentLen - diff;
-                    if (!leaveTail) {
+                else {
+                    while (diff) {
+                        const index = currentLen - diff;
                         modified.push(currentComponents[index]);
                         currentComponents[index].destroy();
+                        diff--;
                     }
-                    diff--;
-                }
-                if (!leaveTail) {
                     currentComponents.length = dataLen;
                 }
             }
