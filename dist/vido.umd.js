@@ -193,15 +193,17 @@
                 return style + `${prop}:${value};`;
             }, '');
         }
-        updateStyle(elementStyle, currentElementStyles, style) {
+        updateStyle(elementStyle, currentElementStyles, style, element) {
             const previous = style.previousStyle;
             for (const name of currentElementStyles) {
-                if (this.style[name] === undefined) {
+                if (name && this.style[name] === undefined) {
                     if (!style.toRemove.includes(name))
                         style.toRemove.push(name);
                 }
             }
             for (const name in previous) {
+                if (!name)
+                    continue;
                 if (!(name in this.style))
                     continue;
                 // @ts-ignore
@@ -211,9 +213,13 @@
                 }
             }
             for (const name in this.style) {
+                if (!name)
+                    continue;
                 if (!(name in this.style))
                     continue;
                 const value = this.style[name];
+                if (!value)
+                    continue;
                 const prev = previous[name];
                 if (prev !== undefined && prev === value && currentElementStyles.includes(name)) {
                     continue;
@@ -228,6 +234,8 @@
                 }
                 for (const name of style.toUpdate) {
                     const value = this.style[name];
+                    if (!value)
+                        continue;
                     if (!name.includes('-')) {
                         elementStyle[name] = value;
                     }
@@ -261,11 +269,11 @@
                 .filter((item) => !!item);
             if (this.schedule) {
                 requestAnimationFrame(() => {
-                    this.updateStyle(elementStyle, currentElementStyles, style);
+                    this.updateStyle(elementStyle, currentElementStyles, style, element);
                 });
             }
             else {
-                this.updateStyle(elementStyle, currentElementStyles, style);
+                this.updateStyle(elementStyle, currentElementStyles, style, element);
             }
             elements.set(element, style);
         }

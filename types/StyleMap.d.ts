@@ -10,6 +10,6 @@ export declare class StyleMap {
     directive(): any;
     setStyle(styleInfo: any): void;
     toString(): string;
-    updateStyle(elementStyle: any, currentElementStyles: any, style: any): void;
+    updateStyle(elementStyle: any, currentElementStyles: any, style: any, element: any): void;
     execute(part: AttributePart): void;
 }
