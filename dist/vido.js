@@ -996,6 +996,7 @@ function Vido(state, api) {
             this.lastProps = {};
             this.html = p$1;
             this.svg = y;
+            this.lithtml = lithtml;
             this.directive = e$4;
             this.asyncAppend = c$2;
             this.asyncReplace = h$1;

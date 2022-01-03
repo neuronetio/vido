@@ -71,6 +71,7 @@ interface vido<State, Api> {
   state: State;
   api: Api;
   html: typeof html;
+  lithtml: typeof lithtml;
   svg: typeof svg;
   onDestroy: (callback: Callback) => void;
   onChange: (callback: OnChangeCallback) => void;
@@ -153,6 +154,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
     lastProps = {};
     html = html;
     svg = svg;
+    lithtml = lithtml;
     directive = directive;
     asyncAppend = asyncAppend;
     asyncReplace = asyncReplace;

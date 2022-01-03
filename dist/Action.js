@@ -5,3 +5,4 @@ class Action {
 }
 Action.prototype.isAction = true;
 export default Action;
+export { Action };

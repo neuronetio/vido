@@ -52,6 +52,7 @@ interface vido<State, Api> {
     state: State;
     api: Api;
     html: typeof html;
+    lithtml: typeof lithtml;
     svg: typeof svg;
     onDestroy: (callback: Callback) => void;
     onChange: (callback: OnChangeCallback) => void;
