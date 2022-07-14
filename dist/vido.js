@@ -785,7 +785,9 @@ function isObject(item) {
     }
     return typeof item === 'object' && item !== null;
 }
-function getEmpty(value) {
+function getEmpty(value, targetValue) {
+    if (targetValue)
+        return targetValue;
     if (Array.isArray(value))
         return new Array(value.length);
     if (isObject(value))
@@ -805,16 +807,21 @@ function mergeDeep(target, ...sources) {
         target = source.clone();
     }
     else if (isObject(source)) {
+        if (!target) {
+            target = {};
+        }
         for (const key in source) {
             const value = source[key];
-            target[key] = mergeDeep(getEmpty(value), value);
+            target[key] = mergeDeep(getEmpty(value, target[key]), value);
         }
     }
     else if (Array.isArray(source)) {
-        target = getEmpty(source);
+        if (!target) {
+            target = new Array(source.length);
+        }
         let index = 0;
         for (const value of source) {
-            target[index] = mergeDeep(getEmpty(value), value);
+            target[index] = mergeDeep(getEmpty(value, target[index]), value);
             index++;
         }
         // array has properties too
@@ -824,7 +831,7 @@ function mergeDeep(target, ...sources) {
             for (let i = index; i < arrayKeysLen; i++) {
                 const propName = arrayKeys[i];
                 const value = source[propName];
-                target[propName] = mergeDeep(getEmpty(value), value);
+                target[propName] = mergeDeep(getEmpty(value, target[propName]), value);
             }
         }
     }
