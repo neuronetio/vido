@@ -9,10 +9,20 @@ import { repeat } from 'lit-html/directives/repeat.js';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { until } from 'lit-html/directives/until.js';
 import { live } from 'lit-html/directives/live.js';
-import detach from './Detach';
 import { styleMap } from 'lit-html/directives/style-map.js';
-import { StyleMap } from './StyleMap';
 import { classMap } from 'lit-html/directives/class-map.js';
+import { when } from 'lit-html/directives/when.js';
+import { choose } from 'lit-html/directives/choose.js';
+import { map } from 'lit-html/directives/map.js';
+import { join } from 'lit-html/directives/join.js';
+import { range } from 'lit-html/directives/range.js';
+import { keyed } from 'lit-html/directives/keyed.js';
+import { templateContent } from 'lit-html/directives/template-content.js';
+import { unsafeSVG } from 'lit-html/directives/unsafe-svg.js';
+import { ref } from 'lit-html/directives/ref.js';
+
+import { StyleMap } from './StyleMap';
+import detach from './Detach';
 import PointerAction from './PointerAction';
 import getPublicComponentMethods from './PublicComponentMethods';
 import getActionsCollector from './ActionsCollector';
@@ -168,6 +178,15 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
     repeat = repeat;
     unsafeHTML = unsafeHTML;
     until = until;
+    when = when;
+    choose = choose;
+    map = map;
+    join = join;
+    range = range;
+    keyed = keyed;
+    templateContent = templateContent;
+    unsafeSVG = unsafeSVG;
+    ref = ref;
     schedule = schedule;
     getElement = directive(GetElementDirective);
     actionsByInstance = (/* componentActions, props */) => {};
@@ -435,6 +454,15 @@ Vido.prototype.repeat = repeat;
 Vido.prototype.unsafeHTML = unsafeHTML;
 Vido.prototype.until = until;
 Vido.prototype.Slots = Slots;
+Vido.prototype.when = when;
+Vido.prototype.choose = choose;
+Vido.prototype.map = map;
+Vido.prototype.join = join;
+Vido.prototype.range = range;
+Vido.prototype.keyed = keyed;
+Vido.prototype.templateContent = templateContent;
+Vido.prototype.unsafeSVG = unsafeSVG;
+Vido.prototype.ref = ref;
 
 const lit = lithtml;
 
@@ -457,6 +485,15 @@ export {
   repeat,
   unsafeHTML,
   until,
+  when,
+  choose,
+  map,
+  join,
+  range,
+  keyed,
+  templateContent,
+  unsafeSVG,
+  ref,
   Slots,
   helpers,
   ClassInfo,
