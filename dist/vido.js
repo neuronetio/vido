@@ -785,6 +785,13 @@ function isObject(item) {
     }
     return typeof item === 'object' && item !== null;
 }
+function getEmpty(value) {
+    if (Array.isArray(value))
+        return new Array(value.length);
+    if (isObject(value))
+        return {};
+    return value;
+}
 /**
  * Merge deep - helper function which will merge objects recursively - creating brand new one - like clone
  *
@@ -794,41 +801,35 @@ function isObject(item) {
  */
 function mergeDeep(target, ...sources) {
     const source = sources.shift();
-    if (isObject(target) && isObject(source)) {
+    if (source && typeof source.clone === 'function') {
+        target = source.clone();
+    }
+    else if (isObject(source)) {
         for (const key in source) {
-            if (isObject(source[key])) {
-                if (typeof source[key].clone === 'function') {
-                    target[key] = source[key].clone();
-                }
-                else {
-                    if (typeof target[key] === 'undefined') {
-                        target[key] = {};
-                    }
-                    target[key] = mergeDeep(target[key], source[key]);
-                }
-            }
-            else if (Array.isArray(source[key])) {
-                target[key] = new Array(source[key].length);
-                let index = 0;
-                for (let item of source[key]) {
-                    if (isObject(item)) {
-                        if (typeof item.clone === 'function') {
-                            target[key][index] = item.clone();
-                        }
-                        else {
-                            target[key][index] = mergeDeep({}, item);
-                        }
-                    }
-                    else {
-                        target[key][index] = item;
-                    }
-                    index++;
-                }
-            }
-            else {
-                target[key] = source[key];
+            const value = source[key];
+            target[key] = mergeDeep(getEmpty(value), value);
+        }
+    }
+    else if (Array.isArray(source)) {
+        target = getEmpty(source);
+        let index = 0;
+        for (const value of source) {
+            target[index] = mergeDeep(getEmpty(value), value);
+            index++;
+        }
+        // array has properties too
+        const arrayKeys = Object.keys(source);
+        if (arrayKeys.length > index) {
+            const arrayKeysLen = arrayKeys.length;
+            for (let i = index; i < arrayKeysLen; i++) {
+                const propName = arrayKeys[i];
+                const value = source[propName];
+                target[propName] = mergeDeep(getEmpty(value), value);
             }
         }
+    }
+    else {
+        target = source;
     }
     if (!sources.length) {
         return target;
