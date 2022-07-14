@@ -1,5 +1,6 @@
 {
-  "exclude": ["**/*.js", "dist/**", "types/**", "node_modules/**"],
+  "include": ["src/*.*"],
+  "exclude": ["**/*.js", "dist/**", "types/**", "node_modules/**", "*.mjs"],
   "compilerOptions": {
     "moduleResolution": "node",
     "baseUrl": ".",
