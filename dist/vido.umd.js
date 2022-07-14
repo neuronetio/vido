@@ -824,7 +824,8 @@
                 index++;
             }
             // array has properties too
-            const arrayKeys = Object.keys(source);
+            index++; // because length is also own property name - wee don't want to set this value
+            const arrayKeys = Object.getOwnPropertyNames(source);
             if (arrayKeys.length > index) {
                 const arrayKeysLen = arrayKeys.length;
                 for (let i = index; i < arrayKeysLen; i++) {
