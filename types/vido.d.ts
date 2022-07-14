@@ -16,7 +16,6 @@ import { choose } from 'lit-html/directives/choose.js';
 import { map } from 'lit-html/directives/map.js';
 import { join } from 'lit-html/directives/join.js';
 import { range } from 'lit-html/directives/range.js';
-import { keyed, Keyed } from 'lit-html/directives/keyed.js';
 import { templateContent, TemplateContentDirective } from 'lit-html/directives/template-content.js';
 import { unsafeSVG, UnsafeSVGDirective } from 'lit-html/directives/unsafe-svg.js';
 import { ref, RefDirective, Ref, createRef } from 'lit-html/directives/ref.js';
@@ -30,7 +29,7 @@ import helpers from './helpers';
 import * as lithtml from 'lit-html';
 export * from 'lit-html/directive.js';
 export * from 'lit-html';
-export { AsyncAppendDirective, AsyncReplaceDirective, CacheDirective, GuardDirective, RepeatDirective, UnsafeHTMLDirective, UntilDirective, LiveDirective, StyleMapDirective, ClassMapDirective, Keyed, TemplateContentDirective, UnsafeSVGDirective, RefDirective, Ref, createRef, };
+export { AsyncAppendDirective, AsyncReplaceDirective, CacheDirective, GuardDirective, RepeatDirective, UnsafeHTMLDirective, UntilDirective, LiveDirective, StyleMapDirective, ClassMapDirective, TemplateContentDirective, UnsafeSVGDirective, RefDirective, Ref, createRef, };
 declare type htmlResult = lithtml.TemplateResult | lithtml.TemplateResult[] | lithtml.SVGTemplateResult | lithtml.SVGTemplateResult[] | undefined | null;
 interface ClassInfo {
     [name: string]: string | boolean | number;
@@ -91,7 +90,6 @@ interface vido<State, Api> {
     map: typeof map;
     join: typeof join;
     range: typeof range;
-    keyed: typeof keyed;
     templateContent: typeof templateContent;
     unsafeSVG: typeof unsafeSVG;
     ref: typeof ref;
@@ -128,7 +126,6 @@ declare namespace Vido {
         map: typeof map;
         join: typeof join;
         range: typeof range;
-        keyed: (k: unknown, v: unknown) => import("lit-html/directive.js").DirectiveResult<typeof Keyed>;
         templateContent: (template: HTMLTemplateElement) => import("lit-html/directive.js").DirectiveResult<typeof TemplateContentDirective>;
         unsafeSVG: (value: string | typeof import("lit-html").noChange | typeof import("lit-html").nothing) => import("lit-html/directive.js").DirectiveResult<typeof UnsafeSVGDirective>;
         ref: (_ref: import("lit-html/directives/ref.js").RefOrCallback) => import("lit-html/directive.js").DirectiveResult<typeof RefDirective>;
@@ -136,4 +133,4 @@ declare namespace Vido {
 }
 export default Vido;
 declare const lit: typeof lithtml;
-export { vido, lithtml, lit, Action, schedule, detach, styleMap, StyleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, when, choose, map, join, range, keyed, templateContent, unsafeSVG, ref, Slots, helpers, ClassInfo, StyleInfo, htmlResult, UpdateTemplate, Component, ComponentInstance, CreateAppConfig, OnChangeCallback, Callback, GetPropsFn, AnyVido, };
+export { vido, lithtml, lit, Action, schedule, detach, styleMap, StyleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, when, choose, map, join, range, templateContent, unsafeSVG, ref, Slots, helpers, ClassInfo, StyleInfo, htmlResult, UpdateTemplate, Component, ComponentInstance, CreateAppConfig, OnChangeCallback, Callback, GetPropsFn, AnyVido, };

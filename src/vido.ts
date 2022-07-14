@@ -17,7 +17,7 @@ import { choose } from 'lit-html/directives/choose.js';
 import { map } from 'lit-html/directives/map.js';
 import { join } from 'lit-html/directives/join.js';
 import { range } from 'lit-html/directives/range.js';
-import { keyed, Keyed } from 'lit-html/directives/keyed.js';
+//import { keyed, Keyed } from 'lit-html/directives/keyed.js';
 import { templateContent, TemplateContentDirective } from 'lit-html/directives/template-content.js';
 import { unsafeSVG, UnsafeSVGDirective } from 'lit-html/directives/unsafe-svg.js';
 import { ref, RefDirective, Ref, createRef } from 'lit-html/directives/ref.js';
@@ -48,7 +48,7 @@ export {
   LiveDirective,
   StyleMapDirective,
   ClassMapDirective,
-  Keyed,
+  //Keyed,
   TemplateContentDirective,
   UnsafeSVGDirective,
   RefDirective,
@@ -137,7 +137,7 @@ interface vido<State, Api> {
   map: typeof map;
   join: typeof join;
   range: typeof range;
-  keyed: typeof keyed;
+  //keyed: typeof keyed;
   templateContent: typeof templateContent;
   unsafeSVG: typeof unsafeSVG;
   ref: typeof ref;
@@ -212,7 +212,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
     map = map;
     join = join;
     range = range;
-    keyed = keyed;
+    //keyed = keyed;
     templateContent = templateContent;
     unsafeSVG = unsafeSVG;
     ref = ref;
@@ -490,7 +490,7 @@ Vido.directives = {
   map,
   join,
   range,
-  keyed,
+  //keyed,
   templateContent,
   unsafeSVG,
   ref,
@@ -522,7 +522,7 @@ export {
   map,
   join,
   range,
-  keyed,
+  //keyed,
   templateContent,
   unsafeSVG,
   ref,
