@@ -112,6 +112,15 @@ interface vido<State, Api> {
   until: typeof until;
   schedule: typeof schedule;
   detach: typeof detach;
+  when: typeof when;
+  choose: typeof choose;
+  map: typeof map;
+  join: typeof join;
+  range: typeof range;
+  keyed: typeof keyed;
+  templateContent: typeof templateContent;
+  unsafeSVG: typeof unsafeSVG;
+  ref: typeof ref;
   PointerAction: typeof PointerAction;
   Action: typeof Action;
   Slots: typeof Slots;
@@ -435,34 +444,37 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
   return new VidoInstance();
 }
 
-Vido.prototype.lithtml = lithtml;
-Vido.prototype.Action = Action;
-Vido.prototype.Directive = Directive;
-Vido.prototype.schedule = schedule;
-Vido.prototype.detach = detach;
-Vido.prototype.styleMap = styleMap;
-Vido.prototype.classMap = classMap;
-Vido.prototype.StyleMap = StyleMap;
-Vido.prototype.PointerAction = PointerAction;
-Vido.prototype.asyncAppend = asyncAppend;
-Vido.prototype.asyncReplace = asyncReplace;
-Vido.prototype.cache = cache;
-Vido.prototype.guard = guard;
-Vido.prototype.live = live;
-Vido.prototype.ifDefined = ifDefined;
-Vido.prototype.repeat = repeat;
-Vido.prototype.unsafeHTML = unsafeHTML;
-Vido.prototype.until = until;
-Vido.prototype.Slots = Slots;
-Vido.prototype.when = when;
-Vido.prototype.choose = choose;
-Vido.prototype.map = map;
-Vido.prototype.join = join;
-Vido.prototype.range = range;
-Vido.prototype.keyed = keyed;
-Vido.prototype.templateContent = templateContent;
-Vido.prototype.unsafeSVG = unsafeSVG;
-Vido.prototype.ref = ref;
+Vido.lithtml = lithtml;
+Vido.Action = Action;
+Vido.Directive = Directive;
+Vido.StyleMap = StyleMap;
+Vido.PointerAction = PointerAction;
+Vido.Slots = Slots;
+
+Vido.directives = {
+  schedule,
+  detach,
+  styleMap,
+  classMap,
+  asyncAppend,
+  asyncReplace,
+  cache,
+  guard,
+  live,
+  ifDefined,
+  repeat,
+  unsafeHTML,
+  until,
+  when,
+  choose,
+  map,
+  join,
+  range,
+  keyed,
+  templateContent,
+  unsafeSVG,
+  ref,
+};
 
 const lit = lithtml;
 

@@ -85,12 +85,54 @@ interface vido<State, Api> {
     until: typeof until;
     schedule: typeof schedule;
     detach: typeof detach;
+    when: typeof when;
+    choose: typeof choose;
+    map: typeof map;
+    join: typeof join;
+    range: typeof range;
+    keyed: typeof keyed;
+    templateContent: typeof templateContent;
+    unsafeSVG: typeof unsafeSVG;
+    ref: typeof ref;
     PointerAction: typeof PointerAction;
     Action: typeof Action;
     Slots: typeof Slots;
     Actions?: any;
 }
 declare type AnyVido = vido<any, any>;
-export default function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
+declare function Vido<State, Api>(state: State, api: Api): vido<State, Api>;
+declare namespace Vido {
+    var lithtml: typeof import("lit-html");
+    var Action: typeof import("./Action").default;
+    var Directive: typeof import("lit-html/directive.js").Directive;
+    var StyleMap: typeof import("./StyleMap").StyleMap;
+    var PointerAction: typeof import("./PointerAction").default;
+    var Slots: typeof import("./Slots").Slots;
+    var directives: {
+        schedule: typeof schedule;
+        detach: (shouldDetach: boolean) => import("lit-html/directive.js").DirectiveResult<typeof import("./Detach").Detach>;
+        styleMap: (styleInfo: Readonly<import("lit-html/directives/style-map.js").StyleInfo>) => import("lit-html/directive.js").DirectiveResult<typeof import("lit-html/directives/style-map.js").StyleMapDirective>;
+        classMap: (classInfo: import("lit-html/directives/class-map.js").ClassInfo) => import("lit-html/directive.js").DirectiveResult<typeof import("lit-html/directives/class-map.js").ClassMapDirective>;
+        asyncAppend: (value: AsyncIterable<unknown>, _mapper?: (v: unknown, index?: number) => unknown) => import("lit-html/directive.js").DirectiveResult<typeof import("lit-html/directives/async-append.js").AsyncAppendDirective>;
+        asyncReplace: (value: AsyncIterable<unknown>, _mapper?: (v: unknown, index?: number) => unknown) => import("lit-html/directive.js").DirectiveResult<typeof import("lit-html/directives/async-replace.js").AsyncReplaceDirective>;
+        cache: (v: unknown) => import("lit-html/directive.js").DirectiveResult<typeof import("lit-html/directives/cache.js").CacheDirective>;
+        guard: (_value: unknown, f: () => unknown) => import("lit-html/directive.js").DirectiveResult<typeof import("lit-html/directives/guard.js").GuardDirective>;
+        live: (value: unknown) => import("lit-html/directive.js").DirectiveResult<typeof import("lit-html/directives/live.js").LiveDirective>;
+        ifDefined: <T>(value: T) => typeof import("lit-html").nothing | NonNullable<T>;
+        repeat: import("lit-html/directives/repeat.js").RepeatDirectiveFn;
+        unsafeHTML: (value: string | typeof import("lit-html").noChange | typeof import("lit-html").nothing) => import("lit-html/directive.js").DirectiveResult<typeof import("lit-html/directives/unsafe-html.js").UnsafeHTMLDirective>;
+        until: (...values: unknown[]) => import("lit-html/directive.js").DirectiveResult<typeof import("lit-html/directives/until.js").UntilDirective>;
+        when: typeof when;
+        choose: <T_1, V>(value: T_1, cases: [T_1, () => V][], defaultCase?: () => V) => V;
+        map: typeof map;
+        join: typeof join;
+        range: typeof range;
+        keyed: (k: unknown, v: unknown) => import("lit-html/directive.js").DirectiveResult<typeof import("lit-html/directives/keyed.js").Keyed>;
+        templateContent: (template: HTMLTemplateElement) => import("lit-html/directive.js").DirectiveResult<typeof import("lit-html/directives/template-content.js").TemplateContentDirective>;
+        unsafeSVG: (value: string | typeof import("lit-html").noChange | typeof import("lit-html").nothing) => import("lit-html/directive.js").DirectiveResult<typeof import("lit-html/directives/unsafe-svg.js").UnsafeSVGDirective>;
+        ref: (_ref: import("lit-html/directives/ref.js").RefOrCallback) => import("lit-html/directive.js").DirectiveResult<typeof import("lit-html/directives/ref.js").RefDirective>;
+    };
+}
+export default Vido;
 declare const lit: typeof lithtml;
 export { vido, lithtml, lit, Action, schedule, detach, styleMap, StyleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, when, choose, map, join, range, keyed, templateContent, unsafeSVG, ref, Slots, helpers, ClassInfo, StyleInfo, htmlResult, UpdateTemplate, Component, ComponentInstance, CreateAppConfig, OnChangeCallback, Callback, GetPropsFn, AnyVido, };

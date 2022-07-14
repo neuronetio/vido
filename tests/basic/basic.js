@@ -141,6 +141,7 @@ function Main(vido, props) {
     `;
 }
 
+globalThis.Vido = Vido;
 globalThis.vido = Vido({}, {});
 globalThis.app = vido.createApp({
   component: Main,

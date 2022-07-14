@@ -1309,34 +1309,36 @@
         }
         return new VidoInstance();
     }
-    Vido.prototype.lithtml = lithtml;
-    Vido.prototype.Action = Action;
-    Vido.prototype.Directive = i$5;
-    Vido.prototype.schedule = schedule;
-    Vido.prototype.detach = detach;
-    Vido.prototype.styleMap = i$1;
-    Vido.prototype.classMap = o$6;
-    Vido.prototype.StyleMap = StyleMap;
-    Vido.prototype.PointerAction = PointerAction;
-    Vido.prototype.asyncAppend = c$2;
-    Vido.prototype.asyncReplace = h$2;
-    Vido.prototype.cache = d;
-    Vido.prototype.guard = i$2;
-    Vido.prototype.live = l;
-    Vido.prototype.ifDefined = l$1;
-    Vido.prototype.repeat = c$1;
-    Vido.prototype.unsafeHTML = o$7;
-    Vido.prototype.until = c;
-    Vido.prototype.Slots = Slots;
-    Vido.prototype.when = n$1;
-    Vido.prototype.choose = o$5;
-    Vido.prototype.map = o$4;
-    Vido.prototype.join = o$3;
-    Vido.prototype.range = o$2;
-    Vido.prototype.keyed = i;
-    Vido.prototype.templateContent = o$1;
-    Vido.prototype.unsafeSVG = o;
-    Vido.prototype.ref = n;
+    Vido.lithtml = lithtml;
+    Vido.Action = Action;
+    Vido.Directive = i$5;
+    Vido.StyleMap = StyleMap;
+    Vido.PointerAction = PointerAction;
+    Vido.Slots = Slots;
+    Vido.directives = {
+        schedule,
+        detach,
+        styleMap: i$1,
+        classMap: o$6,
+        asyncAppend: c$2,
+        asyncReplace: h$2,
+        cache: d,
+        guard: i$2,
+        live: l,
+        ifDefined: l$1,
+        repeat: c$1,
+        unsafeHTML: o$7,
+        until: c,
+        when: n$1,
+        choose: o$5,
+        map: o$4,
+        join: o$3,
+        range: o$2,
+        keyed: i,
+        templateContent: o$1,
+        unsafeSVG: o,
+        ref: n,
+    };
 
     return Vido;
 
