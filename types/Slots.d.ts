@@ -19,3 +19,4 @@ export declare class Slots {
     getProps(): unknown;
     isDestroyed(): boolean;
 }
+//# sourceMappingURL=Slots.d.ts.map

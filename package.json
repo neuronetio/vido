@@ -6,7 +6,7 @@
   "type": "module",
   "types": "types/vido.d.ts",
   "scripts": {
-    "build": "tsc -p ./tsconfig.json && rollup -c",
+    "build": "tsc -p ./tsconfig.types.json && tsc -p ./tsconfig.json && rollup -c",
     "types": "tsc -p ./tsconfig.types.json",
     "autobuild": "rollup -c -w",
     "test": "echo 'test'"
