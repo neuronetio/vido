@@ -157,3 +157,14 @@ function destroyItemInstance() {
   i.destroy();
   globalThis.app.update();
 }
+
+globalThis.getComponents = function getComponents() {
+  const c = [];
+  const components = window.vido._components;
+  for (const [name, component] of components) {
+    c.push(component);
+  }
+  return c;
+};
+
+console.log('basic page loaded');

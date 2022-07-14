@@ -5,18 +5,8 @@ const url = 'file:///' + path.resolve('./tests');
 describe('Basic', () => {
   beforeAll(async () => {
     await page.goto(`${url}/basic/basic.html`);
-    await page.evaluate((_) => {
-      window.getComponents = function getComponents() {
-        const c = [];
-        const components = window.vido._components;
-        for (const [name, component] of components) {
-          c.push(component);
-        }
-        return c;
-      };
-    });
+    console.log(`${url}/basic/basic.html`);
   });
-
   it('should display everything', async () => {
     await expect(page).toMatch('Test text');
     await expect(page).toMatchElement('#slot-2');
@@ -27,24 +17,25 @@ describe('Basic', () => {
   });
 
   it('should have proper number of components', async () => {
-    const c1 = await page.evaluate((_) => {
-      return getComponents();
+    await page.goto(`${url}/basic/basic.html`);
+    const c1 = await page.evaluate(() => {
+      return globalThis.getComponents();
     });
-    expect(c1.length).toEqual(6 + 5 * 7);
+    await expect(c1.length).toEqual(6 + 5 * 7);
 
-    const c2 = await page.evaluate((_) => {
+    const c2 = await page.evaluate(() => {
       window.destroyItemInstance();
       return getComponents();
     });
-    expect(c2.length).toEqual(6 + 4 * 7);
+    await expect(c2.length).toEqual(6 + 4 * 7);
     await expect(page).not.toMatchElement('.item-1');
 
     await page.click('#remove-one');
     await expect(page).not.toMatchElement('.item-5');
-    const c3 = await page.evaluate((_) => {
+    const c3 = await page.evaluate(() => {
       return getComponents();
     });
-    expect(c3.length).toEqual(5 + 3 * 7);
+    await expect(c3.length).toEqual(5 + 3 * 7);
   });
 
   it('should change background color', async () => {

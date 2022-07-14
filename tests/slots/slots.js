@@ -68,3 +68,12 @@ function changeProps(count = 2) {
   }
   app.change({ components });
 }
+
+globalThis.getComponents = function getComponents() {
+  const c = [];
+  const components = window.vido._components;
+  for (const [name, component] of components) {
+    c.push(component);
+  }
+  return c;
+};

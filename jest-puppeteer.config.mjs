@@ -2,7 +2,7 @@ export default {
   launch: {
     dumpio: true,
     headless: true,
+    product: 'chrome',
   },
-  browser: 'chromium',
   browserContext: 'default',
 };

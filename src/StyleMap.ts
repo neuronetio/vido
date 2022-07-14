@@ -69,7 +69,7 @@ export class StyleMap {
   updateStyle(elementStyle, currentElementStyles, style) {
     const previous = style.previousStyle;
     for (const name of currentElementStyles) {
-      if (name && this.style[name] === undefined) {
+      if (name && !this.style[name]) {
         if (!style.toRemove.includes(name)) style.toRemove.push(name);
       }
     }
@@ -77,7 +77,7 @@ export class StyleMap {
       if (!name) continue;
       if (!(name in this.style)) continue;
       // @ts-ignore
-      if (this.style[name] === undefined && currentElementStyles.includes(name)) {
+      if (!this.style[name] && currentElementStyles.includes(name)) {
         if (!style.toRemove.includes(name)) style.toRemove.push(name);
       }
     }
