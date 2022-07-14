@@ -800,13 +800,6 @@
             return {};
         return value;
     }
-    /**
-     * Merge deep - helper function which will merge objects recursively - creating brand new one - like clone
-     *
-     * @param {object} target
-     * @params {[object]} sources
-     * @returns {object}
-     */
     function mergeDeep(target, ...sources) {
         const source = sources.shift();
         if (source && typeof source.clone === 'function') {

@@ -43,13 +43,6 @@ function getEmpty(value: any, targetValue: any) {
   return value;
 }
 
-/**
- * Merge deep - helper function which will merge objects recursively - creating brand new one - like clone
- *
- * @param {object} target
- * @params {[object]} sources
- * @returns {object}
- */
 export function mergeDeep<T>(target: any, ...sources: any[]): T {
   const source = sources.shift();
   if (source && typeof source.clone === 'function') {

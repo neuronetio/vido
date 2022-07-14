@@ -8,13 +8,6 @@ export declare function schedule(fn: (argument: unknown) => void | any): (argume
 export interface UnknownObject {
     [key: string]: unknown;
 }
-/**
- * Merge deep - helper function which will merge objects recursively - creating brand new one - like clone
- *
- * @param {object} target
- * @params {[object]} sources
- * @returns {object}
- */
 export declare function mergeDeep<T>(target: any, ...sources: any[]): T;
 /**
  * Clone helper function
