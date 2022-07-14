@@ -1,25 +1,26 @@
 import { render, html, svg } from 'lit-html';
 import { directive, Directive } from 'lit-html/directive.js';
-import { asyncAppend } from 'lit-html/directives/async-append.js';
-import { asyncReplace } from 'lit-html/directives/async-replace.js';
-import { cache } from 'lit-html/directives/cache.js';
-import { guard } from 'lit-html/directives/guard.js';
+// Directives
+import { asyncAppend, AsyncAppendDirective } from 'lit-html/directives/async-append.js';
+import { asyncReplace, AsyncReplaceDirective } from 'lit-html/directives/async-replace.js';
+import { cache, CacheDirective } from 'lit-html/directives/cache.js';
+import { guard, GuardDirective } from 'lit-html/directives/guard.js';
 import { ifDefined } from 'lit-html/directives/if-defined.js';
-import { repeat } from 'lit-html/directives/repeat.js';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
-import { until } from 'lit-html/directives/until.js';
-import { live } from 'lit-html/directives/live.js';
-import { styleMap } from 'lit-html/directives/style-map.js';
-import { classMap } from 'lit-html/directives/class-map.js';
+import { repeat, RepeatDirective } from 'lit-html/directives/repeat.js';
+import { unsafeHTML, UnsafeHTMLDirective } from 'lit-html/directives/unsafe-html.js';
+import { until, UntilDirective } from 'lit-html/directives/until.js';
+import { live, LiveDirective } from 'lit-html/directives/live.js';
+import { styleMap, StyleMapDirective } from 'lit-html/directives/style-map.js';
+import { classMap, ClassMapDirective } from 'lit-html/directives/class-map.js';
 import { when } from 'lit-html/directives/when.js';
 import { choose } from 'lit-html/directives/choose.js';
 import { map } from 'lit-html/directives/map.js';
 import { join } from 'lit-html/directives/join.js';
 import { range } from 'lit-html/directives/range.js';
-import { keyed } from 'lit-html/directives/keyed.js';
-import { templateContent } from 'lit-html/directives/template-content.js';
-import { unsafeSVG } from 'lit-html/directives/unsafe-svg.js';
-import { ref } from 'lit-html/directives/ref.js';
+import { keyed, Keyed } from 'lit-html/directives/keyed.js';
+import { templateContent, TemplateContentDirective } from 'lit-html/directives/template-content.js';
+import { unsafeSVG, UnsafeSVGDirective } from 'lit-html/directives/unsafe-svg.js';
+import { ref, RefDirective, Ref, createRef } from 'lit-html/directives/ref.js';
 
 import { StyleMap } from './StyleMap';
 import detach from './Detach';
@@ -35,6 +36,25 @@ import helpers from './helpers';
 import * as lithtml from 'lit-html';
 export * from 'lit-html/directive.js';
 export * from 'lit-html';
+
+export {
+  AsyncAppendDirective,
+  AsyncReplaceDirective,
+  CacheDirective,
+  GuardDirective,
+  RepeatDirective,
+  UnsafeHTMLDirective,
+  UntilDirective,
+  LiveDirective,
+  StyleMapDirective,
+  ClassMapDirective,
+  Keyed,
+  TemplateContentDirective,
+  UnsafeSVGDirective,
+  RefDirective,
+  Ref,
+  createRef,
+};
 
 type htmlResult =
   | lithtml.TemplateResult
