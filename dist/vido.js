@@ -826,26 +826,27 @@ function schedule(fn) {
     }
     return wrapperFn;
 }
-/**
- * Is object - helper function to determine if specified variable is an object
- *
- * @param {any} item
- * @returns {boolean}
- */
+function isPrimitive(value) {
+    return (value === undefined ||
+        value === null ||
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'boolean' ||
+        typeof value === 'bigint' ||
+        typeof value === 'symbol');
+}
 function isObject(item) {
+    if (isPrimitive(item))
+        return false;
     if (item && item.constructor) {
         return item.constructor.name === 'Object';
     }
     return typeof item === 'object' && item !== null;
 }
-function getEmpty(value, targetValue) {
-    if (targetValue)
-        return targetValue;
-    if (Array.isArray(value))
-        return new Array(value.length);
-    if (isObject(value))
-        return {};
-    return value;
+function shouldMerge(item) {
+    if (isPrimitive(item))
+        return false;
+    return Array.isArray(item) || isObject(item);
 }
 function mergeDeep(target, ...sources) {
     const source = sources.shift();
@@ -853,36 +854,52 @@ function mergeDeep(target, ...sources) {
         target = source.clone();
     }
     else if (isObject(source)) {
-        if (!target) {
-            target = {};
+        if (!isObject(target)) {
+            target = Object.create(null);
         }
         for (const key in source) {
             const value = source[key];
-            target[key] = mergeDeep(getEmpty(value, target[key]), value);
+            if (shouldMerge(value)) {
+                target[key] = mergeDeep(target[key], value);
+            }
+            else {
+                target[key] = value;
+            }
         }
     }
     else if (Array.isArray(source)) {
-        if (!target || !Array.isArray(target)) {
-            target = new Array(source.length);
+        const sourceLen = source.length;
+        if (!Array.isArray(target)) {
+            target = new Array(sourceLen);
         }
         else {
-            target.length = source.length;
+            target.length = sourceLen;
         }
         let index = 0;
-        for (const value of source) {
-            target[index] = mergeDeep(getEmpty(value, target[index]), value);
-            index++;
+        for (; index < sourceLen; index++) {
+            const value = source[index];
+            if (shouldMerge(value)) {
+                target[index] = mergeDeep(target[index], value);
+            }
+            else {
+                target[index] = value;
+            }
         }
         // array has properties too
         index++; // because length is also own property name - wee don't want to set this value
         const arrayKeys = Object.getOwnPropertyNames(source);
-        if (arrayKeys.length > source.length + 1) {
+        if (arrayKeys.length > sourceLen + 1) {
             // +1 because of length Array property
             const arrayKeysLen = arrayKeys.length;
-            for (let i = index; i < arrayKeysLen; i++) {
-                const propName = arrayKeys[i];
+            for (; index < arrayKeysLen; index++) {
+                const propName = arrayKeys[index];
                 const value = source[propName];
-                target[propName] = mergeDeep(getEmpty(value, target[propName]), value);
+                if (shouldMerge(value)) {
+                    target[propName] = mergeDeep(target[propName], value);
+                }
+                else {
+                    target[propName] = value;
+                }
             }
         }
     }

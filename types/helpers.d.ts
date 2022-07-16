@@ -8,6 +8,8 @@ export declare function schedule(fn: (argument: unknown) => void | any): (argume
 export interface UnknownObject {
     [key: string]: unknown;
 }
+export declare function isPrimitive(value: any): boolean;
+export declare function isObject(item: any): boolean;
 export declare function mergeDeep<T>(target: any, ...sources: any[]): T;
 /**
  * Clone helper function
