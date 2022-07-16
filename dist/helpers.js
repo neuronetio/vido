@@ -97,7 +97,7 @@ export function mergeDeep(target, ...sources) {
         // @ts-ignore
         if (source.raw !== undefined) {
             // @ts-ignore
-            target.raw = mergeDeep(target.raw, source.raw);
+            target.raw = source.raw.slice();
         }
     }
     else {

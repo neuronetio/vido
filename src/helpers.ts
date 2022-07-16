@@ -83,7 +83,7 @@ export function mergeDeep<T>(target, ...sources): T {
     }
     // array has properties too
     // index++; // because length is also own property name - wee don't want to set this value
-    // const arrayKeys = Object.getOwnPropertyNames(source);
+    // const arrayKeys = Object.getOwnPropertyNames(source); // <- we don't need non enumerable properties because we will copy raw later
     // if (arrayKeys.length > sourceLen + 1) {
     //   // +1 because of length Array property
     //   const arrayKeysLen = arrayKeys.length;
@@ -102,7 +102,7 @@ export function mergeDeep<T>(target, ...sources): T {
     // @ts-ignore
     if (source.raw !== undefined) {
       // @ts-ignore
-      target.raw = mergeDeep(target.raw, source.raw);
+      target.raw = source.raw.slice();
     }
   } else {
     target = source;
