@@ -67,7 +67,8 @@ export function mergeDeep<T>(target: any, ...sources: any[]): T {
     // array has properties too
     index++; // because length is also own property name - wee don't want to set this value
     const arrayKeys = Object.getOwnPropertyNames(source);
-    if (arrayKeys.length > index) {
+    if (arrayKeys.length > source.length + 1) {
+      // +1 because of length Array property
       const arrayKeysLen = arrayKeys.length;
       for (let i = index; i < arrayKeysLen; i++) {
         const propName = arrayKeys[i];
