@@ -50,9 +50,10 @@ function shouldMerge(item) {
 
 export function mergeDeep<T>(target, ...sources): T {
   const source = sources.shift();
-  if (source && typeof source.clone === 'function') {
-    target = source.clone();
-  } else if (isObject(source)) {
+  // if (source && typeof source.clone === 'function') {
+  //   target = source.clone();
+  // } else
+  if (isObject(source)) {
     if (!isObject(target)) {
       target = Object.create(null);
     }
@@ -81,20 +82,27 @@ export function mergeDeep<T>(target, ...sources): T {
       }
     }
     // array has properties too
-    index++; // because length is also own property name - wee don't want to set this value
-    const arrayKeys = Object.getOwnPropertyNames(source);
-    if (arrayKeys.length > sourceLen + 1) {
-      // +1 because of length Array property
-      const arrayKeysLen = arrayKeys.length;
-      for (; index < arrayKeysLen; index++) {
-        const propName = arrayKeys[index];
-        const value = source[propName];
-        if (shouldMerge(value)) {
-          target[propName] = mergeDeep(target[propName], value);
-        } else {
-          target[propName] = value;
-        }
-      }
+    // index++; // because length is also own property name - wee don't want to set this value
+    // const arrayKeys = Object.getOwnPropertyNames(source);
+    // if (arrayKeys.length > sourceLen + 1) {
+    //   // +1 because of length Array property
+    //   const arrayKeysLen = arrayKeys.length;
+    //   for (; index < arrayKeysLen; index++) {
+    //     const propName = arrayKeys[index];
+    //     const value = source[propName];
+    //     if (shouldMerge(value)) {
+    //       target[propName] = mergeDeep(target[propName], value);
+    //     } else {
+    //       target[propName] = value;
+    //     }
+    //   }
+    // }
+
+    // lit templates array has a raw not enumerable property
+    // @ts-ignore
+    if (source.raw !== undefined) {
+      // @ts-ignore
+      target.raw = mergeDeep(target.raw, source.raw);
     }
   } else {
     target = source;
