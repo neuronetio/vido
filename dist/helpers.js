@@ -54,8 +54,11 @@ export function mergeDeep(target, ...sources) {
         }
     }
     else if (Array.isArray(source)) {
-        if (!target) {
+        if (!target || !Array.isArray(target)) {
             target = new Array(source.length);
+        }
+        else {
+            target.length = source.length;
         }
         let index = 0;
         for (const value of source) {
