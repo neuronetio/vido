@@ -13,4 +13,3 @@ export default function getInternalComponentMethods(components: Map<string, any>
         }): void;
     };
 };
-//# sourceMappingURL=InternalComponentMethods.d.ts.map

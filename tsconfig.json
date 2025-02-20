@@ -14,7 +14,7 @@
     "skipLibCheck": false,
     "skipDefaultLibCheck": false,
     "outDir": "dist",
-    "declarationDir": "types",
+    "declarationDir": "dist/types",
     "declaration": true
   }
 }

@@ -15,4 +15,3 @@ export declare class StyleMap {
     updateStyle(elementStyle: any, currentElementStyles: any, style: any): void;
     execute(part: AttributePart): void;
 }
-//# sourceMappingURL=StyleMap.d.ts.map

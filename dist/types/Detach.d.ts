@@ -11,4 +11,3 @@ export declare class Detach extends Directive {
 }
 declare const detach: (shouldDetach: boolean) => import("lit-html/directive.js").DirectiveResult<typeof Detach>;
 export default detach;
-//# sourceMappingURL=Detach.d.ts.map

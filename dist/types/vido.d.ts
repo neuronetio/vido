@@ -134,4 +134,3 @@ declare namespace Vido {
 export default Vido;
 declare const lit: typeof lithtml;
 export { vido, lithtml, lit, Action, schedule, detach, styleMap, StyleMap, classMap, PointerAction, asyncAppend, asyncReplace, cache, guard, ifDefined, repeat, unsafeHTML, until, when, choose, map, join, range, templateContent, unsafeSVG, ref, Slots, helpers, ClassInfo, StyleInfo, htmlResult, UpdateTemplate, Component, ComponentInstance, CreateAppConfig, OnChangeCallback, Callback, GetPropsFn, AnyVido, };
-//# sourceMappingURL=vido.d.ts.map
