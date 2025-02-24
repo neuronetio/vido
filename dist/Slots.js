@@ -45,6 +45,7 @@ export class Slots {
     change(changedProps, options = undefined) {
         if (this.destroyed)
             return;
+        this.props = changedProps;
         for (const slotPlacement in this.slotInstances) {
             const instances = this.slotInstances[slotPlacement];
             for (const slot of instances) {
