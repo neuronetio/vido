@@ -114,7 +114,7 @@ interface vido<State, Api> {
     getProps: GetPropsFn,
     component: Component,
     leaveTail?: boolean,
-    debug?: boolean
+    debug?: boolean,
   ) => void;
   getElement: (callback: (element: Element) => void) => void;
   directive: typeof directive;
@@ -275,7 +275,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       getProps: GetPropsFn,
       component: Component,
       leaveTail = true,
-      debug = false
+      debug = false,
     ) {
       const modified = [];
       const currentLen = currentComponents.length;
@@ -332,7 +332,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       const internalMethods = new InternalComponentMethods(
         instance,
         vidoInstance,
-        component(vidoInstance as AnyVido, props)
+        component(vidoInstance as AnyVido, props),
       );
       components.set(instance, internalMethods);
       components.get(instance).change(props);
@@ -471,7 +471,31 @@ Vido.StyleMap = StyleMap;
 Vido.PointerAction = PointerAction;
 Vido.Slots = Slots;
 
-Vido.directives = {
+export interface VidoDirectives {
+  schedule: typeof schedule;
+  detach: typeof detach;
+  styleMap: typeof styleMap;
+  classMap: typeof classMap;
+  asyncAppend: typeof asyncAppend;
+  asyncReplace: typeof asyncReplace;
+  cache: typeof cache;
+  guard: typeof guard;
+  live: typeof live;
+  ifDefined: typeof ifDefined;
+  repeat: typeof repeat;
+  unsafeHTML: typeof unsafeHTML;
+  until: typeof until;
+  when: typeof when;
+  choose: typeof choose;
+  map: typeof map;
+  join: typeof join;
+  range: typeof range;
+  templateContent: typeof templateContent;
+  unsafeSVG: typeof unsafeSVG;
+  ref: typeof ref;
+}
+
+const directives: VidoDirectives = {
   schedule,
   detach,
   styleMap,
@@ -495,6 +519,8 @@ Vido.directives = {
   unsafeSVG,
   ref,
 };
+
+Vido.directives = directives;
 
 const lit = lithtml;
 
