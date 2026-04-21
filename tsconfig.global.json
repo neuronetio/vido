@@ -11,7 +11,7 @@
     "downlevelIteration": true,
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
-    "target": "ES2015",
+    "target": "es2016",
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "declarationMap": false,
