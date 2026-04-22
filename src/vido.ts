@@ -452,7 +452,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
 
     public render(): void {
       const appComponent = components.get(app);
-      if (appComponent) {
+      if (appComponent && !appComponent.destroyed) {
         render(appComponent.update(), element);
         this.executeActions();
       } else if (element) {
