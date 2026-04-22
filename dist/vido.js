@@ -1330,7 +1330,10 @@ function Vido(state, api) {
                 this.executeActions();
             }
             else if (element) {
-                element.remove();
+                // do not remove element itself because it may be reused in the future when app will be created again, just remove its content
+                for (const child of Array.from(element.children)) {
+                    child.remove();
+                }
             }
         }
     }
