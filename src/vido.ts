@@ -457,9 +457,10 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
         this.executeActions();
       } else if (element) {
         // do not remove element itself because it may be reused in the future when app will be created again, just remove its content
-        for (const child of Array.from(element.children)) {
-          child.remove();
-        }
+        render(null, element);
+        element.innerHTML = '';
+        // @ts-ignore
+        delete element._$litPart$;
       }
     }
   }
