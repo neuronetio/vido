@@ -458,7 +458,10 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       } else if (element) {
         // do not remove element itself because it may be reused in the future when app will be created again, just remove its content
         render(null, element);
-        element.innerHTML = '';
+        render(null, element);
+        for (const child of element.children) {
+          child.remove();
+        }
         // @ts-ignore
         delete element._$litPart$;
       }
