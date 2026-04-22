@@ -1,13 +1,15 @@
 import Action from './Action';
-const defaultOptions = {
-    element: document.createTextNode(''),
-    axis: 'xy',
-    threshold: 10,
-    onDown() { },
-    onMove() { },
-    onUp() { },
-    onWheel() { },
-};
+function getDefaultOptions() {
+    return {
+        element: document.createTextNode(''),
+        axis: 'xy',
+        threshold: 10,
+        onDown() { },
+        onMove() { },
+        onUp() { },
+        onWheel() { },
+    };
+}
 const pointerEventsExists = typeof PointerEvent !== 'undefined';
 let id = 0;
 export default class PointerAction extends Action {
@@ -24,7 +26,7 @@ export default class PointerAction extends Action {
         this.onWheel = this.onWheel.bind(this);
         this.element = element;
         this.id = ++id;
-        this.options = Object.assign(Object.assign({}, defaultOptions), data.pointerOptions);
+        this.options = Object.assign(Object.assign({}, getDefaultOptions()), data.pointerOptions);
         if (pointerEventsExists) {
             element.addEventListener('pointerdown', this.onPointerDown);
             document.addEventListener('pointermove', this.onPointerMove);

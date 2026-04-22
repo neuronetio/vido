@@ -1,7 +1,7 @@
 import Action from './Action';
 export type EventToNormalize = PointerEvent | TouchEvent | WheelEvent | Event;
 export interface Options {
-    element?: HTMLElement;
+    element?: HTMLElement | Text;
     axis?: string;
     threshold?: number;
     onDown?: (data: NormalizedEvent) => void;
@@ -10,7 +10,7 @@ export interface Options {
     onWheel?: (data: NormalizedEvent) => void;
 }
 export interface InternalOptions extends Options {
-    element: HTMLElement;
+    element: HTMLElement | Text;
     axis: string;
     threshold: number;
     onDown: (data: NormalizedEvent) => void;
