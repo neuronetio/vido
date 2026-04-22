@@ -1322,15 +1322,16 @@
             }
             render() {
                 const appComponent = components.get(app);
-                if (appComponent) {
+                if (appComponent && !appComponent.destroyed) {
                     D(appComponent.update(), element);
                     this.executeActions();
                 }
                 else if (element) {
                     // do not remove element itself because it may be reused in the future when app will be created again, just remove its content
-                    for (const child of Array.from(element.children)) {
-                        child.remove();
-                    }
+                    D(null, element);
+                    element.innerHTML = '';
+                    // @ts-ignore
+                    delete element._$litPart$;
                 }
             }
         }
