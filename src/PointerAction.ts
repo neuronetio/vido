@@ -3,7 +3,7 @@ import Action from './Action';
 export type EventToNormalize = PointerEvent | TouchEvent | WheelEvent | Event;
 
 export interface Options {
-  element?: HTMLElement;
+  element?: HTMLElement | Text;
   axis?: string;
   threshold?: number;
   onDown?: (data: NormalizedEvent) => void;
@@ -13,7 +13,7 @@ export interface Options {
 }
 
 export interface InternalOptions extends Options {
-  element: HTMLElement;
+  element: HTMLElement | Text;
   axis: string;
   threshold: number;
   onDown: (data: NormalizedEvent) => void;
@@ -46,15 +46,17 @@ export interface NormalizedEvent {
   event: Event;
 }
 
-const defaultOptions = {
-  element: document.createTextNode(''),
-  axis: 'xy',
-  threshold: 10,
-  onDown() {},
-  onMove() {},
-  onUp() {},
-  onWheel() {},
-};
+function getDefaultOptions(): InternalOptions {
+  return {
+    element: document.createTextNode(''),
+    axis: 'xy',
+    threshold: 10,
+    onDown() {},
+    onMove() {},
+    onUp() {},
+    onWheel() {},
+  };
+}
 
 const pointerEventsExists = typeof PointerEvent !== 'undefined';
 let id = 0;
@@ -77,7 +79,7 @@ export default class PointerAction extends Action {
     this.onWheel = this.onWheel.bind(this);
     this.element = element;
     this.id = ++id;
-    this.options = { ...defaultOptions, ...data.pointerOptions } as InternalOptions;
+    this.options = { ...getDefaultOptions(), ...data.pointerOptions } as InternalOptions;
     if (pointerEventsExists) {
       element.addEventListener('pointerdown', this.onPointerDown);
       document.addEventListener('pointermove', this.onPointerMove);
