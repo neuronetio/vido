@@ -26,7 +26,7 @@ import { StyleMap } from './StyleMap';
 import detach from './Detach';
 import PointerAction from './PointerAction';
 import getPublicComponentMethods from './PublicComponentMethods';
-import getActionsCollector from './ActionsCollector';
+import getActionsCollector, { type IAction } from './ActionsCollector';
 import getInternalComponentMethods, { type IInternalComponentMethods } from './InternalComponentMethods';
 import { schedule, clone } from './helpers';
 import Action from './Action';
@@ -152,7 +152,7 @@ type AnyVido = vido<any, any>;
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api> {
   let componentId = 0;
   const components: Map<string, IInternalComponentMethods> = new Map();
-  let actionsByInstance = new Map();
+  let actionsByInstance: Map<string, IAction[]> = new Map();
   let app: string, element: HTMLElement;
   let shouldUpdateCount = 0;
   const afterUpdateCallbacks: (() => void)[] = [];
@@ -168,7 +168,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       this.instance = instance;
     }
 
-    public create(actions: unknown[], props: object) {
+    public create(actions: IAction[], props: object) {
       const actionsInstanceDirective = directive(ActionsCollector);
       const actionsInstance = () => {
         return actionsInstanceDirective(this.instance, actions, props);
@@ -186,6 +186,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
     Actions: InstanceActionsCollector;
     destroyable: Callback[] = [];
     destroyed = false;
+    destroying = false;
     onChangeFunctions: OnChangeCallback[] = [];
     debug = false;
     state = state as State;
@@ -335,7 +336,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
         component(vidoInstance as AnyVido, props),
       );
       components.set(instance, internalMethods);
-      components.get(instance).change(props);
+      internalMethods.change(props);
       if (vidoInstance.debug) {
         console.groupCollapsed(`component created ${instance}`);
         console.log(clone({ props, components: components.keys(), actionsByInstance }));
@@ -352,6 +353,15 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
         console.trace();
         console.groupEnd();
       }
+      vidoInstance.destroying = true;
+      const component = components.get(instance);
+      if (!component || component.destroyed) {
+        console.warn(`No component to destroy! [${instance}]`);
+        return;
+      }
+
+      component.destroying = true;
+
       if (actionsByInstance.has(instance)) {
         for (const action of actionsByInstance.get(instance)) {
           if (typeof action.componentAction.destroy === 'function') {
@@ -360,14 +370,14 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
         }
       }
       actionsByInstance.delete(instance);
-      const component = components.get(instance);
-      if (!component || component.destroyed) {
-        console.warn(`No component to destroy! [${instance}]`);
-        return;
-      }
       component.destroy();
       components.delete(instance);
-      this.render(); // cleanup DOM after component destroy  don't wait for promise here
+
+      if (instance === app) {
+        // main app component was destroyed, cleanup DOM
+        this.render();
+      }
+
       if (vidoInstance.debug) {
         console.groupCollapsed(`component destroyed ${instance}`);
         console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -379,13 +389,13 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
     private executeActions() {
       for (const actions of actionsByInstance.values()) {
         for (const action of actions) {
-          if (action.element.vido === undefined) {
+          if (!action.created) {
             const component = components.get(action.instance);
-            if (component.destroyed) {
+            if (!component || component.destroyed || component.destroying) {
               continue;
             }
             action.isActive = function isActive() {
-              return component && component.destroyed === false;
+              return component && component.destroyed === false && component.destroying === false;
             };
             const componentAction = action.componentAction;
             const create = componentAction.create;
@@ -400,6 +410,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
               } else {
                 result = create(action.element, action.props);
               }
+              action.created = true;
               if (result !== undefined) {
                 if (typeof result === 'function') {
                   componentAction.destroy = result;

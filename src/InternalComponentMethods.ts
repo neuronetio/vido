@@ -1,3 +1,4 @@
+import { IAction } from './ActionsCollector';
 import { AnyVido, htmlResult } from './vido';
 
 export interface IInternalComponentMethods {
@@ -6,6 +7,7 @@ export interface IInternalComponentMethods {
   renderFunction: (changedProps: any) => void;
   content: any;
   destroyed: boolean;
+  destroying: boolean;
   destroy(): void;
   update(props?: any): any;
   change(changedProps: unknown, options?: { leave: boolean }): void;
@@ -19,7 +21,7 @@ export type IInternalComponentMethodsConstructor = new (
 
 export default function getInternalComponentMethods(
   components: Map<string, any>,
-  actionsByInstance: Map<string, any>,
+  actionsByInstance: Map<string, IAction[]>,
   clone: (obj: object) => object,
 ): IInternalComponentMethodsConstructor {
   return class InternalComponentMethods implements IInternalComponentMethods {
@@ -28,6 +30,7 @@ export default function getInternalComponentMethods(
     public renderFunction: (changedProps: any) => void;
     public content: any;
     public destroyed = false;
+    public destroying = false;
 
     constructor(instance: string, vidoInstance: AnyVido, renderFunction: (arg: any) => htmlResult) {
       this.instance = instance;
@@ -61,6 +64,8 @@ export default function getInternalComponentMethods(
       }
       this.vidoInstance.onChangeFunctions.length = 0;
       this.vidoInstance.destroyable.length = 0;
+      this.vidoInstance.destroying = false;
+      this.destroying = false;
       this.vidoInstance.destroyed = true;
       this.destroyed = true;
       this.vidoInstance.update();

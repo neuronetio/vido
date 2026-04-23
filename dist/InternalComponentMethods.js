@@ -2,6 +2,7 @@ export default function getInternalComponentMethods(components, actionsByInstanc
     return class InternalComponentMethods {
         constructor(instance, vidoInstance, renderFunction) {
             this.destroyed = false;
+            this.destroying = false;
             this.instance = instance;
             this.vidoInstance = vidoInstance;
             this.renderFunction = renderFunction;
@@ -31,6 +32,8 @@ export default function getInternalComponentMethods(components, actionsByInstanc
             }
             this.vidoInstance.onChangeFunctions.length = 0;
             this.vidoInstance.destroyable.length = 0;
+            this.vidoInstance.destroying = false;
+            this.destroying = false;
             this.vidoInstance.destroyed = true;
             this.destroyed = true;
             this.vidoInstance.update();

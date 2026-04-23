@@ -5,34 +5,46 @@ export default function getActionsCollector(actionsByInstance) {
         update(part, props) {
             const element = part.element;
             const instance = props[0];
-            const actions = props[1];
+            const userActions = props[1];
             const actionProps = props[2];
-            for (const create of actions) {
-                if (typeof create !== 'undefined') {
+            for (const userAction of userActions) {
+                if (typeof userAction !== 'undefined') {
+                    const currentActions = actionsByInstance.get(instance);
                     let exists;
-                    if (actionsByInstance.has(instance)) {
-                        for (const action of actionsByInstance.get(instance)) {
-                            if (action.componentAction.create === create && action.element === element) {
-                                exists = action;
+                    if (currentActions) {
+                        for (const currentAction of currentActions) {
+                            if (currentAction.componentAction.create === userAction) {
+                                exists = currentAction;
                                 break;
                             }
                         }
                     }
-                    if (!exists) {
+                    if (!exists || exists.element !== element) {
+                        if (exists && exists.created && exists.element !== element) {
+                            // we need to remove old action if element differs, otherwise it may cause memory leaks and unexpected behavior
+                            exists.componentAction.destroy(exists.element, exists.props);
+                            actionsByInstance.set(instance, currentActions.filter((action) => action !== exists));
+                        }
                         // @ts-ignore
                         if (typeof element.vido !== 'undefined')
                             delete element.vido;
                         const componentAction = {
-                            create,
-                            update() { },
-                            destroy() { },
+                            create: userAction,
+                            update(el, props) { },
+                            destroy(el, props) { },
                         };
-                        const action = { instance: instance, componentAction, element, props: actionProps };
+                        const newAction = {
+                            instance: instance,
+                            componentAction,
+                            element,
+                            props: actionProps,
+                            created: false,
+                        };
                         let byInstance = [];
                         if (actionsByInstance.has(instance)) {
                             byInstance = actionsByInstance.get(instance);
                         }
-                        byInstance.push(action);
+                        byInstance.push(newAction);
                         actionsByInstance.set(instance, byInstance);
                     }
                     else {

@@ -700,34 +700,46 @@ function getActionsCollector(actionsByInstance) {
         update(part, props) {
             const element = part.element;
             const instance = props[0];
-            const actions = props[1];
+            const userActions = props[1];
             const actionProps = props[2];
-            for (const create of actions) {
-                if (typeof create !== 'undefined') {
+            for (const userAction of userActions) {
+                if (typeof userAction !== 'undefined') {
+                    const currentActions = actionsByInstance.get(instance);
                     let exists;
-                    if (actionsByInstance.has(instance)) {
-                        for (const action of actionsByInstance.get(instance)) {
-                            if (action.componentAction.create === create && action.element === element) {
-                                exists = action;
+                    if (currentActions) {
+                        for (const currentAction of currentActions) {
+                            if (currentAction.componentAction.create === userAction) {
+                                exists = currentAction;
                                 break;
                             }
                         }
                     }
-                    if (!exists) {
+                    if (!exists || exists.element !== element) {
+                        if (exists && exists.created && exists.element !== element) {
+                            // we need to remove old action if element differs, otherwise it may cause memory leaks and unexpected behavior
+                            exists.componentAction.destroy(exists.element, exists.props);
+                            actionsByInstance.set(instance, currentActions.filter((action) => action !== exists));
+                        }
                         // @ts-ignore
                         if (typeof element.vido !== 'undefined')
                             delete element.vido;
                         const componentAction = {
-                            create,
-                            update() { },
-                            destroy() { },
+                            create: userAction,
+                            update(el, props) { },
+                            destroy(el, props) { },
                         };
-                        const action = { instance: instance, componentAction, element, props: actionProps };
+                        const newAction = {
+                            instance: instance,
+                            componentAction,
+                            element,
+                            props: actionProps,
+                            created: false,
+                        };
                         let byInstance = [];
                         if (actionsByInstance.has(instance)) {
                             byInstance = actionsByInstance.get(instance);
                         }
-                        byInstance.push(action);
+                        byInstance.push(newAction);
                         actionsByInstance.set(instance, byInstance);
                     }
                     else {
@@ -746,6 +758,7 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
     return class InternalComponentMethods {
         constructor(instance, vidoInstance, renderFunction) {
             this.destroyed = false;
+            this.destroying = false;
             this.instance = instance;
             this.vidoInstance = vidoInstance;
             this.renderFunction = renderFunction;
@@ -775,6 +788,8 @@ function getInternalComponentMethods(components, actionsByInstance, clone) {
             }
             this.vidoInstance.onChangeFunctions.length = 0;
             this.vidoInstance.destroyable.length = 0;
+            this.vidoInstance.destroying = false;
+            this.destroying = false;
             this.vidoInstance.destroyed = true;
             this.destroyed = true;
             this.vidoInstance.update();
@@ -1074,6 +1089,7 @@ function Vido(state, api) {
             this.name = '';
             this.destroyable = [];
             this.destroyed = false;
+            this.destroying = false;
             this.onChangeFunctions = [];
             this.debug = false;
             this.state = state;
@@ -1211,7 +1227,7 @@ function Vido(state, api) {
             const publicMethods = new PublicComponentMethods(instance, vidoInstance, props);
             const internalMethods = new InternalComponentMethods(instance, vidoInstance, component(vidoInstance, props));
             components.set(instance, internalMethods);
-            components.get(instance).change(props);
+            internalMethods.change(props);
             if (vidoInstance.debug) {
                 console.groupCollapsed(`component created ${instance}`);
                 console.log(clone({ props, components: components.keys(), actionsByInstance }));
@@ -1227,6 +1243,13 @@ function Vido(state, api) {
                 console.trace();
                 console.groupEnd();
             }
+            vidoInstance.destroying = true;
+            const component = components.get(instance);
+            if (!component || component.destroyed) {
+                console.warn(`No component to destroy! [${instance}]`);
+                return;
+            }
+            component.destroying = true;
             if (actionsByInstance.has(instance)) {
                 for (const action of actionsByInstance.get(instance)) {
                     if (typeof action.componentAction.destroy === 'function') {
@@ -1235,14 +1258,12 @@ function Vido(state, api) {
                 }
             }
             actionsByInstance.delete(instance);
-            const component = components.get(instance);
-            if (!component || component.destroyed) {
-                console.warn(`No component to destroy! [${instance}]`);
-                return;
-            }
             component.destroy();
             components.delete(instance);
-            this.render(); // cleanup DOM after component destroy  don't wait for promise here
+            if (instance === app) {
+                // main app component was destroyed, cleanup DOM
+                this.render();
+            }
             if (vidoInstance.debug) {
                 console.groupCollapsed(`component destroyed ${instance}`);
                 console.log(clone({ components: components.keys(), actionsByInstance }));
@@ -1253,13 +1274,13 @@ function Vido(state, api) {
         executeActions() {
             for (const actions of actionsByInstance.values()) {
                 for (const action of actions) {
-                    if (action.element.vido === undefined) {
+                    if (!action.created) {
                         const component = components.get(action.instance);
-                        if (component.destroyed) {
+                        if (!component || component.destroyed || component.destroying) {
                             continue;
                         }
                         action.isActive = function isActive() {
-                            return component && component.destroyed === false;
+                            return component && component.destroyed === false && component.destroying === false;
                         };
                         const componentAction = action.componentAction;
                         const create = componentAction.create;
@@ -1273,6 +1294,7 @@ function Vido(state, api) {
                             else {
                                 result = create(action.element, action.props);
                             }
+                            action.created = true;
                             if (result !== undefined) {
                                 if (typeof result === 'function') {
                                     componentAction.destroy = result;
