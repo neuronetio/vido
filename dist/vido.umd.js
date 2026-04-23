@@ -1233,7 +1233,7 @@
                 }
                 actionsByInstance.delete(instance);
                 const component = components.get(instance);
-                if (!component) {
+                if (!component || component.destroyed) {
                     console.warn(`No component to destroy! [${instance}]`);
                     return;
                 }
@@ -1252,6 +1252,9 @@
                     for (const action of actions) {
                         if (action.element.vido === undefined) {
                             const component = components.get(action.instance);
+                            if (component.destroyed) {
+                                continue;
+                            }
                             action.isActive = function isActive() {
                                 return component && component.destroyed === false;
                             };
