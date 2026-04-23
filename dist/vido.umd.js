@@ -1329,12 +1329,6 @@
                 else if (element) {
                     // do not remove element itself because it may be reused in the future when app will be created again, just remove its content
                     D(null, element);
-                    D(null, element);
-                    for (const child of element.children) {
-                        child.remove();
-                    }
-                    // @ts-ignore
-                    delete element._$litPart$;
                 }
             }
         }
