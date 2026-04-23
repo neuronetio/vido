@@ -1242,6 +1242,7 @@ function Vido(state, api) {
             }
             component.destroy();
             components.delete(instance);
+            this.render(); // cleanup DOM after component destroy  don't wait for promise here
             if (vidoInstance.debug) {
                 console.groupCollapsed(`component destroyed ${instance}`);
                 console.log(clone({ components: components.keys(), actionsByInstance }));
