@@ -27,7 +27,7 @@ import detach from './Detach';
 import PointerAction from './PointerAction';
 import getPublicComponentMethods from './PublicComponentMethods';
 import getActionsCollector from './ActionsCollector';
-import getInternalComponentMethods from './InternalComponentMethods';
+import getInternalComponentMethods, { type IInternalComponentMethods } from './InternalComponentMethods';
 import { schedule, clone } from './helpers';
 import Action from './Action';
 import { Slots } from './Slots';
@@ -151,7 +151,7 @@ type AnyVido = vido<any, any>;
 
 export default function Vido<State, Api>(state: State, api: Api): vido<State, Api> {
   let componentId = 0;
-  const components = new Map();
+  const components: Map<string, IInternalComponentMethods> = new Map();
   let actionsByInstance = new Map();
   let app: string, element: HTMLElement;
   let shouldUpdateCount = 0;
@@ -361,7 +361,7 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
       }
       actionsByInstance.delete(instance);
       const component = components.get(instance);
-      if (!component) {
+      if (!component || component.destroyed) {
         console.warn(`No component to destroy! [${instance}]`);
         return;
       }
@@ -381,6 +381,9 @@ export default function Vido<State, Api>(state: State, api: Api): vido<State, Ap
         for (const action of actions) {
           if (action.element.vido === undefined) {
             const component = components.get(action.instance);
+            if (component.destroyed) {
+              continue;
+            }
             action.isActive = function isActive() {
               return component && component.destroyed === false;
             };
