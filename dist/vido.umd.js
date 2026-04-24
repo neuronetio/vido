@@ -718,9 +718,18 @@
                         }
                         if (!exists || exists.element !== element) {
                             if (exists && exists.created && exists.element !== element) {
-                                // we need to remove old action if element differs, otherwise it may cause memory leaks and unexpected behavior
-                                exists.componentAction.destroy(exists.element, exists.props);
-                                actionsByInstance.set(instance, currentActions.filter((action) => action !== exists));
+                                if (!exists.element.isConnected) {
+                                    // we need to remove old action if element is detached
+                                    // because in react it will fire multiple times probably because of hydration
+                                    exists.componentAction.destroy(exists.element, exists.props);
+                                    actionsByInstance.set(instance, currentActions.filter((action) => action !== exists));
+                                }
+                                else {
+                                    // just update and return (probably other element is reused)
+                                    exists.element = element;
+                                    exists.props = actionProps;
+                                    return;
+                                }
                             }
                             // @ts-ignore
                             if (typeof element.vido !== 'undefined')
